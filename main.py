@@ -43,9 +43,7 @@ class BracketStructure(BaseModel):
             "structure": {
                 str(game): list(inputs) for game, inputs in self.structure.items()
             },
-            "games": {
-                str(game): list(inputs) for game, inputs in self.games.items()
-            },
+            "games": {str(game): list(inputs) for game, inputs in self.games.items()},
         }
 
     def to_json_str(self, indent: int = 4) -> str:

@@ -186,13 +186,17 @@ def test_json_round_trip_with_games() -> None:
 
 
 def test_load_tournament_validates_and_returns_models() -> None:
-    bracket, teams = load_tournament("definitions/bracket.json", "definitions/teams.json")
+    bracket, teams = load_tournament(
+        "definitions/bracket.json", "definitions/teams.json"
+    )
     assert bracket.final_game == 6
     assert len(teams) == 8
 
 
 def test_ascii_bracket_render_contains_connectors_and_truncated_names() -> None:
-    bracket, teams = load_tournament("definitions/bracket.json", "definitions/teams.json")
+    bracket, teams = load_tournament(
+        "definitions/bracket.json", "definitions/teams.json"
+    )
     ascii_bracket = bracket.to_ascii_bracket(teams, name_width=10)
 
     assert "Kentucky" in ascii_bracket
@@ -206,13 +210,17 @@ def test_ascii_bracket_render_contains_connectors_and_truncated_names() -> None:
 
 
 def test_ascii_bracket_matches_reference_file_exactly() -> None:
-    bracket, teams = load_tournament("definitions/bracket.json", "definitions/teams.json")
+    bracket, teams = load_tournament(
+        "definitions/bracket.json", "definitions/teams.json"
+    )
     expected = Path(".mayo/ascii.txt").read_text(encoding="utf-8").rstrip("\n")
     assert bracket.to_ascii_bracket(teams, name_width=10) == expected
 
 
 def test_box_mode_uses_box_drawing_characters() -> None:
-    bracket, teams = load_tournament("definitions/bracket.json", "definitions/teams.json")
+    bracket, teams = load_tournament(
+        "definitions/bracket.json", "definitions/teams.json"
+    )
     rendered = bracket.to_ascii_bracket(teams, name_width=10, mode="box")
 
     assert "╮" in rendered
