@@ -5,11 +5,13 @@
     "checkpoints": [
         {
             "games_completed": 0,
+            "label": "Initial",
             "completed_scoreboard_event_ids": [],
             "report_path": "checkpoints/000-games-complete.json"
         },
         {
             "games_completed": 1,
+            "label": "TCU beats OSU",
             "completed_scoreboard_event_ids": [
                 "401856479"
             ],
@@ -17,6 +19,7 @@
         },
         {
             "games_completed": 2,
+            "label": "NEB beats TROY",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489"
@@ -25,6 +28,7 @@
         },
         {
             "games_completed": 3,
+            "label": "LOU beats USF",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -34,6 +38,7 @@
         },
         {
             "games_completed": 4,
+            "label": "HPU beats WIS",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -44,6 +49,7 @@
         },
         {
             "games_completed": 5,
+            "label": "DUKE beats SIE",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -55,6 +61,7 @@
         },
         {
             "games_completed": 6,
+            "label": "VAN beats MCN",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -67,6 +74,7 @@
         },
         {
             "games_completed": 7,
+            "label": "ARK beats HAW",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -80,6 +88,7 @@
         },
         {
             "games_completed": 8,
+            "label": "MSU beats NDSU",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -94,6 +103,7 @@
         },
         {
             "games_completed": 9,
+            "label": "VCU beats UNC",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -109,6 +119,7 @@
         },
         {
             "games_completed": 10,
+            "label": "MICH beats HOW",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -125,6 +136,7 @@
         },
         {
             "games_completed": 11,
+            "label": "TEX beats BYU",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -142,6 +154,7 @@
         },
         {
             "games_completed": 12,
+            "label": "TA&M beats SMC",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -160,6 +173,7 @@
         },
         {
             "games_completed": 13,
+            "label": "ILL beats PENN",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -179,6 +193,7 @@
         },
         {
             "games_completed": 14,
+            "label": "SLU beats UGA",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -199,6 +214,7 @@
         },
         {
             "games_completed": 15,
+            "label": "HOU beats IDHO",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -220,6 +236,7 @@
         },
         {
             "games_completed": 16,
+            "label": "GONZ beats KENN",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -242,6 +259,7 @@
         },
         {
             "games_completed": 17,
+            "label": "UK beats SCU",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -265,6 +283,7 @@
         },
         {
             "games_completed": 18,
+            "label": "TTU beats AKR",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -289,6 +308,7 @@
         },
         {
             "games_completed": 19,
+            "label": "ARIZ beats LIU",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -314,6 +334,7 @@
         },
         {
             "games_completed": 20,
+            "label": "UVA beats WRST",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -340,6 +361,7 @@
         },
         {
             "games_completed": 21,
+            "label": "ISU beats TNST",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -367,6 +389,7 @@
         },
         {
             "games_completed": 22,
+            "label": "ALA beats HOF",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -395,6 +418,7 @@
         },
         {
             "games_completed": 23,
+            "label": "USU beats VILL",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -424,6 +448,7 @@
         },
         {
             "games_completed": 24,
+            "label": "TENN beats M-OH",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -454,6 +479,7 @@
         },
         {
             "games_completed": 25,
+            "label": "IOWA beats CLEM",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -485,6 +511,7 @@
         },
         {
             "games_completed": 26,
+            "label": "SJU beats UNI",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -517,6 +544,7 @@
         },
         {
             "games_completed": 27,
+            "label": "UCLA beats UCF",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -550,6 +578,7 @@
         },
         {
             "games_completed": 28,
+            "label": "PUR beats QUC",
             "completed_scoreboard_event_ids": [
                 "401856479",
                 "401856489",
@@ -594,146 +623,175 @@
             "points": [
                 {
                     "games_completed": 0,
+                    "average_score": 95.187,
                     "average_finishing_position": 3.407,
                     "winning_percentage": 13.900000000000002
                 },
                 {
                     "games_completed": 1,
+                    "average_score": 94.389,
                     "average_finishing_position": 3.651,
                     "winning_percentage": 13.600000000000001
                 },
                 {
                     "games_completed": 2,
+                    "average_score": 94.89,
                     "average_finishing_position": 3.532,
                     "winning_percentage": 14.799999999999999
                 },
                 {
                     "games_completed": 3,
+                    "average_score": 94.979,
                     "average_finishing_position": 3.455,
                     "winning_percentage": 15.7
                 },
                 {
                     "games_completed": 4,
+                    "average_score": 97.333,
                     "average_finishing_position": 3.359,
                     "winning_percentage": 16.1
                 },
                 {
                     "games_completed": 5,
+                    "average_score": 95.79,
                     "average_finishing_position": 3.474,
                     "winning_percentage": 13.200000000000001
                 },
                 {
                     "games_completed": 6,
+                    "average_score": 95.753,
                     "average_finishing_position": 3.43,
                     "winning_percentage": 14.899999999999999
                 },
                 {
                     "games_completed": 7,
+                    "average_score": 95.488,
                     "average_finishing_position": 3.559,
                     "winning_percentage": 13.600000000000001
                 },
                 {
                     "games_completed": 8,
+                    "average_score": 95.685,
                     "average_finishing_position": 3.515,
                     "winning_percentage": 14.7
                 },
                 {
                     "games_completed": 9,
+                    "average_score": 93.76,
                     "average_finishing_position": 3.586,
                     "winning_percentage": 13.700000000000001
                 },
                 {
                     "games_completed": 10,
+                    "average_score": 94.998,
                     "average_finishing_position": 3.573,
                     "winning_percentage": 14.399999999999999
                 },
                 {
                     "games_completed": 11,
+                    "average_score": 93.78,
                     "average_finishing_position": 3.674,
                     "winning_percentage": 12.2
                 },
                 {
                     "games_completed": 12,
+                    "average_score": 95.315,
                     "average_finishing_position": 3.412,
                     "winning_percentage": 17.4
                 },
                 {
                     "games_completed": 13,
+                    "average_score": 94.702,
                     "average_finishing_position": 3.472,
                     "winning_percentage": 15.9
                 },
                 {
                     "games_completed": 14,
+                    "average_score": 95.653,
                     "average_finishing_position": 3.374,
                     "winning_percentage": 15.299999999999999
                 },
                 {
                     "games_completed": 15,
+                    "average_score": 96.093,
                     "average_finishing_position": 3.28,
                     "winning_percentage": 16.400000000000002
                 },
                 {
                     "games_completed": 16,
+                    "average_score": 96.188,
                     "average_finishing_position": 3.318,
                     "winning_percentage": 15.9
                 },
                 {
                     "games_completed": 17,
+                    "average_score": 94.776,
                     "average_finishing_position": 3.357,
                     "winning_percentage": 16.900000000000002
                 },
                 {
                     "games_completed": 18,
+                    "average_score": 96.211,
                     "average_finishing_position": 3.301,
                     "winning_percentage": 16.900000000000002
                 },
                 {
                     "games_completed": 19,
+                    "average_score": 96.195,
                     "average_finishing_position": 3.42,
                     "winning_percentage": 16.1
                 },
                 {
                     "games_completed": 20,
+                    "average_score": 95.476,
                     "average_finishing_position": 3.429,
                     "winning_percentage": 14.000000000000002
                 },
                 {
                     "games_completed": 21,
+                    "average_score": 96.361,
                     "average_finishing_position": 3.333,
                     "winning_percentage": 14.2
                 },
                 {
                     "games_completed": 22,
+                    "average_score": 96.692,
                     "average_finishing_position": 3.327,
                     "winning_percentage": 16.900000000000002
                 },
                 {
                     "games_completed": 23,
+                    "average_score": 95.587,
                     "average_finishing_position": 3.506,
                     "winning_percentage": 12.8
                 },
                 {
                     "games_completed": 24,
+                    "average_score": 94.773,
                     "average_finishing_position": 3.445,
                     "winning_percentage": 14.799999999999999
                 },
                 {
                     "games_completed": 25,
+                    "average_score": 95.546,
                     "average_finishing_position": 3.417,
                     "winning_percentage": 15.8
                 },
                 {
                     "games_completed": 26,
+                    "average_score": 95.904,
                     "average_finishing_position": 3.373,
                     "winning_percentage": 17.299999999999997
                 },
                 {
                     "games_completed": 27,
+                    "average_score": 95.493,
                     "average_finishing_position": 3.316,
                     "winning_percentage": 16.8
                 },
                 {
                     "games_completed": 28,
+                    "average_score": 96.907,
                     "average_finishing_position": 3.218,
                     "winning_percentage": 18.099999999999998
                 }
@@ -749,146 +807,175 @@
             "points": [
                 {
                     "games_completed": 0,
+                    "average_score": 93.153,
                     "average_finishing_position": 4.089,
                     "winning_percentage": 8.6
                 },
                 {
                     "games_completed": 1,
+                    "average_score": 92.537,
                     "average_finishing_position": 4.297,
                     "winning_percentage": 6.9
                 },
                 {
                     "games_completed": 2,
+                    "average_score": 93.16,
                     "average_finishing_position": 4.178,
                     "winning_percentage": 8.7
                 },
                 {
                     "games_completed": 3,
+                    "average_score": 93.165,
                     "average_finishing_position": 4.227,
                     "winning_percentage": 8.5
                 },
                 {
                     "games_completed": 4,
+                    "average_score": 95.583,
                     "average_finishing_position": 3.978,
                     "winning_percentage": 8.3
                 },
                 {
                     "games_completed": 5,
+                    "average_score": 93.936,
                     "average_finishing_position": 4.154,
                     "winning_percentage": 7.8
                 },
                 {
                     "games_completed": 6,
+                    "average_score": 94.099,
                     "average_finishing_position": 4.042,
                     "winning_percentage": 8.5
                 },
                 {
                     "games_completed": 7,
+                    "average_score": 93.64,
                     "average_finishing_position": 4.193,
                     "winning_percentage": 8.1
                 },
                 {
                     "games_completed": 8,
+                    "average_score": 94.245,
                     "average_finishing_position": 4.033,
                     "winning_percentage": 8.9
                 },
                 {
                     "games_completed": 9,
+                    "average_score": 92.276,
                     "average_finishing_position": 4.164,
                     "winning_percentage": 7.199999999999999
                 },
                 {
                     "games_completed": 10,
+                    "average_score": 93.68,
                     "average_finishing_position": 4.108,
                     "winning_percentage": 7.7
                 },
                 {
                     "games_completed": 11,
+                    "average_score": 92.342,
                     "average_finishing_position": 4.182,
                     "winning_percentage": 8.5
                 },
                 {
                     "games_completed": 12,
+                    "average_score": 93.957,
                     "average_finishing_position": 3.934,
                     "winning_percentage": 9.8
                 },
                 {
                     "games_completed": 13,
+                    "average_score": 93.42,
                     "average_finishing_position": 4.039,
                     "winning_percentage": 10.100000000000001
                 },
                 {
                     "games_completed": 14,
+                    "average_score": 94.811,
                     "average_finishing_position": 3.726,
                     "winning_percentage": 11.3
                 },
                 {
                     "games_completed": 15,
+                    "average_score": 94.603,
                     "average_finishing_position": 3.836,
                     "winning_percentage": 10.299999999999999
                 },
                 {
                     "games_completed": 16,
+                    "average_score": 94.758,
                     "average_finishing_position": 3.822,
                     "winning_percentage": 11.1
                 },
                 {
                     "games_completed": 17,
+                    "average_score": 93.846,
                     "average_finishing_position": 3.675,
                     "winning_percentage": 10.9
                 },
                 {
                     "games_completed": 18,
+                    "average_score": 95.275,
                     "average_finishing_position": 3.753,
                     "winning_percentage": 11.799999999999999
                 },
                 {
                     "games_completed": 19,
+                    "average_score": 95.111,
                     "average_finishing_position": 3.853,
                     "winning_percentage": 10.299999999999999
                 },
                 {
                     "games_completed": 20,
+                    "average_score": 94.664,
                     "average_finishing_position": 3.717,
                     "winning_percentage": 11.1
                 },
                 {
                     "games_completed": 21,
+                    "average_score": 95.347,
                     "average_finishing_position": 3.676,
                     "winning_percentage": 11.600000000000001
                 },
                 {
                     "games_completed": 22,
+                    "average_score": 95.558,
                     "average_finishing_position": 3.719,
                     "winning_percentage": 12.1
                 },
                 {
                     "games_completed": 23,
+                    "average_score": 95.329,
                     "average_finishing_position": 3.68,
                     "winning_percentage": 13.600000000000001
                 },
                 {
                     "games_completed": 24,
+                    "average_score": 94.529,
                     "average_finishing_position": 3.64,
                     "winning_percentage": 11.600000000000001
                 },
                 {
                     "games_completed": 25,
+                    "average_score": 94.63,
                     "average_finishing_position": 3.854,
                     "winning_percentage": 8.9
                 },
                 {
                     "games_completed": 26,
+                    "average_score": 95.312,
                     "average_finishing_position": 3.78,
                     "winning_percentage": 10.0
                 },
                 {
                     "games_completed": 27,
+                    "average_score": 94.845,
                     "average_finishing_position": 3.772,
                     "winning_percentage": 8.7
                 },
                 {
                     "games_completed": 28,
+                    "average_score": 96.245,
                     "average_finishing_position": 3.633,
                     "winning_percentage": 10.0
                 }
@@ -904,146 +991,175 @@
             "points": [
                 {
                     "games_completed": 0,
+                    "average_score": 92.293,
                     "average_finishing_position": 4.352,
                     "winning_percentage": 25.1
                 },
                 {
                     "games_completed": 1,
+                    "average_score": 90.325,
                     "average_finishing_position": 4.734,
                     "winning_percentage": 20.200000000000003
                 },
                 {
                     "games_completed": 2,
+                    "average_score": 91.01,
                     "average_finishing_position": 4.445,
                     "winning_percentage": 22.400000000000002
                 },
                 {
                     "games_completed": 3,
+                    "average_score": 91.371,
                     "average_finishing_position": 4.471,
                     "winning_percentage": 22.900000000000002
                 },
                 {
                     "games_completed": 4,
+                    "average_score": 94.855,
                     "average_finishing_position": 4.115,
                     "winning_percentage": 26.8
                 },
                 {
                     "games_completed": 5,
+                    "average_score": 95.406,
                     "average_finishing_position": 3.928,
                     "winning_percentage": 28.299999999999997
                 },
                 {
                     "games_completed": 6,
+                    "average_score": 94.147,
                     "average_finishing_position": 4.078,
                     "winning_percentage": 27.500000000000004
                 },
                 {
                     "games_completed": 7,
+                    "average_score": 93.202,
                     "average_finishing_position": 4.227,
                     "winning_percentage": 26.3
                 },
                 {
                     "games_completed": 8,
+                    "average_score": 92.487,
                     "average_finishing_position": 4.37,
                     "winning_percentage": 23.9
                 },
                 {
                     "games_completed": 9,
+                    "average_score": 91.324,
                     "average_finishing_position": 4.309,
                     "winning_percentage": 25.4
                 },
                 {
                     "games_completed": 10,
+                    "average_score": 92.988,
                     "average_finishing_position": 4.442,
                     "winning_percentage": 26.200000000000003
                 },
                 {
                     "games_completed": 11,
+                    "average_score": 90.872,
                     "average_finishing_position": 4.389,
                     "winning_percentage": 25.8
                 },
                 {
                     "games_completed": 12,
+                    "average_score": 91.413,
                     "average_finishing_position": 4.431,
                     "winning_percentage": 23.200000000000003
                 },
                 {
                     "games_completed": 13,
+                    "average_score": 90.752,
                     "average_finishing_position": 4.56,
                     "winning_percentage": 22.0
                 },
                 {
                     "games_completed": 14,
+                    "average_score": 92.039,
                     "average_finishing_position": 4.43,
                     "winning_percentage": 24.2
                 },
                 {
                     "games_completed": 15,
+                    "average_score": 92.787,
                     "average_finishing_position": 4.344,
                     "winning_percentage": 25.6
                 },
                 {
                     "games_completed": 16,
+                    "average_score": 92.76,
                     "average_finishing_position": 4.344,
                     "winning_percentage": 21.8
                 },
                 {
                     "games_completed": 17,
+                    "average_score": 90.356,
                     "average_finishing_position": 4.477,
                     "winning_percentage": 21.0
                 },
                 {
                     "games_completed": 18,
+                    "average_score": 92.029,
                     "average_finishing_position": 4.514,
                     "winning_percentage": 23.200000000000003
                 },
                 {
                     "games_completed": 19,
+                    "average_score": 92.587,
                     "average_finishing_position": 4.407,
                     "winning_percentage": 23.7
                 },
                 {
                     "games_completed": 20,
+                    "average_score": 92.512,
                     "average_finishing_position": 4.425,
                     "winning_percentage": 24.5
                 },
                 {
                     "games_completed": 21,
+                    "average_score": 91.933,
                     "average_finishing_position": 4.525,
                     "winning_percentage": 22.5
                 },
                 {
                     "games_completed": 22,
+                    "average_score": 92.85,
                     "average_finishing_position": 4.358,
                     "winning_percentage": 22.5
                 },
                 {
                     "games_completed": 23,
+                    "average_score": 92.943,
                     "average_finishing_position": 4.375,
                     "winning_percentage": 25.1
                 },
                 {
                     "games_completed": 24,
+                    "average_score": 91.901,
                     "average_finishing_position": 4.351,
                     "winning_percentage": 23.599999999999998
                 },
                 {
                     "games_completed": 25,
+                    "average_score": 93.518,
                     "average_finishing_position": 4.319,
                     "winning_percentage": 24.2
                 },
                 {
                     "games_completed": 26,
+                    "average_score": 92.194,
                     "average_finishing_position": 4.285,
                     "winning_percentage": 23.7
                 },
                 {
                     "games_completed": 27,
+                    "average_score": 92.407,
                     "average_finishing_position": 4.418,
                     "winning_percentage": 22.2
                 },
                 {
                     "games_completed": 28,
+                    "average_score": 92.747,
                     "average_finishing_position": 4.453,
                     "winning_percentage": 22.3
                 }
@@ -1059,146 +1175,175 @@
             "points": [
                 {
                     "games_completed": 0,
+                    "average_score": 87.691,
                     "average_finishing_position": 5.48,
                     "winning_percentage": 9.9
                 },
                 {
                     "games_completed": 1,
+                    "average_score": 86.727,
                     "average_finishing_position": 5.722,
                     "winning_percentage": 9.4
                 },
                 {
                     "games_completed": 2,
+                    "average_score": 87.668,
                     "average_finishing_position": 5.462,
                     "winning_percentage": 10.0
                 },
                 {
                     "games_completed": 3,
+                    "average_score": 88.029,
                     "average_finishing_position": 5.492,
                     "winning_percentage": 8.6
                 },
                 {
                     "games_completed": 4,
+                    "average_score": 90.717,
                     "average_finishing_position": 5.106,
                     "winning_percentage": 11.899999999999999
                 },
                 {
                     "games_completed": 5,
+                    "average_score": 89.544,
                     "average_finishing_position": 5.205,
                     "winning_percentage": 10.8
                 },
                 {
                     "games_completed": 6,
+                    "average_score": 89.561,
                     "average_finishing_position": 5.214,
                     "winning_percentage": 10.299999999999999
                 },
                 {
                     "games_completed": 7,
+                    "average_score": 89.402,
                     "average_finishing_position": 5.247,
                     "winning_percentage": 10.8
                 },
                 {
                     "games_completed": 8,
+                    "average_score": 89.557,
                     "average_finishing_position": 5.301,
                     "winning_percentage": 10.299999999999999
                 },
                 {
                     "games_completed": 9,
+                    "average_score": 88.544,
                     "average_finishing_position": 5.229,
                     "winning_percentage": 10.5
                 },
                 {
                     "games_completed": 10,
+                    "average_score": 90.566,
                     "average_finishing_position": 4.987,
                     "winning_percentage": 12.0
                 },
                 {
                     "games_completed": 11,
+                    "average_score": 89.276,
                     "average_finishing_position": 5.005,
                     "winning_percentage": 13.0
                 },
                 {
                     "games_completed": 12,
+                    "average_score": 89.595,
                     "average_finishing_position": 5.076,
                     "winning_percentage": 10.7
                 },
                 {
                     "games_completed": 13,
+                    "average_score": 89.702,
                     "average_finishing_position": 5.107,
                     "winning_percentage": 11.0
                 },
                 {
                     "games_completed": 14,
+                    "average_score": 90.473,
                     "average_finishing_position": 4.904,
                     "winning_percentage": 12.3
                 },
                 {
                     "games_completed": 15,
+                    "average_score": 90.949,
                     "average_finishing_position": 4.908,
                     "winning_percentage": 11.899999999999999
                 },
                 {
                     "games_completed": 16,
+                    "average_score": 91.134,
                     "average_finishing_position": 4.945,
                     "winning_percentage": 14.7
                 },
                 {
                     "games_completed": 17,
+                    "average_score": 89.376,
                     "average_finishing_position": 5.027,
                     "winning_percentage": 12.0
                 },
                 {
                     "games_completed": 18,
+                    "average_score": 91.105,
                     "average_finishing_position": 4.966,
                     "winning_percentage": 10.5
                 },
                 {
                     "games_completed": 19,
+                    "average_score": 90.627,
                     "average_finishing_position": 5.087,
                     "winning_percentage": 9.8
                 },
                 {
                     "games_completed": 20,
+                    "average_score": 90.47,
                     "average_finishing_position": 4.92,
                     "winning_percentage": 13.5
                 },
                 {
                     "games_completed": 21,
+                    "average_score": 90.383,
                     "average_finishing_position": 5.174,
                     "winning_percentage": 11.899999999999999
                 },
                 {
                     "games_completed": 22,
+                    "average_score": 90.992,
                     "average_finishing_position": 4.994,
                     "winning_percentage": 12.4
                 },
                 {
                     "games_completed": 23,
+                    "average_score": 91.153,
                     "average_finishing_position": 5.009,
                     "winning_percentage": 11.1
                 },
                 {
                     "games_completed": 24,
+                    "average_score": 90.329,
                     "average_finishing_position": 5.016,
                     "winning_percentage": 11.600000000000001
                 },
                 {
                     "games_completed": 25,
+                    "average_score": 91.162,
                     "average_finishing_position": 4.941,
                     "winning_percentage": 12.6
                 },
                 {
                     "games_completed": 26,
+                    "average_score": 91.734,
                     "average_finishing_position": 4.846,
                     "winning_percentage": 12.9
                 },
                 {
                     "games_completed": 27,
+                    "average_score": 90.977,
                     "average_finishing_position": 4.957,
                     "winning_percentage": 13.600000000000001
                 },
                 {
                     "games_completed": 28,
+                    "average_score": 91.491,
                     "average_finishing_position": 4.947,
                     "winning_percentage": 12.6
                 }
@@ -1214,146 +1359,175 @@
             "points": [
                 {
                     "games_completed": 0,
+                    "average_score": 85.367,
                     "average_finishing_position": 5.139,
                     "winning_percentage": 13.3
                 },
                 {
                     "games_completed": 1,
+                    "average_score": 86.579,
                     "average_finishing_position": 5.028,
                     "winning_percentage": 15.8
                 },
                 {
                     "games_completed": 2,
+                    "average_score": 85.466,
                     "average_finishing_position": 5.056,
                     "winning_percentage": 14.2
                 },
                 {
                     "games_completed": 3,
+                    "average_score": 85.269,
                     "average_finishing_position": 5.199,
                     "winning_percentage": 15.2
                 },
                 {
                     "games_completed": 4,
+                    "average_score": 84.999,
                     "average_finishing_position": 5.266,
                     "winning_percentage": 11.0
                 },
                 {
                     "games_completed": 5,
+                    "average_score": 85.992,
                     "average_finishing_position": 5.158,
                     "winning_percentage": 13.200000000000001
                 },
                 {
                     "games_completed": 6,
+                    "average_score": 85.565,
                     "average_finishing_position": 5.174,
                     "winning_percentage": 12.7
                 },
                 {
                     "games_completed": 7,
+                    "average_score": 84.634,
                     "average_finishing_position": 5.296,
                     "winning_percentage": 12.4
                 },
                 {
                     "games_completed": 8,
+                    "average_score": 83.665,
                     "average_finishing_position": 5.328,
                     "winning_percentage": 11.700000000000001
                 },
                 {
                     "games_completed": 9,
+                    "average_score": 82.966,
                     "average_finishing_position": 5.41,
                     "winning_percentage": 11.799999999999999
                 },
                 {
                     "games_completed": 10,
+                    "average_score": 84.01,
                     "average_finishing_position": 5.426,
                     "winning_percentage": 9.700000000000001
                 },
                 {
                     "games_completed": 11,
+                    "average_score": 82.278,
                     "average_finishing_position": 5.543,
                     "winning_percentage": 10.7
                 },
                 {
                     "games_completed": 12,
+                    "average_score": 84.279,
                     "average_finishing_position": 5.319,
                     "winning_percentage": 13.5
                 },
                 {
                     "games_completed": 13,
+                    "average_score": 83.27,
                     "average_finishing_position": 5.449,
                     "winning_percentage": 10.7
                 },
                 {
                     "games_completed": 14,
+                    "average_score": 84.309,
                     "average_finishing_position": 5.375,
                     "winning_percentage": 13.4
                 },
                 {
                     "games_completed": 15,
+                    "average_score": 85.409,
                     "average_finishing_position": 5.196,
                     "winning_percentage": 12.5
                 },
                 {
                     "games_completed": 16,
+                    "average_score": 85.098,
                     "average_finishing_position": 5.265,
                     "winning_percentage": 12.7
                 },
                 {
                     "games_completed": 17,
+                    "average_score": 84.5,
                     "average_finishing_position": 5.236,
                     "winning_percentage": 14.799999999999999
                 },
                 {
                     "games_completed": 18,
+                    "average_score": 85.829,
                     "average_finishing_position": 5.19,
                     "winning_percentage": 12.6
                 },
                 {
                     "games_completed": 19,
+                    "average_score": 86.829,
                     "average_finishing_position": 4.95,
                     "winning_percentage": 14.7
                 },
                 {
                     "games_completed": 20,
+                    "average_score": 86.172,
                     "average_finishing_position": 5.057,
                     "winning_percentage": 13.5
                 },
                 {
                     "games_completed": 21,
+                    "average_score": 86.421,
                     "average_finishing_position": 5.091,
                     "winning_percentage": 15.299999999999999
                 },
                 {
                     "games_completed": 22,
+                    "average_score": 86.298,
                     "average_finishing_position": 5.093,
                     "winning_percentage": 14.2
                 },
                 {
                     "games_completed": 23,
+                    "average_score": 87.101,
                     "average_finishing_position": 4.934,
                     "winning_percentage": 14.000000000000002
                 },
                 {
                     "games_completed": 24,
+                    "average_score": 86.399,
                     "average_finishing_position": 4.899,
                     "winning_percentage": 15.6
                 },
                 {
                     "games_completed": 25,
+                    "average_score": 87.452,
                     "average_finishing_position": 4.87,
                     "winning_percentage": 15.2
                 },
                 {
                     "games_completed": 26,
+                    "average_score": 85.504,
                     "average_finishing_position": 5.096,
                     "winning_percentage": 13.5
                 },
                 {
                     "games_completed": 27,
+                    "average_score": 86.149,
                     "average_finishing_position": 5.116,
                     "winning_percentage": 14.000000000000002
                 },
                 {
                     "games_completed": 28,
+                    "average_score": 85.697,
                     "average_finishing_position": 5.196,
                     "winning_percentage": 12.3
                 }
@@ -1369,146 +1543,175 @@
             "points": [
                 {
                     "games_completed": 0,
+                    "average_score": 91.655,
                     "average_finishing_position": 4.576,
                     "winning_percentage": 6.2
                 },
                 {
                     "games_completed": 1,
+                    "average_score": 92.153,
                     "average_finishing_position": 4.46,
                     "winning_percentage": 7.1
                 },
                 {
                     "games_completed": 2,
+                    "average_score": 92.464,
                     "average_finishing_position": 4.471,
                     "winning_percentage": 6.1
                 },
                 {
                     "games_completed": 3,
+                    "average_score": 92.215,
                     "average_finishing_position": 4.458,
                     "winning_percentage": 6.5
                 },
                 {
                     "games_completed": 4,
+                    "average_score": 94.525,
                     "average_finishing_position": 4.326,
                     "winning_percentage": 5.4
                 },
                 {
                     "games_completed": 5,
+                    "average_score": 92.916,
                     "average_finishing_position": 4.467,
                     "winning_percentage": 5.0
                 },
                 {
                     "games_completed": 6,
+                    "average_score": 92.957,
                     "average_finishing_position": 4.38,
                     "winning_percentage": 6.7
                 },
                 {
                     "games_completed": 7,
+                    "average_score": 92.706,
                     "average_finishing_position": 4.45,
                     "winning_percentage": 5.3
                 },
                 {
                     "games_completed": 8,
+                    "average_score": 92.697,
                     "average_finishing_position": 4.519,
                     "winning_percentage": 4.6
                 },
                 {
                     "games_completed": 9,
+                    "average_score": 91.382,
                     "average_finishing_position": 4.444,
                     "winning_percentage": 6.800000000000001
                 },
                 {
                     "games_completed": 10,
+                    "average_score": 92.42,
                     "average_finishing_position": 4.518,
                     "winning_percentage": 5.1
                 },
                 {
                     "games_completed": 11,
+                    "average_score": 90.898,
                     "average_finishing_position": 4.63,
                     "winning_percentage": 5.1
                 },
                 {
                     "games_completed": 12,
+                    "average_score": 90.927,
                     "average_finishing_position": 4.881,
                     "winning_percentage": 2.4
                 },
                 {
                     "games_completed": 13,
+                    "average_score": 90.482,
                     "average_finishing_position": 5.016,
                     "winning_percentage": 2.3
                 },
                 {
                     "games_completed": 14,
+                    "average_score": 90.647,
                     "average_finishing_position": 5.107,
                     "winning_percentage": 1.4000000000000001
                 },
                 {
                     "games_completed": 15,
+                    "average_score": 90.525,
                     "average_finishing_position": 5.18,
                     "winning_percentage": 0.8999999999999999
                 },
                 {
                     "games_completed": 16,
+                    "average_score": 90.778,
                     "average_finishing_position": 5.109,
                     "winning_percentage": 1.6
                 },
                 {
                     "games_completed": 17,
+                    "average_score": 88.524,
                     "average_finishing_position": 5.437,
                     "winning_percentage": 0.6
                 },
                 {
                     "games_completed": 18,
+                    "average_score": 90.421,
                     "average_finishing_position": 5.314,
                     "winning_percentage": 0.8999999999999999
                 },
                 {
                     "games_completed": 19,
+                    "average_score": 90.019,
                     "average_finishing_position": 5.473,
                     "winning_percentage": 0.6
                 },
                 {
                     "games_completed": 20,
+                    "average_score": 89.634,
                     "average_finishing_position": 5.443,
                     "winning_percentage": 0.6
                 },
                 {
                     "games_completed": 21,
+                    "average_score": 90.419,
                     "average_finishing_position": 5.323,
                     "winning_percentage": 0.8
                 },
                 {
                     "games_completed": 22,
+                    "average_score": 90.614,
                     "average_finishing_position": 5.338,
                     "winning_percentage": 0.5
                 },
                 {
                     "games_completed": 23,
+                    "average_score": 90.221,
                     "average_finishing_position": 5.373,
                     "winning_percentage": 0.8999999999999999
                 },
                 {
                     "games_completed": 24,
+                    "average_score": 89.579,
                     "average_finishing_position": 5.279,
                     "winning_percentage": 0.8999999999999999
                 },
                 {
                     "games_completed": 25,
+                    "average_score": 89.434,
                     "average_finishing_position": 5.519,
                     "winning_percentage": 0.3
                 },
                 {
                     "games_completed": 26,
+                    "average_score": 90.19,
                     "average_finishing_position": 5.357,
                     "winning_percentage": 0.5
                 },
                 {
                     "games_completed": 27,
+                    "average_score": 89.213,
                     "average_finishing_position": 5.519,
                     "winning_percentage": 0.2
                 },
                 {
                     "games_completed": 28,
+                    "average_score": 90.647,
                     "average_finishing_position": 5.432,
                     "winning_percentage": 0.1
                 }
@@ -1524,146 +1727,175 @@
             "points": [
                 {
                     "games_completed": 0,
+                    "average_score": 72.641,
                     "average_finishing_position": 6.561,
                     "winning_percentage": 12.4
                 },
                 {
                     "games_completed": 1,
+                    "average_score": 74.149,
                     "average_finishing_position": 6.407,
                     "winning_percentage": 12.1
                 },
                 {
                     "games_completed": 2,
+                    "average_score": 72.852,
                     "average_finishing_position": 6.645,
                     "winning_percentage": 12.2
                 },
                 {
                     "games_completed": 3,
+                    "average_score": 73.683,
                     "average_finishing_position": 6.619,
                     "winning_percentage": 11.5
                 },
                 {
                     "games_completed": 4,
+                    "average_score": 70.425,
                     "average_finishing_position": 7.069,
                     "winning_percentage": 8.7
                 },
                 {
                     "games_completed": 5,
+                    "average_score": 70.824,
                     "average_finishing_position": 6.996,
                     "winning_percentage": 9.6
                 },
                 {
                     "games_completed": 6,
+                    "average_score": 70.301,
                     "average_finishing_position": 7.092,
                     "winning_percentage": 8.200000000000001
                 },
                 {
                     "games_completed": 7,
+                    "average_score": 71.598,
                     "average_finishing_position": 6.814,
                     "winning_percentage": 10.6
                 },
                 {
                     "games_completed": 8,
+                    "average_score": 71.379,
                     "average_finishing_position": 6.85,
                     "winning_percentage": 10.6
                 },
                 {
                     "games_completed": 9,
+                    "average_score": 72.32,
                     "average_finishing_position": 6.551,
                     "winning_percentage": 11.899999999999999
                 },
                 {
                     "games_completed": 10,
+                    "average_score": 72.85,
                     "average_finishing_position": 6.61,
                     "winning_percentage": 10.8
                 },
                 {
                     "games_completed": 11,
+                    "average_score": 71.782,
                     "average_finishing_position": 6.679,
                     "winning_percentage": 10.4
                 },
                 {
                     "games_completed": 12,
+                    "average_score": 73.251,
                     "average_finishing_position": 6.511,
                     "winning_percentage": 12.9
                 },
                 {
                     "games_completed": 13,
+                    "average_score": 73.494,
                     "average_finishing_position": 6.41,
                     "winning_percentage": 13.5
                 },
                 {
                     "games_completed": 14,
+                    "average_score": 73.807,
                     "average_finishing_position": 6.424,
                     "winning_percentage": 11.600000000000001
                 },
                 {
                     "games_completed": 15,
+                    "average_score": 73.821,
                     "average_finishing_position": 6.497,
                     "winning_percentage": 12.3
                 },
                 {
                     "games_completed": 16,
+                    "average_score": 73.166,
                     "average_finishing_position": 6.491,
                     "winning_percentage": 10.100000000000001
                 },
                 {
                     "games_completed": 17,
+                    "average_score": 72.92,
                     "average_finishing_position": 6.575,
                     "winning_percentage": 11.4
                 },
                 {
                     "games_completed": 18,
+                    "average_score": 73.319,
                     "average_finishing_position": 6.533,
                     "winning_percentage": 12.2
                 },
                 {
                     "games_completed": 19,
+                    "average_score": 74.667,
                     "average_finishing_position": 6.426,
                     "winning_percentage": 11.5
                 },
                 {
                     "games_completed": 20,
+                    "average_score": 73.446,
                     "average_finishing_position": 6.65,
                     "winning_percentage": 10.8
                 },
                 {
                     "games_completed": 21,
+                    "average_score": 74.643,
                     "average_finishing_position": 6.315,
                     "winning_percentage": 12.7
                 },
                 {
                     "games_completed": 22,
+                    "average_score": 74.156,
                     "average_finishing_position": 6.496,
                     "winning_percentage": 12.3
                 },
                 {
                     "games_completed": 23,
+                    "average_score": 73.579,
                     "average_finishing_position": 6.663,
                     "winning_percentage": 10.9
                 },
                 {
                     "games_completed": 24,
+                    "average_score": 73.017,
                     "average_finishing_position": 6.559,
                     "winning_percentage": 11.4
                 },
                 {
                     "games_completed": 25,
+                    "average_score": 73.216,
                     "average_finishing_position": 6.603,
                     "winning_percentage": 11.3
                 },
                 {
                     "games_completed": 26,
+                    "average_score": 73.396,
                     "average_finishing_position": 6.617,
                     "winning_percentage": 10.5
                 },
                 {
                     "games_completed": 27,
+                    "average_score": 73.583,
                     "average_finishing_position": 6.556,
                     "winning_percentage": 11.600000000000001
                 },
                 {
                     "games_completed": 28,
+                    "average_score": 73.661,
                     "average_finishing_position": 6.654,
                     "winning_percentage": 11.3
                 }
@@ -1679,146 +1911,175 @@
             "points": [
                 {
                     "games_completed": 0,
+                    "average_score": 64.787,
                     "average_finishing_position": 8.424,
                     "winning_percentage": 1.3
                 },
                 {
                     "games_completed": 1,
+                    "average_score": 66.395,
                     "average_finishing_position": 8.317,
                     "winning_percentage": 1.7999999999999998
                 },
                 {
                     "games_completed": 2,
+                    "average_score": 66.228,
                     "average_finishing_position": 8.211,
                     "winning_percentage": 2.1999999999999997
                 },
                 {
                     "games_completed": 3,
+                    "average_score": 66.039,
                     "average_finishing_position": 8.372,
                     "winning_percentage": 1.6
                 },
                 {
                     "games_completed": 4,
+                    "average_score": 65.043,
                     "average_finishing_position": 8.395,
                     "winning_percentage": 1.7000000000000002
                 },
                 {
                     "games_completed": 5,
+                    "average_score": 64.424,
                     "average_finishing_position": 8.526,
                     "winning_percentage": 2.3
                 },
                 {
                     "games_completed": 6,
+                    "average_score": 64.079,
                     "average_finishing_position": 8.664,
                     "winning_percentage": 2.3
                 },
                 {
                     "games_completed": 7,
+                    "average_score": 64.298,
                     "average_finishing_position": 8.532,
                     "winning_percentage": 1.0
                 },
                 {
                     "games_completed": 8,
+                    "average_score": 64.393,
                     "average_finishing_position": 8.598,
                     "winning_percentage": 2.0
                 },
                 {
                     "games_completed": 9,
+                    "average_score": 63.244,
                     "average_finishing_position": 8.758,
                     "winning_percentage": 1.9
                 },
                 {
                     "games_completed": 10,
+                    "average_score": 64.108,
                     "average_finishing_position": 8.642,
                     "winning_percentage": 1.0999999999999999
                 },
                 {
                     "games_completed": 11,
+                    "average_score": 65.094,
                     "average_finishing_position": 8.287,
                     "winning_percentage": 2.1999999999999997
                 },
                 {
                     "games_completed": 12,
+                    "average_score": 65.549,
                     "average_finishing_position": 8.243,
                     "winning_percentage": 2.3
                 },
                 {
                     "games_completed": 13,
+                    "average_score": 65.914,
                     "average_finishing_position": 8.153,
                     "winning_percentage": 2.6
                 },
                 {
                     "games_completed": 14,
+                    "average_score": 64.951,
                     "average_finishing_position": 8.436,
                     "winning_percentage": 1.7999999999999998
                 },
                 {
                     "games_completed": 15,
+                    "average_score": 65.371,
                     "average_finishing_position": 8.408,
                     "winning_percentage": 1.7999999999999998
                 },
                 {
                     "games_completed": 16,
+                    "average_score": 65.224,
                     "average_finishing_position": 8.409,
                     "winning_percentage": 1.7000000000000002
                 },
                 {
                     "games_completed": 17,
+                    "average_score": 65.574,
                     "average_finishing_position": 8.378,
                     "winning_percentage": 1.7999999999999998
                 },
                 {
                     "games_completed": 18,
+                    "average_score": 64.959,
                     "average_finishing_position": 8.522,
                     "winning_percentage": 1.7000000000000002
                 },
                 {
                     "games_completed": 19,
+                    "average_score": 66.037,
                     "average_finishing_position": 8.431,
                     "winning_percentage": 2.4
                 },
                 {
                     "games_completed": 20,
+                    "average_score": 64.972,
                     "average_finishing_position": 8.513,
                     "winning_percentage": 1.6
                 },
                 {
                     "games_completed": 21,
+                    "average_score": 65.817,
                     "average_finishing_position": 8.43,
                     "winning_percentage": 1.6
                 },
                 {
                     "games_completed": 22,
+                    "average_score": 66.184,
                     "average_finishing_position": 8.391,
                     "winning_percentage": 1.9
                 },
                 {
                     "games_completed": 23,
+                    "average_score": 66.411,
                     "average_finishing_position": 8.258,
                     "winning_percentage": 2.0
                 },
                 {
                     "games_completed": 24,
+                    "average_score": 65.837,
                     "average_finishing_position": 8.467,
                     "winning_percentage": 2.0
                 },
                 {
                     "games_completed": 25,
+                    "average_score": 65.758,
                     "average_finishing_position": 8.392,
                     "winning_percentage": 2.8000000000000003
                 },
                 {
                     "games_completed": 26,
+                    "average_score": 65.08,
                     "average_finishing_position": 8.558,
                     "winning_percentage": 1.6
                 },
                 {
                     "games_completed": 27,
+                    "average_score": 66.235,
                     "average_finishing_position": 8.331,
                     "winning_percentage": 2.1999999999999997
                 },
                 {
                     "games_completed": 28,
+                    "average_score": 66.723,
                     "average_finishing_position": 8.264,
                     "winning_percentage": 2.3
                 }
@@ -1834,146 +2095,175 @@
             "points": [
                 {
                     "games_completed": 0,
+                    "average_score": 55.637,
                     "average_finishing_position": 10.467,
                     "winning_percentage": 0.8
                 },
                 {
                     "games_completed": 1,
+                    "average_score": 56.213,
                     "average_finishing_position": 10.504,
                     "winning_percentage": 0.8999999999999999
                 },
                 {
                     "games_completed": 2,
+                    "average_score": 55.912,
                     "average_finishing_position": 10.59,
                     "winning_percentage": 1.0
                 },
                 {
                     "games_completed": 3,
+                    "average_score": 55.997,
                     "average_finishing_position": 10.699,
                     "winning_percentage": 0.8
                 },
                 {
                     "games_completed": 4,
+                    "average_score": 56.633,
                     "average_finishing_position": 10.315,
                     "winning_percentage": 0.7000000000000001
                 },
                 {
                     "games_completed": 5,
+                    "average_score": 56.83,
                     "average_finishing_position": 10.235,
                     "winning_percentage": 1.0999999999999999
                 },
                 {
                     "games_completed": 6,
+                    "average_score": 58.145,
                     "average_finishing_position": 9.888,
                     "winning_percentage": 1.0999999999999999
                 },
                 {
                     "games_completed": 7,
+                    "average_score": 58.444,
                     "average_finishing_position": 9.795,
                     "winning_percentage": 2.1
                 },
                 {
                     "games_completed": 8,
+                    "average_score": 57.849,
                     "average_finishing_position": 9.972,
                     "winning_percentage": 1.9
                 },
                 {
                     "games_completed": 9,
+                    "average_score": 57.222,
                     "average_finishing_position": 10.055,
                     "winning_percentage": 1.4000000000000001
                 },
                 {
                     "games_completed": 10,
+                    "average_score": 57.398,
                     "average_finishing_position": 10.04,
                     "winning_percentage": 1.3
                 },
                 {
                     "games_completed": 11,
+                    "average_score": 58.1,
                     "average_finishing_position": 9.879,
                     "winning_percentage": 1.4000000000000001
                 },
                 {
                     "games_completed": 12,
+                    "average_score": 58.921,
                     "average_finishing_position": 9.733,
                     "winning_percentage": 1.5
                 },
                 {
                     "games_completed": 13,
+                    "average_score": 59.146,
                     "average_finishing_position": 9.606,
                     "winning_percentage": 1.9
                 },
                 {
                     "games_completed": 14,
+                    "average_score": 59.665,
                     "average_finishing_position": 9.718,
                     "winning_percentage": 1.6
                 },
                 {
                     "games_completed": 15,
+                    "average_score": 59.751,
                     "average_finishing_position": 9.624,
                     "winning_percentage": 1.0999999999999999
                 },
                 {
                     "games_completed": 16,
+                    "average_score": 59.662,
                     "average_finishing_position": 9.603,
                     "winning_percentage": 1.7999999999999998
                 },
                 {
                     "games_completed": 17,
+                    "average_score": 60.578,
                     "average_finishing_position": 9.453,
                     "winning_percentage": 2.4
                 },
                 {
                     "games_completed": 18,
+                    "average_score": 60.267,
                     "average_finishing_position": 9.544,
                     "winning_percentage": 1.6
                 },
                 {
                     "games_completed": 19,
+                    "average_score": 60.515,
                     "average_finishing_position": 9.583,
                     "winning_percentage": 2.1999999999999997
                 },
                 {
                     "games_completed": 20,
+                    "average_score": 60.554,
                     "average_finishing_position": 9.586,
                     "winning_percentage": 1.2
                 },
                 {
                     "games_completed": 21,
+                    "average_score": 60.515,
                     "average_finishing_position": 9.603,
                     "winning_percentage": 1.3
                 },
                 {
                     "games_completed": 22,
+                    "average_score": 60.368,
                     "average_finishing_position": 9.594,
                     "winning_percentage": 1.7999999999999998
                 },
                 {
                     "games_completed": 23,
+                    "average_score": 60.483,
                     "average_finishing_position": 9.607,
                     "winning_percentage": 1.3
                 },
                 {
                     "games_completed": 24,
+                    "average_score": 60.927,
                     "average_finishing_position": 9.472,
                     "winning_percentage": 1.7000000000000002
                 },
                 {
                     "games_completed": 25,
+                    "average_score": 61.456,
                     "average_finishing_position": 9.353,
                     "winning_percentage": 1.9
                 },
                 {
                     "games_completed": 26,
+                    "average_score": 62.134,
                     "average_finishing_position": 9.118,
                     "winning_percentage": 3.0
                 },
                 {
                     "games_completed": 27,
+                    "average_score": 62.097,
                     "average_finishing_position": 9.212,
                     "winning_percentage": 2.1
                 },
                 {
                     "games_completed": 28,
+                    "average_score": 62.327,
                     "average_finishing_position": 9.208,
                     "winning_percentage": 2.3
                 }
@@ -1989,146 +2279,175 @@
             "points": [
                 {
                     "games_completed": 0,
+                    "average_score": 65.115,
                     "average_finishing_position": 8.586,
                     "winning_percentage": 8.1
                 },
                 {
                     "games_completed": 1,
+                    "average_score": 67.545,
                     "average_finishing_position": 8.253,
                     "winning_percentage": 10.6
                 },
                 {
                     "games_completed": 2,
+                    "average_score": 65.52,
                     "average_finishing_position": 8.627,
                     "winning_percentage": 7.3999999999999995
                 },
                 {
                     "games_completed": 3,
+                    "average_score": 66.667,
                     "average_finishing_position": 8.491,
                     "winning_percentage": 9.1
                 },
                 {
                     "games_completed": 4,
+                    "average_score": 64.681,
                     "average_finishing_position": 8.683,
                     "winning_percentage": 8.9
                 },
                 {
                     "games_completed": 5,
+                    "average_score": 64.334,
                     "average_finishing_position": 8.73,
                     "winning_percentage": 7.8
                 },
                 {
                     "games_completed": 6,
+                    "average_score": 63.461,
                     "average_finishing_position": 8.97,
                     "winning_percentage": 7.3999999999999995
                 },
                 {
                     "games_completed": 7,
+                    "average_score": 64.678,
                     "average_finishing_position": 8.855,
                     "winning_percentage": 8.1
                 },
                 {
                     "games_completed": 8,
+                    "average_score": 65.057,
                     "average_finishing_position": 8.694,
                     "winning_percentage": 9.5
                 },
                 {
                     "games_completed": 9,
+                    "average_score": 63.754,
                     "average_finishing_position": 8.832,
                     "winning_percentage": 6.3
                 },
                 {
                     "games_completed": 10,
+                    "average_score": 65.25,
                     "average_finishing_position": 8.722,
                     "winning_percentage": 10.0
                 },
                 {
                     "games_completed": 11,
+                    "average_score": 64.214,
                     "average_finishing_position": 8.865,
                     "winning_percentage": 9.4
                 },
                 {
                     "games_completed": 12,
+                    "average_score": 62.435,
                     "average_finishing_position": 9.188,
                     "winning_percentage": 6.3
                 },
                 {
                     "games_completed": 13,
+                    "average_score": 63.142,
                     "average_finishing_position": 9.087,
                     "winning_percentage": 8.6
                 },
                 {
                     "games_completed": 14,
+                    "average_score": 63.631,
                     "average_finishing_position": 9.116,
                     "winning_percentage": 7.6
                 },
                 {
                     "games_completed": 15,
+                    "average_score": 62.881,
                     "average_finishing_position": 9.301,
                     "winning_percentage": 7.1
                 },
                 {
                     "games_completed": 16,
+                    "average_score": 63.254,
                     "average_finishing_position": 9.26,
                     "winning_percentage": 8.0
                 },
                 {
                     "games_completed": 17,
+                    "average_score": 61.614,
                     "average_finishing_position": 9.531,
                     "winning_percentage": 6.1
                 },
                 {
                     "games_completed": 18,
+                    "average_score": 62.621,
                     "average_finishing_position": 9.295,
                     "winning_percentage": 7.3999999999999995
                 },
                 {
                     "games_completed": 19,
+                    "average_score": 63.733,
                     "average_finishing_position": 9.24,
                     "winning_percentage": 7.8
                 },
                 {
                     "games_completed": 20,
+                    "average_score": 62.71,
                     "average_finishing_position": 9.374,
                     "winning_percentage": 8.0
                 },
                 {
                     "games_completed": 21,
+                    "average_score": 63.849,
                     "average_finishing_position": 9.21,
                     "winning_percentage": 8.6
                 },
                 {
                     "games_completed": 22,
+                    "average_score": 62.336,
                     "average_finishing_position": 9.529,
                     "winning_percentage": 7.000000000000001
                 },
                 {
                     "games_completed": 23,
+                    "average_score": 63.587,
                     "average_finishing_position": 9.245,
                     "winning_percentage": 8.9
                 },
                 {
                     "games_completed": 24,
+                    "average_score": 62.589,
                     "average_finishing_position": 9.353,
                     "winning_percentage": 6.6000000000000005
                 },
                 {
                     "games_completed": 25,
+                    "average_score": 62.224,
                     "average_finishing_position": 9.608,
                     "winning_percentage": 6.7
                 },
                 {
                     "games_completed": 26,
+                    "average_score": 61.12,
                     "average_finishing_position": 9.761,
                     "winning_percentage": 6.9
                 },
                 {
                     "games_completed": 27,
+                    "average_score": 61.557,
                     "average_finishing_position": 9.655,
                     "winning_percentage": 6.4
                 },
                 {
                     "games_completed": 28,
+                    "average_score": 62.111,
                     "average_finishing_position": 9.572,
                     "winning_percentage": 7.8
                 }
@@ -2144,146 +2463,175 @@
             "points": [
                 {
                     "games_completed": 0,
+                    "average_score": 59.739,
                     "average_finishing_position": 9.587,
                     "winning_percentage": 2.0
                 },
                 {
                     "games_completed": 1,
+                    "average_score": 60.085,
                     "average_finishing_position": 9.606,
                     "winning_percentage": 2.1999999999999997
                 },
                 {
                     "games_completed": 2,
+                    "average_score": 59.722,
                     "average_finishing_position": 9.738,
                     "winning_percentage": 2.4
                 },
                 {
                     "games_completed": 3,
+                    "average_score": 60.263,
                     "average_finishing_position": 9.682,
                     "winning_percentage": 1.6
                 },
                 {
                     "games_completed": 4,
+                    "average_score": 56.945,
                     "average_finishing_position": 10.263,
                     "winning_percentage": 1.6
                 },
                 {
                     "games_completed": 5,
+                    "average_score": 58.124,
                     "average_finishing_position": 9.919,
                     "winning_percentage": 1.4000000000000001
                 },
                 {
                     "games_completed": 6,
+                    "average_score": 58.789,
                     "average_finishing_position": 9.916,
                     "winning_percentage": 2.0
                 },
                 {
                     "games_completed": 7,
+                    "average_score": 58.966,
                     "average_finishing_position": 9.828,
                     "winning_percentage": 2.1
                 },
                 {
                     "games_completed": 8,
+                    "average_score": 58.771,
                     "average_finishing_position": 9.848,
                     "winning_percentage": 2.3
                 },
                 {
                     "games_completed": 9,
+                    "average_score": 58.696,
                     "average_finishing_position": 9.78,
                     "winning_percentage": 2.3
                 },
                 {
                     "games_completed": 10,
+                    "average_score": 58.012,
                     "average_finishing_position": 10.079,
                     "winning_percentage": 2.3
                 },
                 {
                     "games_completed": 11,
+                    "average_score": 57.882,
                     "average_finishing_position": 10.022,
                     "winning_percentage": 2.3
                 },
                 {
                     "games_completed": 12,
+                    "average_score": 58.495,
                     "average_finishing_position": 9.921,
                     "winning_percentage": 2.1999999999999997
                 },
                 {
                     "games_completed": 13,
+                    "average_score": 58.22,
                     "average_finishing_position": 9.945,
                     "winning_percentage": 2.1
                 },
                 {
                     "games_completed": 14,
+                    "average_score": 58.635,
                     "average_finishing_position": 9.941,
                     "winning_percentage": 1.6
                 },
                 {
                     "games_completed": 15,
+                    "average_score": 59.139,
                     "average_finishing_position": 9.978,
                     "winning_percentage": 2.1
                 },
                 {
                     "games_completed": 16,
+                    "average_score": 59.136,
                     "average_finishing_position": 9.88,
                     "winning_percentage": 1.6
                 },
                 {
                     "games_completed": 17,
+                    "average_score": 59.978,
                     "average_finishing_position": 9.697,
                     "winning_percentage": 2.5
                 },
                 {
                     "games_completed": 18,
+                    "average_score": 59.639,
                     "average_finishing_position": 9.825,
                     "winning_percentage": 2.7
                 },
                 {
                     "games_completed": 19,
+                    "average_score": 59.701,
                     "average_finishing_position": 9.807,
                     "winning_percentage": 1.9
                 },
                 {
                     "games_completed": 20,
+                    "average_score": 59.746,
                     "average_finishing_position": 9.814,
                     "winning_percentage": 2.7
                 },
                 {
                     "games_completed": 21,
+                    "average_score": 59.853,
                     "average_finishing_position": 9.895,
                     "winning_percentage": 2.1999999999999997
                 },
                 {
                     "games_completed": 22,
+                    "average_score": 59.25,
                     "average_finishing_position": 10.013,
                     "winning_percentage": 2.0
                 },
                 {
                     "games_completed": 23,
+                    "average_score": 59.385,
                     "average_finishing_position": 9.984,
                     "winning_percentage": 1.7999999999999998
                 },
                 {
                     "games_completed": 24,
+                    "average_score": 59.325,
                     "average_finishing_position": 9.944,
                     "winning_percentage": 1.6
                 },
                 {
                     "games_completed": 25,
+                    "average_score": 60.21,
                     "average_finishing_position": 9.773,
                     "winning_percentage": 2.0
                 },
                 {
                     "games_completed": 26,
+                    "average_score": 59.112,
                     "average_finishing_position": 9.986,
                     "winning_percentage": 2.0
                 },
                 {
                     "games_completed": 27,
+                    "average_score": 60.081,
                     "average_finishing_position": 9.775,
                     "winning_percentage": 1.7999999999999998
                 },
                 {
                     "games_completed": 28,
+                    "average_score": 59.595,
                     "average_finishing_position": 9.885,
                     "winning_percentage": 2.0
                 }
@@ -2299,146 +2647,175 @@
             "points": [
                 {
                     "games_completed": 0,
+                    "average_score": 58.743,
                     "average_finishing_position": 10.095,
                     "winning_percentage": 0.0
                 },
                 {
                     "games_completed": 1,
+                    "average_score": 58.325,
                     "average_finishing_position": 10.228,
                     "winning_percentage": 0.5
                 },
                 {
                     "games_completed": 2,
+                    "average_score": 58.58,
                     "average_finishing_position": 10.142,
                     "winning_percentage": 0.1
                 },
                 {
                     "games_completed": 3,
+                    "average_score": 59.497,
                     "average_finishing_position": 10.082,
                     "winning_percentage": 0.1
                 },
                 {
                     "games_completed": 4,
+                    "average_score": 59.009,
                     "average_finishing_position": 9.931,
                     "winning_percentage": 0.0
                 },
                 {
                     "games_completed": 5,
+                    "average_score": 58.496,
                     "average_finishing_position": 10.11,
                     "winning_percentage": 0.0
                 },
                 {
                     "games_completed": 6,
+                    "average_score": 57.597,
                     "average_finishing_position": 10.286,
                     "winning_percentage": 0.0
                 },
                 {
                     "games_completed": 7,
+                    "average_score": 57.366,
                     "average_finishing_position": 10.339,
                     "winning_percentage": 0.1
                 },
                 {
                     "games_completed": 8,
+                    "average_score": 58.135,
                     "average_finishing_position": 10.132,
                     "winning_percentage": 0.1
                 },
                 {
                     "games_completed": 9,
+                    "average_score": 56.938,
                     "average_finishing_position": 10.403,
                     "winning_percentage": 0.1
                 },
                 {
                     "games_completed": 10,
+                    "average_score": 57.728,
                     "average_finishing_position": 10.219,
                     "winning_percentage": 0.1
                 },
                 {
                     "games_completed": 11,
+                    "average_score": 56.34,
                     "average_finishing_position": 10.487,
                     "winning_percentage": 0.2
                 },
                 {
                     "games_completed": 12,
+                    "average_score": 57.569,
                     "average_finishing_position": 10.339,
                     "winning_percentage": 0.1
                 },
                 {
                     "games_completed": 13,
+                    "average_score": 57.246,
                     "average_finishing_position": 10.425,
                     "winning_percentage": 0.0
                 },
                 {
                     "games_completed": 14,
+                    "average_score": 56.745,
                     "average_finishing_position": 10.535,
                     "winning_percentage": 0.0
                 },
                 {
                     "games_completed": 15,
+                    "average_score": 57.057,
                     "average_finishing_position": 10.529,
                     "winning_percentage": 0.0
                 },
                 {
                     "games_completed": 16,
+                    "average_score": 56.662,
                     "average_finishing_position": 10.563,
                     "winning_percentage": 0.0
                 },
                 {
                     "games_completed": 17,
+                    "average_score": 56.83,
                     "average_finishing_position": 10.533,
                     "winning_percentage": 0.1
                 },
                 {
                     "games_completed": 18,
+                    "average_score": 57.781,
                     "average_finishing_position": 10.457,
                     "winning_percentage": 0.1
                 },
                 {
                     "games_completed": 19,
+                    "average_score": 57.715,
                     "average_finishing_position": 10.436,
                     "winning_percentage": 0.0
                 },
                 {
                     "games_completed": 20,
+                    "average_score": 57.28,
                     "average_finishing_position": 10.543,
                     "winning_percentage": 0.1
                 },
                 {
                     "games_completed": 21,
+                    "average_score": 57.349,
                     "average_finishing_position": 10.516,
                     "winning_percentage": 0.0
                 },
                 {
                     "games_completed": 22,
+                    "average_score": 58.254,
                     "average_finishing_position": 10.34,
                     "winning_percentage": 0.0
                 },
                 {
                     "games_completed": 23,
+                    "average_score": 57.195,
                     "average_finishing_position": 10.547,
                     "winning_percentage": 0.0
                 },
                 {
                     "games_completed": 24,
+                    "average_score": 56.475,
                     "average_finishing_position": 10.743,
                     "winning_percentage": 0.0
                 },
                 {
                     "games_completed": 25,
+                    "average_score": 57.42,
                     "average_finishing_position": 10.499,
                     "winning_percentage": 0.0
                 },
                 {
                     "games_completed": 26,
+                    "average_score": 57.476,
                     "average_finishing_position": 10.501,
                     "winning_percentage": 0.1
                 },
                 {
                     "games_completed": 27,
+                    "average_score": 57.505,
                     "average_finishing_position": 10.523,
                     "winning_percentage": 0.1
                 },
                 {
                     "games_completed": 28,
+                    "average_score": 58.071,
                     "average_finishing_position": 10.417,
                     "winning_percentage": 0.0
                 }
@@ -2454,146 +2831,175 @@
             "points": [
                 {
                     "games_completed": 0,
+                    "average_score": 52.067,
                     "average_finishing_position": 11.286,
                     "winning_percentage": 2.1
                 },
                 {
                     "games_completed": 1,
+                    "average_score": 53.677,
                     "average_finishing_position": 10.996,
                     "winning_percentage": 3.1
                 },
                 {
                     "games_completed": 2,
+                    "average_score": 53.854,
                     "average_finishing_position": 10.989,
                     "winning_percentage": 2.8000000000000003
                 },
                 {
                     "games_completed": 3,
+                    "average_score": 54.329,
                     "average_finishing_position": 10.897,
                     "winning_percentage": 2.7
                 },
                 {
                     "games_completed": 4,
+                    "average_score": 53.765,
                     "average_finishing_position": 10.855,
                     "winning_percentage": 3.4000000000000004
                 },
                 {
                     "games_completed": 5,
+                    "average_score": 54.836,
                     "average_finishing_position": 10.645,
                     "winning_percentage": 4.2
                 },
                 {
                     "games_completed": 6,
+                    "average_score": 54.809,
                     "average_finishing_position": 10.681,
                     "winning_percentage": 2.8000000000000003
                 },
                 {
                     "games_completed": 7,
+                    "average_score": 55.386,
                     "average_finishing_position": 10.619,
                     "winning_percentage": 3.5999999999999996
                 },
                 {
                     "games_completed": 8,
+                    "average_score": 54.875,
                     "average_finishing_position": 10.67,
                     "winning_percentage": 3.5000000000000004
                 },
                 {
                     "games_completed": 9,
+                    "average_score": 54.52,
                     "average_finishing_position": 10.604,
                     "winning_percentage": 3.0
                 },
                 {
                     "games_completed": 10,
+                    "average_score": 53.654,
                     "average_finishing_position": 10.84,
                     "winning_percentage": 2.1999999999999997
                 },
                 {
                     "games_completed": 11,
+                    "average_score": 54.86,
                     "average_finishing_position": 10.604,
                     "winning_percentage": 3.0
                 },
                 {
                     "games_completed": 12,
+                    "average_score": 53.481,
                     "average_finishing_position": 10.96,
                     "winning_percentage": 2.3
                 },
                 {
                     "games_completed": 13,
+                    "average_score": 54.382,
                     "average_finishing_position": 10.728,
                     "winning_percentage": 3.2
                 },
                 {
                     "games_completed": 14,
+                    "average_score": 54.741,
                     "average_finishing_position": 10.775,
                     "winning_percentage": 2.7
                 },
                 {
                     "games_completed": 15,
+                    "average_score": 54.923,
                     "average_finishing_position": 10.723,
                     "winning_percentage": 3.0
                 },
                 {
                     "games_completed": 16,
+                    "average_score": 54.724,
                     "average_finishing_position": 10.753,
                     "winning_percentage": 2.9000000000000004
                 },
                 {
                     "games_completed": 17,
+                    "average_score": 54.574,
                     "average_finishing_position": 10.8,
                     "winning_percentage": 3.3000000000000003
                 },
                 {
                     "games_completed": 18,
+                    "average_score": 54.611,
                     "average_finishing_position": 10.868,
                     "winning_percentage": 2.6
                 },
                 {
                     "games_completed": 19,
+                    "average_score": 54.315,
                     "average_finishing_position": 10.996,
                     "winning_percentage": 2.9000000000000004
                 },
                 {
                     "games_completed": 20,
+                    "average_score": 54.782,
                     "average_finishing_position": 10.823,
                     "winning_percentage": 2.7
                 },
                 {
                     "games_completed": 21,
+                    "average_score": 54.167,
                     "average_finishing_position": 11.015,
                     "winning_percentage": 2.5
                 },
                 {
                     "games_completed": 22,
+                    "average_score": 54.528,
                     "average_finishing_position": 10.886,
                     "winning_percentage": 2.3
                 },
                 {
                     "games_completed": 23,
+                    "average_score": 54.541,
                     "average_finishing_position": 10.913,
                     "winning_percentage": 2.6
                 },
                 {
                     "games_completed": 24,
+                    "average_score": 55.019,
                     "average_finishing_position": 10.869,
                     "winning_percentage": 3.3000000000000003
                 },
                 {
                     "games_completed": 25,
+                    "average_score": 54.468,
                     "average_finishing_position": 10.866,
                     "winning_percentage": 2.6
                 },
                 {
                     "games_completed": 26,
+                    "average_score": 54.39,
                     "average_finishing_position": 10.799,
                     "winning_percentage": 2.4
                 },
                 {
                     "games_completed": 27,
+                    "average_score": 54.365,
                     "average_finishing_position": 10.97,
                     "winning_percentage": 3.3000000000000003
                 },
                 {
                     "games_completed": 28,
+                    "average_score": 53.985,
                     "average_finishing_position": 11.024,
                     "winning_percentage": 2.8000000000000003
                 }
@@ -2609,146 +3015,175 @@
             "points": [
                 {
                     "games_completed": 0,
+                    "average_score": 50.699,
                     "average_finishing_position": 11.527,
                     "winning_percentage": 0.7000000000000001
                 },
                 {
                     "games_completed": 1,
+                    "average_score": 51.685,
                     "average_finishing_position": 11.322,
                     "winning_percentage": 1.4000000000000001
                 },
                 {
                     "games_completed": 2,
+                    "average_score": 51.682,
                     "average_finishing_position": 11.445,
                     "winning_percentage": 0.7000000000000001
                 },
                 {
                     "games_completed": 3,
+                    "average_score": 52.305,
                     "average_finishing_position": 11.32,
                     "winning_percentage": 1.3
                 },
                 {
                     "games_completed": 4,
+                    "average_score": 49.015,
                     "average_finishing_position": 11.869,
                     "winning_percentage": 0.4
                 },
                 {
                     "games_completed": 5,
+                    "average_score": 48.834,
                     "average_finishing_position": 11.959,
                     "winning_percentage": 0.8
                 },
                 {
                     "games_completed": 6,
+                    "average_score": 50.093,
                     "average_finishing_position": 11.659,
                     "winning_percentage": 1.2
                 },
                 {
                     "games_completed": 7,
+                    "average_score": 50.328,
                     "average_finishing_position": 11.707,
                     "winning_percentage": 0.8999999999999999
                 },
                 {
                     "games_completed": 8,
+                    "average_score": 50.237,
                     "average_finishing_position": 11.619,
                     "winning_percentage": 1.2
                 },
                 {
                     "games_completed": 9,
+                    "average_score": 50.984,
                     "average_finishing_position": 11.369,
                     "winning_percentage": 1.4000000000000001
                 },
                 {
                     "games_completed": 10,
+                    "average_score": 51.21,
                     "average_finishing_position": 11.411,
                     "winning_percentage": 1.3
                 },
                 {
                     "games_completed": 11,
+                    "average_score": 51.948,
                     "average_finishing_position": 11.252,
                     "winning_percentage": 1.0999999999999999
                 },
                 {
                     "games_completed": 12,
+                    "average_score": 50.401,
                     "average_finishing_position": 11.626,
                     "winning_percentage": 1.0999999999999999
                 },
                 {
                     "games_completed": 13,
+                    "average_score": 50.98,
                     "average_finishing_position": 11.449,
                     "winning_percentage": 1.2
                 },
                 {
                     "games_completed": 14,
+                    "average_score": 50.625,
                     "average_finishing_position": 11.644,
                     "winning_percentage": 0.7000000000000001
                 },
                 {
                     "games_completed": 15,
+                    "average_score": 50.587,
                     "average_finishing_position": 11.718,
                     "winning_percentage": 0.6
                 },
                 {
                     "games_completed": 16,
+                    "average_score": 50.336,
                     "average_finishing_position": 11.788,
                     "winning_percentage": 1.0
                 },
                 {
                     "games_completed": 17,
+                    "average_score": 51.644,
                     "average_finishing_position": 11.334,
                     "winning_percentage": 1.0
                 },
                 {
                     "games_completed": 18,
+                    "average_score": 52.181,
                     "average_finishing_position": 11.422,
                     "winning_percentage": 0.8999999999999999
                 },
                 {
                     "games_completed": 19,
+                    "average_score": 51.915,
                     "average_finishing_position": 11.449,
                     "winning_percentage": 0.8999999999999999
                 },
                 {
                     "games_completed": 20,
+                    "average_score": 52.242,
                     "average_finishing_position": 11.28,
                     "winning_percentage": 1.7000000000000002
                 },
                 {
                     "games_completed": 21,
+                    "average_score": 52.211,
                     "average_finishing_position": 11.368,
                     "winning_percentage": 1.0
                 },
                 {
                     "games_completed": 22,
+                    "average_score": 52.122,
                     "average_finishing_position": 11.421,
                     "winning_percentage": 0.8999999999999999
                 },
                 {
                     "games_completed": 23,
+                    "average_score": 52.717,
                     "average_finishing_position": 11.33,
                     "winning_percentage": 1.2
                 },
                 {
                     "games_completed": 24,
+                    "average_score": 52.463,
                     "average_finishing_position": 11.362,
                     "winning_percentage": 1.5
                 },
                 {
                     "games_completed": 25,
+                    "average_score": 52.06,
                     "average_finishing_position": 11.442,
                     "winning_percentage": 1.2
                 },
                 {
                     "games_completed": 26,
+                    "average_score": 51.896,
                     "average_finishing_position": 11.356,
                     "winning_percentage": 0.8999999999999999
                 },
                 {
                     "games_completed": 27,
+                    "average_score": 51.679,
                     "average_finishing_position": 11.444,
                     "winning_percentage": 0.8999999999999999
                 },
                 {
                     "games_completed": 28,
+                    "average_score": 51.219,
                     "average_finishing_position": 11.636,
                     "winning_percentage": 1.0999999999999999
                 }

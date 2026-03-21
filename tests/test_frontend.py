@@ -100,7 +100,12 @@ def test_prediction_and_historical_pages_render() -> None:
     assert "Prediction Engine" in prediction_html
     assert "Monte Carlo history" in prediction_html
     assert "Average Finish Over Time" in prediction_html
+    assert "Average Points Over Time" in prediction_html
     assert "Winning Percentage Over Time" in prediction_html
+    assert "Initial" in prediction_html
+    assert "beats" in prediction_html
+    assert "Plotly.newPlot" in prediction_html
+    assert "prediction-average-finish-chart" in prediction_html
     assert "Darren Boyd" in prediction_html
 
     assert historical_response.status_code == 200

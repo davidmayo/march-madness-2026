@@ -15,9 +15,13 @@ from html import escape
 from pathlib import Path
 import math
 
+import plotly.graph_objects as go
+import plotly.io as pio
+
 from march_madness.canonical_bracket import REGION_ORDER
 from march_madness.canonical_bracket import ROUND_NAMES
 from march_madness.canonical_bracket import canonical_team_name_by_id
+from march_madness.predictions import PredictionHistoryCheckpoint
 from march_madness.predictions import TournamentPredictionHistory
 from march_madness.predictions import UserPredictionHistorySeries
 from march_madness.predictions import load_prediction_history
@@ -308,11 +312,8 @@ def render_prediction_page() -> str:
     """Render the Monte Carlo prediction-history page."""
 
     prediction_history = load_prediction_history_data()
-    latest_series = [
-        series
-        for series in prediction_history.users
-        if series.points
-    ]
+    checkpoints = prediction_history.checkpoints
+    latest_series = [series for series in prediction_history.users if series.points]
     latest_series.sort(
         key=lambda series: (
             series.points[-1].average_finishing_position,
@@ -330,7 +331,7 @@ def render_prediction_page() -> str:
     summary_cards = "".join(
         (
             _render_stat_card("Simulations Per Checkpoint", _format_score(float(prediction_history.simulation_count))),
-            _render_stat_card("Checkpoints", _format_score(float(len(prediction_history.checkpoints)))),
+            _render_stat_card("Checkpoints", _format_score(float(len(checkpoints)))),
             _render_stat_card("Latest Completed Games", _format_score(float(prediction_history.completed_game_count_max))),
         )
     )
@@ -358,29 +359,44 @@ def render_prediction_page() -> str:
         )
 
     average_finish_chart = _render_prediction_history_chart(
-        title="Average Finish History",
-        subtitle="Lower is better. Shared places keep the same finishing position.",
+        chart_id="prediction-average-finish-chart",
+        checkpoints=checkpoints,
         series_list=latest_series,
         metric_name="average_finishing_position",
         y_axis_label="Average Finish",
+        hover_label="Average Finish",
         y_min=1.0,
         y_max=float(max(len(latest_series), 1)),
         y_tick_values=_average_finish_tick_values(len(latest_series)),
+        invert_y_axis=True,
+        include_plotlyjs=True,
+    )
+    average_score_y_min, average_score_y_max, average_score_ticks = _average_score_axis(
+        latest_series,
+    )
+    average_score_chart = _render_prediction_history_chart(
+        chart_id="prediction-average-points-chart",
+        checkpoints=checkpoints,
+        series_list=latest_series,
+        metric_name="average_score",
+        y_axis_label="Average Points",
+        hover_label="Average Points",
+        y_min=average_score_y_min,
+        y_max=average_score_y_max,
+        y_tick_values=average_score_ticks,
     )
     winning_percentage_chart = _render_prediction_history_chart(
-        title="Winning Percentage History",
-        subtitle="Percent of simulations where the bracket finished in first place, including tied firsts.",
+        chart_id="prediction-winning-percentage-chart",
+        checkpoints=checkpoints,
         series_list=latest_series,
         metric_name="winning_percentage",
         y_axis_label="Winning Percentage",
+        hover_label="Winning Percentage",
         y_min=0.0,
         y_max=100.0,
         y_tick_values=[0.0, 20.0, 40.0, 60.0, 80.0, 100.0],
     )
-    rows_html = "".join(
-        _render_prediction_snapshot_row(series)
-        for series in latest_series
-    )
+    rows_html = "".join(_render_prediction_snapshot_row(series) for series in latest_series)
     body = f"""
     <section class="hero">
         <p class="eyebrow">Monte Carlo history</p>
@@ -397,9 +413,19 @@ def render_prediction_page() -> str:
                 <p class="section-kicker">Trend graph</p>
                 <h2>Average Finish Over Time</h2>
             </div>
-            <p class="panel-note">X axis is games completed. Y axis is each user's simulated average finishing place.</p>
+            <p class="panel-note">Each checkpoint is labeled by the newly completed winner, with first place shown at the top.</p>
         </div>
         {average_finish_chart}
+    </section>
+    <section class="panel">
+        <div class="section-heading">
+            <div>
+                <p class="section-kicker">Scoring outlook</p>
+                <h2>Average Points Over Time</h2>
+            </div>
+            <p class="panel-note">Higher is better. These lines track expected traditional points as the tournament advances.</p>
+        </div>
+        {average_score_chart}
     </section>
     <section class="panel">
         <div class="section-heading">
@@ -425,6 +451,7 @@ def render_prediction_page() -> str:
                     <tr>
                         <th>Name</th>
                         <th>Category</th>
+                        <th>Avg Points</th>
                         <th>Avg Finish</th>
                         <th>Winning %</th>
                     </tr>
@@ -490,6 +517,7 @@ def _render_page_shell(
     title: str,
     active_path: str,
     page_body: str,
+    extra_body_html: str = "",
 ) -> str:
     """Wrap page-specific HTML with the shared site shell."""
 
@@ -518,6 +546,7 @@ def _render_page_shell(
     <main class="site-main">
         {page_body}
     </main>
+    {extra_body_html}
 </body>
 </html>
 """
@@ -813,6 +842,7 @@ def _render_prediction_snapshot_row(series: UserPredictionHistorySeries) -> str:
             <a class="standings-link" href="/brackets/{escape(series.slug)}">{escape(series.user_name)}</a>
         </td>
         <td>{_render_table_category_badges(tuple(series.user_categories))}</td>
+        <td>{_format_score(latest_point.average_score)}</td>
         <td>{_format_score(latest_point.average_finishing_position)}</td>
         <td>{_format_percent(latest_point.winning_percentage)}</td>
     </tr>
@@ -821,103 +851,144 @@ def _render_prediction_snapshot_row(series: UserPredictionHistorySeries) -> str:
 
 def _render_prediction_history_chart(
     *,
-    title: str,
-    subtitle: str,
+    chart_id: str,
+    checkpoints: list[PredictionHistoryCheckpoint],
     series_list: list[UserPredictionHistorySeries],
     metric_name: str,
     y_axis_label: str,
+    hover_label: str,
     y_min: float,
     y_max: float,
     y_tick_values: list[float],
+    invert_y_axis: bool = False,
+    include_plotlyjs: bool = False,
 ) -> str:
-    """Render one SVG line chart for the prediction-history page."""
+    """Render one Plotly line chart for the prediction-history page."""
 
-    width = 1180
-    height = 520
-    padding_left = 72
-    padding_right = 28
-    padding_top = 54
-    padding_bottom = 56
-    plot_width = width - padding_left - padding_right
-    plot_height = height - padding_top - padding_bottom
+    checkpoint_labels = [checkpoint.label for checkpoint in checkpoints]
+    label_by_games_completed = {
+        checkpoint.games_completed: checkpoint.label
+        for checkpoint in checkpoints
+    }
+    figure = go.Figure()
 
-    max_games_completed = max(
-        (series.points[-1].games_completed for series in series_list if series.points),
-        default=0,
-    )
-    x_tick_values = _x_axis_tick_values(max_games_completed)
-
-    def x_position(games_completed: int) -> float:
-        if max_games_completed == 0:
-            return padding_left + (plot_width / 2)
-        return padding_left + (games_completed / max_games_completed) * plot_width
-
-    def y_position(value: float) -> float:
-        if math.isclose(y_max, y_min):
-            return padding_top + (plot_height / 2)
-        return padding_top + ((y_max - value) / (y_max - y_min)) * plot_height
-
-    grid_lines = "".join(
-        f"""
-        <line class="chart-grid-line" x1="{padding_left}" y1="{y_position(tick_value):.2f}" x2="{padding_left + plot_width}" y2="{y_position(tick_value):.2f}"></line>
-        <text class="chart-axis-text" x="{padding_left - 12}" y="{y_position(tick_value) + 4:.2f}" text-anchor="end">{escape(_format_chart_tick(metric_name, tick_value))}</text>
-        """
-        for tick_value in y_tick_values
-    )
-    x_axis_labels = "".join(
-        f"""
-        <line class="chart-tick-line" x1="{x_position(tick_value):.2f}" y1="{padding_top + plot_height}" x2="{x_position(tick_value):.2f}" y2="{padding_top + plot_height + 6}"></line>
-        <text class="chart-axis-text" x="{x_position(tick_value):.2f}" y="{padding_top + plot_height + 24}" text-anchor="middle">{tick_value}</text>
-        """
-        for tick_value in x_tick_values
-    )
-
-    line_markup_parts: list[str] = []
-    legend_items: list[str] = []
     for index, series in enumerate(series_list):
         color = _prediction_series_color(index)
-        dasharray = _prediction_series_dasharray(series)
-        points = " ".join(
-            f"{x_position(point.games_completed):.2f},{y_position(getattr(point, metric_name)):.2f}"
+        line_dash = _prediction_series_dash(series)
+        y_values = [
+            getattr(point, metric_name)
             for point in series.points
-        )
-        circle_markup = "".join(
-            f'<circle class="chart-point" cx="{x_position(point.games_completed):.2f}" cy="{y_position(getattr(point, metric_name)):.2f}" r="3.2" fill="{color}"></circle>'
+        ]
+        x_values = [
+            label_by_games_completed[point.games_completed]
             for point in series.points
+        ]
+        hover_template = (
+            f"<b>{escape(series.user_name)}</b><br>"
+            "%{x}<br>"
+            f"{hover_label}: %{{y:.1f}}"
+            f"{'%' if metric_name == 'winning_percentage' else ''}"
+            "<extra></extra>"
         )
-        line_markup_parts.append(
-            f'<polyline class="chart-line" points="{points}" fill="none" stroke="{color}" stroke-dasharray="{dasharray}"></polyline>{circle_markup}'
-        )
-        legend_items.append(
-            f"""
-            <span class="chart-legend-item">
-                <svg class="chart-legend-swatch" viewBox="0 0 32 10" aria-hidden="true">
-                    <line x1="1" y1="5" x2="31" y2="5" stroke="{color}" stroke-width="3" stroke-dasharray="{dasharray}"></line>
-                </svg>
-                <span>{escape(series.user_name)}</span>
-            </span>
-            """
+        figure.add_trace(
+            go.Scatter(
+                x=x_values,
+                y=y_values,
+                name=series.user_name,
+                mode="lines+markers",
+                line={
+                    "color": color,
+                    "width": 3,
+                    "dash": line_dash,
+                },
+                marker={
+                    "size": 7,
+                    "color": color,
+                },
+                hovertemplate=hover_template,
+            )
         )
 
-    svg = f"""
-    <svg class="prediction-chart-svg" viewBox="0 0 {width} {height}" role="img" aria-label="{escape(title)}">
-        <text class="chart-title" x="{padding_left}" y="24">{escape(title)}</text>
-        <text class="chart-subtitle" x="{padding_left}" y="44">{escape(subtitle)}</text>
-        {grid_lines}
-        <line class="chart-axis-line" x1="{padding_left}" y1="{padding_top + plot_height}" x2="{padding_left + plot_width}" y2="{padding_top + plot_height}"></line>
-        <line class="chart-axis-line" x1="{padding_left}" y1="{padding_top}" x2="{padding_left}" y2="{padding_top + plot_height}"></line>
-        {x_axis_labels}
-        {''.join(line_markup_parts)}
-        <text class="chart-axis-label" x="{padding_left + (plot_width / 2):.2f}" y="{height - 12}" text-anchor="middle">Games Completed</text>
-        <text class="chart-axis-label" x="18" y="{padding_top + (plot_height / 2):.2f}" text-anchor="middle" transform="rotate(-90 18 {padding_top + (plot_height / 2):.2f})">{escape(y_axis_label)}</text>
-    </svg>
-    """
-    return f"""
-    <div class="prediction-chart-shell">
-        <div class="prediction-chart-wrap">{svg}</div>
-        <div class="chart-legend">{''.join(legend_items)}</div>
-    </div>
-    """
+    y_axis_range = [y_max, y_min] if invert_y_axis else [y_min, y_max]
+    figure.update_layout(
+        height=520,
+        margin={
+            "l": 74,
+            "r": 24,
+            "t": 24,
+            "b": 150,
+        },
+        paper_bgcolor="rgba(0, 0, 0, 0)",
+        plot_bgcolor="rgba(255, 252, 247, 0.78)",
+        hovermode="closest",
+        showlegend=True,
+        legend={
+            "orientation": "h",
+            "x": 0.0,
+            "xanchor": "left",
+            "y": -0.34,
+            "yanchor": "top",
+            "font": {
+                "size": 10,
+            },
+        },
+        font={
+            "size": 13,
+            "color": "#111b16",
+        },
+        xaxis={
+            "title": {
+                "text": "Games Completed",
+                "font": {
+                    "size": 13,
+                },
+            },
+            "type": "category",
+            "categoryorder": "array",
+            "categoryarray": checkpoint_labels,
+            "tickangle": -45,
+            "automargin": True,
+            "showgrid": True,
+            "showline": True,
+            "gridcolor": "rgba(17, 27, 22, 0.08)",
+            "linecolor": "rgba(17, 27, 22, 0.2)",
+            "tickfont": {
+                "size": 10,
+                "color": "#5e665d",
+            },
+        },
+        yaxis={
+            "title": {
+                "text": y_axis_label,
+                "font": {
+                    "size": 13,
+                },
+            },
+            "range": y_axis_range,
+            "tickvals": y_tick_values,
+            "showgrid": True,
+            "showline": True,
+            "gridcolor": "rgba(17, 27, 22, 0.08)",
+            "linecolor": "rgba(17, 27, 22, 0.2)",
+            "zeroline": False,
+            "tickfont": {
+                "size": 11,
+                "color": "#5e665d",
+            },
+        },
+    )
+
+    chart_html = pio.to_html(
+        figure,
+        config={
+            "displayModeBar": False,
+            "responsive": True,
+        },
+        full_html=False,
+        include_plotlyjs="inline" if include_plotlyjs else False,
+        div_id=chart_id,
+    )
+    return f'<div class="prediction-plot">{chart_html}</div>'
 
 
 def _prediction_series_color(index: int) -> str:
@@ -942,24 +1013,12 @@ def _prediction_series_color(index: int) -> str:
     return palette[index % len(palette)]
 
 
-def _prediction_series_dasharray(series: UserPredictionHistorySeries) -> str:
-    """Return the stroke dash pattern for one user's chart line."""
+def _prediction_series_dash(series: UserPredictionHistorySeries) -> str:
+    """Return the Plotly dash pattern for one user's chart line."""
 
     if "staff" in series.user_categories:
-        return "8 5"
-    return "none"
-
-
-def _x_axis_tick_values(max_games_completed: int) -> list[int]:
-    """Return evenly spaced integer tick values for the chart x axis."""
-
-    if max_games_completed <= 0:
-        return [0]
-    step = max(1, math.ceil(max_games_completed / 7))
-    ticks = list(range(0, max_games_completed + 1, step))
-    if ticks[-1] != max_games_completed:
-        ticks.append(max_games_completed)
-    return ticks
+        return "dash"
+    return "solid"
 
 
 def _average_finish_tick_values(user_count: int) -> list[float]:
@@ -979,12 +1038,40 @@ def _average_finish_tick_values(user_count: int) -> list[float]:
     return ticks
 
 
-def _format_chart_tick(metric_name: str, value: float) -> str:
-    """Format a y-axis tick label for one prediction-history chart."""
+def _average_score_axis(
+    series_list: list[UserPredictionHistorySeries],
+) -> tuple[float, float, list[float]]:
+    """Return y-axis bounds and ticks for the average-score history chart."""
 
-    if metric_name == "winning_percentage":
-        return _format_percent(value)
-    return _format_score(value)
+    score_values = [
+        point.average_score
+        for series in series_list
+        for point in series.points
+    ]
+    if not score_values:
+        return 0.0, 10.0, [0.0, 5.0, 10.0]
+
+    raw_minimum = min(score_values)
+    raw_maximum = max(score_values)
+    if math.isclose(raw_minimum, raw_maximum):
+        padding = max(4.0, raw_maximum * 0.1)
+    else:
+        padding = max(4.0, (raw_maximum - raw_minimum) * 0.15)
+
+    y_minimum = max(0.0, math.floor((raw_minimum - padding) / 5.0) * 5.0)
+    y_maximum = math.ceil((raw_maximum + padding) / 5.0) * 5.0
+    if math.isclose(y_minimum, y_maximum):
+        y_maximum = y_minimum + 5.0
+
+    span = y_maximum - y_minimum
+    step = max(5.0, math.ceil((span / 4.0) / 5.0) * 5.0)
+    tick_values: list[float] = []
+    current_value = y_minimum
+    while current_value < y_maximum:
+        tick_values.append(current_value)
+        current_value += step
+    tick_values.append(y_maximum)
+    return y_minimum, y_maximum, tick_values
 
 
 def _render_stat_card(label: str, value: str) -> str:

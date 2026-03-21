@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from statistics import fmean
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, ValidationError
 
 from march_madness.canonical_bracket import REGION_ORDER
 from march_madness.canonical_bracket import canonical_team_name_by_id
@@ -117,6 +117,7 @@ class UserPredictionHistoryPoint(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     games_completed: int
+    average_score: float
     average_finishing_position: float
     winning_percentage: float
 
@@ -139,6 +140,7 @@ class PredictionHistoryCheckpoint(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     games_completed: int
+    label: str
     completed_scoreboard_event_ids: list[str]
     report_path: str
 
@@ -381,6 +383,7 @@ def build_prediction_history(
     return (
         _build_prediction_history_from_reports(
             checkpoint_reports,
+            scoreboard_blob=scoreboard_blob,
             simulation_count=simulation_count,
             random_seed=random_seed,
         ),
@@ -424,7 +427,10 @@ def load_prediction_history(history_path: Path = PREDICTION_HISTORY_PATH) -> Tou
 
     if not history_path.exists():
         return write_prediction_history_files(history_output_path=history_path)
-    return TournamentPredictionHistory.model_validate_json(history_path.read_text())
+    try:
+        return TournamentPredictionHistory.model_validate_json(history_path.read_text())
+    except ValidationError:
+        return write_prediction_history_files(history_output_path=history_path)
 
 
 def _build_user_prediction_summary(
@@ -468,6 +474,7 @@ def _build_user_prediction_summary(
 def _build_prediction_history_from_reports(
     checkpoint_reports: list[TournamentPredictionReport],
     *,
+    scoreboard_blob: dict[str, object],
     simulation_count: int,
     random_seed: int,
 ) -> TournamentPredictionHistory:
@@ -475,11 +482,13 @@ def _build_prediction_history_from_reports(
 
     user_series_by_slug: dict[str, UserPredictionHistorySeries] = {}
     checkpoint_metadata: list[PredictionHistoryCheckpoint] = []
+    checkpoint_label_by_completed_games = _build_checkpoint_labels(scoreboard_blob)
 
     for checkpoint_report in checkpoint_reports:
         checkpoint_metadata.append(
             PredictionHistoryCheckpoint(
                 games_completed=checkpoint_report.games_completed,
+                label=checkpoint_label_by_completed_games[checkpoint_report.games_completed],
                 completed_scoreboard_event_ids=checkpoint_report.completed_scoreboard_event_ids,
                 report_path=f"checkpoints/{checkpoint_report.games_completed:03d}-games-complete.json",
             )
@@ -498,6 +507,7 @@ def _build_prediction_history_from_reports(
             series.points.append(
                 UserPredictionHistoryPoint(
                     games_completed=checkpoint_report.games_completed,
+                    average_score=user_summary.average_score,
                     average_finishing_position=user_summary.average_finishing_position,
                     winning_percentage=user_summary.winning_percentage,
                 )
@@ -517,6 +527,60 @@ def _build_prediction_history_from_reports(
         checkpoints=checkpoint_metadata,
         users=ordered_users,
     )
+
+
+def _build_checkpoint_labels(scoreboard_blob: dict[str, object]) -> dict[int, str]:
+    """Build the x-axis label used for each completed-game checkpoint."""
+
+    completed_event_ids = get_completed_scoreboard_event_ids(scoreboard_blob)
+    event_lookup = {
+        str(event["id"]): event
+        for event in scoreboard_blob["events"]  # type: ignore[index]
+    }
+    checkpoint_labels = {0: "Initial"}
+    for completed_game_count, event_id in enumerate(completed_event_ids, start=1):
+        scoreboard_event = event_lookup[event_id]
+        checkpoint_labels[completed_game_count] = _scoreboard_event_label(scoreboard_event)
+    return checkpoint_labels
+
+
+def _scoreboard_event_label(scoreboard_event: dict[str, object]) -> str:
+    """Return a compact winner-beats-loser label for one completed game."""
+
+    competition = scoreboard_event["competitions"][0]  # type: ignore[index]
+    competitors = competition["competitors"]  # type: ignore[index]
+    winner = next(
+        competitor
+        for competitor in competitors
+        if competitor.get("winner")
+    )
+    loser = next(
+        competitor
+        for competitor in competitors
+        if not competitor.get("winner")
+    )
+    winner_label = _scoreboard_team_axis_label(winner["team"])  # type: ignore[index]
+    loser_label = _scoreboard_team_axis_label(loser["team"])  # type: ignore[index]
+    return f"{winner_label} beats {loser_label}"
+
+
+def _scoreboard_team_axis_label(scoreboard_team: dict[str, object]) -> str:
+    """Return the short team label used on the prediction chart x axis."""
+
+    abbreviation = scoreboard_team.get("abbreviation")
+    if isinstance(abbreviation, str) and abbreviation and abbreviation != "TBD":
+        return abbreviation
+
+    short_display_name = scoreboard_team.get("shortDisplayName")
+    if isinstance(short_display_name, str) and short_display_name:
+        return short_display_name
+
+    display_name = scoreboard_team.get("displayName")
+    if isinstance(display_name, str) and display_name:
+        return display_name
+
+    team_id = scoreboard_team.get("id")
+    return str(team_id) if team_id is not None else "Unknown"
 
 
 def _primary_user_category(user_bracket: UserBracket) -> UserCategory | None:

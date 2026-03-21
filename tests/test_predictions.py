@@ -101,7 +101,10 @@ def test_build_prediction_history_and_write_files(tmp_path: Path) -> None:
     for series in history.users:
         assert len(series.points) == len(reports)
         assert series.points[0].games_completed == 0
+        assert series.points[0].average_score >= 0.0
         assert series.points[-1].games_completed == len(completed_event_ids)
+    assert history.checkpoints[0].label == "Initial"
+    assert " beats " in history.checkpoints[1].label
 
     output_dir = tmp_path / "checkpoints"
     history_output_path = tmp_path / "prediction-history.json"

@@ -398,86 +398,23 @@ a {
     white-space: nowrap;
 }
 
-.prediction-chart-shell {
-    display: grid;
-    gap: 1rem;
-}
-
-.prediction-chart-wrap {
+.prediction-plot {
     overflow-x: auto;
-    padding-bottom: 0.35rem;
 }
 
-.prediction-chart-svg {
-    display: block;
-    width: 100%;
-    min-width: 64rem;
-    height: auto;
+.prediction-plot .js-plotly-plot,
+.prediction-plot .plotly-graph-div {
+    min-height: 32rem;
 }
 
-.chart-title {
-    fill: var(--ink);
-    font-family: var(--display);
-    font-size: 1.35rem;
-    font-weight: 700;
+.prediction-plot .modebar {
+    border-radius: 999px;
+    background: rgba(255, 252, 247, 0.88) !important;
+    box-shadow: 0 8px 18px rgba(17, 27, 22, 0.08);
 }
 
-.chart-subtitle {
-    fill: var(--muted);
-    font-size: 0.9rem;
-}
-
-.chart-axis-line,
-.chart-tick-line {
-    stroke: rgba(17, 27, 22, 0.2);
-    stroke-width: 1.5;
-}
-
-.chart-grid-line {
-    stroke: rgba(17, 27, 22, 0.08);
-    stroke-width: 1;
-}
-
-.chart-axis-text,
-.chart-axis-label {
-    fill: var(--muted);
-    font-size: 0.82rem;
-}
-
-.chart-axis-label {
-    font-weight: 700;
-}
-
-.chart-line {
-    stroke-width: 3;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    opacity: 0.95;
-}
-
-.chart-point {
-    opacity: 0.95;
-}
-
-.chart-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.7rem 1rem;
-}
-
-.chart-legend-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    color: var(--muted);
-    font-size: 0.88rem;
-}
-
-.chart-legend-swatch {
-    width: 2rem;
-    height: 0.8rem;
-    overflow: visible;
-    flex: 0 0 auto;
+.prediction-plot .modebar-group {
+    gap: 0.1rem;
 }
 
 .region-card {
