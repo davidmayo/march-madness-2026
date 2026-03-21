@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from march_madness.canonical_bracket import build_canonical_bracket
 from march_madness.scoring import get_bracket_from_scoreboard_data
 from march_madness.scoring import load_user_bracket
 from march_madness.scoring import score
@@ -42,8 +43,11 @@ def test_parse_austin_jude_bracket() -> None:
     first_game = bracket.bracket_picks.games[0]
     assert first_game.game_key == "east-round-1-game-1"
     assert first_game.picked_team_1.team_name == "Duke"
+    assert first_game.picked_team_1.team_id == "150"
     assert first_game.picked_team_2.team_name == "Siena"
+    assert first_game.picked_team_2.team_id == "2561"
     assert first_game.picked_winner.team_name == "Duke"
+    assert first_game.picked_winner.team_id == "150"
 
 
 def test_parse_david_mayo_bracket() -> None:
@@ -66,7 +70,9 @@ def test_parse_david_mayo_bracket() -> None:
 
     assert len(bracket.bracket_picks.games) == 63
     assert bracket.bracket_picks.champion.team_name == "Arkansas"
+    assert bracket.bracket_picks.champion.team_id == "8"
     assert bracket.bracket_picks.games[-1].picked_winner.team_name == "Arkansas"
+    assert bracket.bracket_picks.games[-1].picked_winner.team_id == "8"
 
 
 def test_export_saved_user_brackets(tmp_path: Path) -> None:
@@ -82,6 +88,24 @@ def test_export_saved_user_brackets(tmp_path: Path) -> None:
     assert set(exported) == {"bracket_metadata", "bracket_picks"}
     assert exported["bracket_metadata"]["user_name"] == "Austin Jude"
     assert len(exported["bracket_picks"]["games"]) == 63
+    assert exported["bracket_picks"]["games"][0]["picked_winner"]["team_id"] == "150"
+
+
+def test_canonical_bracket_has_explicit_game_graph() -> None:
+    """The canonical bracket should expose one explicit 63-game tournament graph."""
+
+    bracket = build_canonical_bracket()
+    game_lookup = {game.id: game for game in bracket.games}
+
+    assert len(bracket.games) == 63
+    assert game_lookup["east-round-1-game-1"].team_1.team_id == "150"
+    assert game_lookup["east-round-1-game-4"].team_2.team_id == "2856"
+    assert game_lookup["east-round-3-game-1"].feed_in_game_ids == [
+        "east-round-2-game-1",
+        "east-round-2-game-2",
+    ]
+    assert game_lookup["final-four-1"].feed_in_game_ids == ["east-round-4-game-1", "south-round-4-game-1"]
+    assert game_lookup["championship-1"].feed_in_game_ids == ["final-four-1", "final-four-2"]
 
 
 def test_scoreboard_reference_bracket_uses_completed_games_only() -> None:
@@ -93,9 +117,11 @@ def test_scoreboard_reference_bracket_uses_completed_games_only() -> None:
     completed_games = [game for game in reference_bracket.games if game.winner_team_id is not None]
     completed_game_ids = {game.id for game in completed_games}
 
-    assert len(completed_games) == 8
+    assert len(completed_games) == 28
     assert "west-round-1-game-1" in completed_game_ids
     assert "midwest-round-1-game-8" in completed_game_ids
+    assert "west-round-1-game-8" in completed_game_ids
+    assert "east-round-1-game-6" in completed_game_ids
 
 
 def test_traditional_score_for_austin_jude() -> None:
@@ -107,11 +133,11 @@ def test_traditional_score_for_austin_jude() -> None:
 
     result = score(reference_bracket, austin_bracket, calculate_details=True)
 
-    assert result.current_score == 6.0
-    assert result.max_possible_score == 190.0
-    assert result.correctly_picked_games == 6
-    assert result.incorrectly_picked_games == 2
-    assert float(result) == 6.0
+    assert result.current_score == 18.0
+    assert result.max_possible_score == 176.0
+    assert result.correctly_picked_games == 18
+    assert result.incorrectly_picked_games == 10
+    assert float(result) == 18.0
 
 
 def test_scoring_all_saved_user_brackets() -> None:
@@ -123,8 +149,10 @@ def test_scoring_all_saved_user_brackets() -> None:
     scored = score_saved_user_brackets(reference_bracket, calculate_details=True)
 
     assert len(scored) == 14
-    assert scored[0][2].current_score == 8.0
-    assert {scored[0][1].bracket_metadata.user_name, scored[1][1].bracket_metadata.user_name} == {
+    assert scored[0][2].current_score == 25.0
+    assert scored[0][1].bracket_metadata.user_name == "Darren Boyd"
+    assert scored[1][2].current_score == 24.0
+    assert {scored[1][1].bracket_metadata.user_name, scored[2][1].bracket_metadata.user_name} == {
         "Chloe Hart",
-        "Mitchell Mcculley",
+        "Noah Patrick",
     }

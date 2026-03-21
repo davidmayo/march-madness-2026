@@ -107,6 +107,7 @@ class Game(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     id: str
+    espn_event_id: str | None = None
     round_id: int
     round_name: str
     bracket_location: int

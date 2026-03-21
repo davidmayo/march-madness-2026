@@ -27,27 +27,18 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from march_madness.canonical_bracket import REGION_ORDER
+from march_madness.canonical_bracket import REGION_TO_FINAL_FOUR_SLOT
+from march_madness.canonical_bracket import ROUND_NAMES
+from march_madness.canonical_bracket import build_canonical_bracket
+from march_madness.canonical_bracket import canonical_first_round_game_lookup
+from march_madness.canonical_bracket import child_game_keys_for
+
 
 ROOT = Path(__file__).resolve().parents[2]
 BRACKETS_DIR = ROOT / "data" / "brackets"
 HOMEPAGE_IFRAME_PATH = BRACKETS_DIR / "bracket-homepage_files" / "a.html"
 USER_BRACKETS_DIR = ROOT / "data" / "user-brackets"
-
-ROUND_NAMES: dict[int, str] = {
-    1: "1st Round",
-    2: "2nd Round",
-    3: "Sweet 16",
-    4: "Elite 8",
-    5: "Final Four",
-    6: "Championship",
-}
-REGION_ORDER: tuple[str, ...] = ("EAST", "SOUTH", "WEST", "MIDWEST")
-REGION_TO_FINAL_FOUR_SLOT: dict[str, tuple[int, int]] = {
-    "EAST": (1, 1),
-    "SOUTH": (1, 2),
-    "WEST": (2, 1),
-    "MIDWEST": (2, 2),
-}
 
 ENTRY_URL_PATTERN = re.compile(
     r"https://play-prod\.ncaa\.com/mens-bracket-challenge/api/v2/"
@@ -93,6 +84,7 @@ class PickedTeam(BaseModel):
 
     seed: str
     team_name: str
+    team_id: str | None = None
 
 
 class BracketGamePick(BaseModel):
@@ -520,7 +512,7 @@ def _build_bracket_picks(parsed_page: ParsedPage) -> BracketPicks:
         )
     )
 
-    return BracketPicks(
+    picks = BracketPicks(
         games=games,
         champion=champion,
         tiebreaker=BracketTiebreaker(
@@ -528,6 +520,87 @@ def _build_bracket_picks(parsed_page: ParsedPage) -> BracketPicks:
             loser_score=parsed_page.tiebreaker_loser_score,
         ),
     )
+    _attach_team_ids_to_bracket_picks(picks)
+    return picks
+
+
+def _attach_team_ids_to_bracket_picks(picks: BracketPicks) -> None:
+    """Populate ESPN team IDs on parsed picks using the canonical bracket graph.
+
+    The saved NCAA pages expose team names and seeds, but not team IDs. This
+    helper resolves the IDs deterministically:
+    - round-1 slots come directly from the canonical 2026 field
+    - later slots inherit the picked winners from their child games
+    - each picked winner must exactly match one of the two slot occupants
+    """
+
+    _ = build_canonical_bracket()
+    round_1_lookup = canonical_first_round_game_lookup()
+    game_lookup = {game.game_key: game for game in picks.games}
+
+    for game_key, round_1_game in round_1_lookup.items():
+        game = game_lookup[game_key]
+        game.picked_team_1.team_id = round_1_game.team_1.team_id
+        game.picked_team_2.team_id = round_1_game.team_2.team_id
+        game.picked_winner.team_id = _resolve_slot_winner_team_id(
+            picked_winner=game.picked_winner,
+            picked_team_1=game.picked_team_1,
+            picked_team_2=game.picked_team_2,
+        )
+
+    # Walk the rest of the bracket in topological order so each game can inherit
+    # its two entrants from already-resolved child winners.
+    for game in picks.games:
+        if game.round_id == 1:
+            continue
+        child_game_keys = child_game_keys_for(game.game_key)
+        if child_game_keys is None:
+            msg = f"Expected child games for {game.game_key}"
+            raise ValueError(msg)
+        child_game_1 = game_lookup[child_game_keys[0]]
+        child_game_2 = game_lookup[child_game_keys[1]]
+        game.picked_team_1.team_id = child_game_1.picked_winner.team_id
+        game.picked_team_2.team_id = child_game_2.picked_winner.team_id
+        game.picked_winner.team_id = _resolve_slot_winner_team_id(
+            picked_winner=game.picked_winner,
+            picked_team_1=game.picked_team_1,
+            picked_team_2=game.picked_team_2,
+        )
+
+    championship_pick = game_lookup["championship-1"].picked_winner
+    picks.champion.team_id = championship_pick.team_id
+
+
+def _resolve_slot_winner_team_id(
+    picked_winner: PickedTeam,
+    picked_team_1: PickedTeam,
+    picked_team_2: PickedTeam,
+) -> str:
+    """Resolve a picked winner to one of the two explicit team IDs in the game."""
+
+    if _picked_teams_match(picked_winner, picked_team_1):
+        if picked_team_1.team_id is None:
+            msg = f"Expected a team ID for {picked_team_1.team_name}"
+            raise ValueError(msg)
+        return picked_team_1.team_id
+    if _picked_teams_match(picked_winner, picked_team_2):
+        if picked_team_2.team_id is None:
+            msg = f"Expected a team ID for {picked_team_2.team_name}"
+            raise ValueError(msg)
+        return picked_team_2.team_id
+
+    msg = (
+        "Picked winner did not match either team in the resolved game slot: "
+        f"{picked_winner.model_dump()!r} vs {picked_team_1.model_dump()!r} / "
+        f"{picked_team_2.model_dump()!r}"
+    )
+    raise ValueError(msg)
+
+
+def _picked_teams_match(team_1: PickedTeam, team_2: PickedTeam) -> bool:
+    """Return whether two parsed pick objects represent the same NCAA team."""
+
+    return team_1.team_name == team_2.team_name and team_1.seed == team_2.seed
 
 
 def _group_matchups_by_round(matchups: list[ParsedMatchup]) -> dict[int, list[ParsedMatchup]]:

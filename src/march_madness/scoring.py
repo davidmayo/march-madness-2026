@@ -1,47 +1,30 @@
-"""Score saved user brackets against a reference bracket state.
+"""Score saved user brackets against the canonical 2026 bracket definition.
 
-This module has two jobs:
-- build a ``Bracket`` instance that reflects the games already finished
-- score one or many ``UserBracket`` objects against that reference state
-
-The repository currently contains two different bracket templates:
-- ``data/structs/2026-starting-bracket.json`` from ESPN
-- the saved NCAA bracket pages in ``data/brackets``
-
-When the ESPN template can be matched to the scoreboard feed, we use it. If the
-scoreboard and saved user brackets clearly belong to a different bracket layout,
-we fall back to a template reconstructed from one saved NCAA bracket page so the
-scoring still reflects the user bracket data.
+This module intentionally avoids fuzzy matching. The reference bracket is built
+from the explicit 2026 field in :mod:`march_madness.canonical_bracket`, and
+scoreboard results are applied only by:
+- exact ESPN event ID when that ID is known for the bracket slot
+- exact participant team-ID pair once upstream winners have populated a game
 """
 
 from __future__ import annotations
 
-import json
-import re
 from dataclasses import dataclass
-from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict
 
+from march_madness.canonical_bracket import build_canonical_bracket
+from march_madness.canonical_bracket import canonical_team_seed_by_id
+from march_madness.canonical_bracket import child_game_keys_for
 from march_madness.scrape import Bracket
-from march_madness.scrape import BracketRegion
-from march_madness.scrape import BracketRound
 from march_madness.scrape import Game
 from march_madness.scrape import GameSlot
 from march_madness.scrape import GameStatus
-from march_madness.user_brackets import BRACKETS_DIR
-from march_madness.user_brackets import REGION_ORDER
-from march_madness.user_brackets import ROUND_NAMES
 from march_madness.user_brackets import USER_BRACKETS_DIR
 from march_madness.user_brackets import UserBracket
-from march_madness.user_brackets import _parse_saved_iframe_page
 
-
-ROOT = Path(__file__).resolve().parents[2]
-STARTING_BRACKET_PATH = ROOT / "data" / "structs" / "2026-starting-bracket.json"
-TEAMS_PATH = ROOT / "data" / "structs" / "2026-teams.json"
 
 TRADITIONAL_SCORING_BY_ROUND: dict[int, int] = {
     1: 1,
@@ -71,12 +54,13 @@ class UserBracketScore(BaseModel):
 
 @dataclass(frozen=True)
 class _CompletedScoreboardGame:
-    """Represent the completed subset of scoreboard data needed for scoring."""
+    """Represent the exact completed-game data needed for bracket scoring."""
 
     event_id: str
-    team_1_name: str
-    team_2_name: str
-    winner_name: str
+    date: str
+    team_1_id: str
+    team_2_id: str
+    winner_team_id: str
 
 
 def score(
@@ -101,15 +85,14 @@ def score(
 
     for game_key, game in completed_reference_games.items():
         user_game = user_game_lookup.get(game_key)
-        if user_game is None:
+        if user_game is None or game.winner_team_id is None:
             continue
 
-        actual_winner_key = _game_winner_compare_key(game)
-        if actual_winner_key is None:
+        picked_winner_team_id = _picked_winner_team_id(user_game)
+        if picked_winner_team_id is None:
             continue
 
-        picked_winner_key = _normalize_team_key(user_game.picked_winner.team_name)
-        if picked_winner_key == actual_winner_key:
+        if picked_winner_team_id == game.winner_team_id:
             current_score += _traditional_points_for_round(game.round_id)
             if calculate_details:
                 correctly_picked_games += 1
@@ -132,23 +115,9 @@ def score(
 
 
 def get_bracket_from_scoreboard_data(espn_api_scoreboard_blob: Any) -> Bracket:
-    """Build a reference bracket containing the scoreboard's completed results.
+    """Build the canonical reference bracket for the completed scoreboard games."""
 
-    The preferred path starts from the saved ESPN bracket template. If that
-    template cannot be matched back to the scoreboard feed, we rebuild the
-    bracket structure from one saved NCAA bracket page instead. That fallback
-    keeps scoring aligned with the user bracket JSON exports.
-    """
-
-    current_bracket = Bracket.model_validate_json(STARTING_BRACKET_PATH.read_text())
-    matched_games = _apply_scoreboard_results(
-        reference_bracket=current_bracket,
-        espn_api_scoreboard_blob=espn_api_scoreboard_blob,
-    )
-    if matched_games > 0:
-        return current_bracket
-
-    current_bracket = _build_saved_ncaa_reference_bracket()
+    current_bracket = build_canonical_bracket().model_copy(deep=True)
     _apply_scoreboard_results(
         reference_bracket=current_bracket,
         espn_api_scoreboard_blob=espn_api_scoreboard_blob,
@@ -207,99 +176,61 @@ def score_saved_user_brackets(
 
 
 def _completed_reference_game_lookup(reference_bracket: Bracket) -> dict[str, Game]:
-    """Build a game-key lookup for completed games in the reference bracket."""
+    """Build a lookup of completed games keyed by canonical game key."""
 
-    regional_groups: dict[tuple[int, str], list[Game]] = {}
-    semifinal_games: list[Game] = []
-    championship_games: list[Game] = []
-
-    for game in reference_bracket.games:
-        if game.round_id not in TRADITIONAL_SCORING_BY_ROUND:
-            continue
-        if game.round_id <= 4:
-            if game.region_name is None:
-                continue
-            regional_groups.setdefault((game.round_id, game.region_name.upper()), []).append(game)
-        elif game.round_id == 5:
-            semifinal_games.append(game)
-        elif game.round_id == 6:
-            championship_games.append(game)
-
-    completed_games: dict[str, Game] = {}
-
-    for region in REGION_ORDER:
-        for round_id in range(1, 5):
-            games = sorted(
-                regional_groups.get((round_id, region), []),
-                key=lambda game: game.bracket_location,
-            )
-            for matchup_index, game in enumerate(games, start=1):
-                if game.winner_team_id is None:
-                    continue
-                completed_games[_regional_game_key(region, round_id, matchup_index)] = game
-
-    for matchup_index, game in enumerate(sorted(semifinal_games, key=lambda item: item.bracket_location), start=1):
-        if game.winner_team_id is not None:
-            completed_games[f"final-four-{matchup_index}"] = game
-
-    if championship_games:
-        championship_game = sorted(championship_games, key=lambda item: item.bracket_location)[0]
-        if championship_game.winner_team_id is not None:
-            completed_games["championship-1"] = championship_game
-
-    return completed_games
-
-
-def _game_winner_compare_key(game: Game) -> str | None:
-    """Resolve the winning team in a reference game to a normalized compare key."""
-
-    if game.winner_team_id is None:
-        return None
-
-    winning_slot = None
-    if game.team_1.team_id == game.winner_team_id:
-        winning_slot = game.team_1
-    elif game.team_2.team_id == game.winner_team_id:
-        winning_slot = game.team_2
-    else:
-        winning_slot = GameSlot(team_id=game.winner_team_id)
-
-    if winning_slot.team_id is None:
-        return None
-
-    winning_name = _resolve_team_identifier_to_name(winning_slot.team_id)
-    return _normalize_team_key(winning_name)
+    return {
+        game.id: game
+        for game in reference_bracket.games
+        if game.round_id in TRADITIONAL_SCORING_BY_ROUND and game.winner_team_id is not None
+    }
 
 
 def _apply_scoreboard_results(reference_bracket: Bracket, espn_api_scoreboard_blob: Any) -> int:
-    """Apply completed scoreboard results onto a reference bracket template."""
+    """Apply completed scoreboard results onto the canonical bracket template."""
 
     completed_games = _completed_games_from_scoreboard_blob(espn_api_scoreboard_blob)
+    game_lookup = {game.id: game for game in reference_bracket.games}
+    game_by_espn_event_id = {
+        game.espn_event_id: game for game in reference_bracket.games if game.espn_event_id is not None
+    }
     matched_games = 0
 
     for completed_game in completed_games:
-        bracket_game = _find_reference_game_for_scoreboard_result(reference_bracket, completed_game)
+        _propagate_all_known_winners(reference_bracket)
+
+        bracket_game = game_by_espn_event_id.get(completed_game.event_id)
         if bracket_game is None:
-            continue
+            bracket_game = _find_game_by_exact_team_ids(
+                reference_bracket=reference_bracket,
+                team_1_id=completed_game.team_1_id,
+                team_2_id=completed_game.team_2_id,
+            )
+        if bracket_game is None:
+            msg = (
+                "Could not map completed scoreboard game to the canonical bracket: "
+                f"event_id={completed_game.event_id} teams="
+                f"{completed_game.team_1_id}/{completed_game.team_2_id}"
+            )
+            raise ValueError(msg)
 
-        winner_key = _normalize_team_key(completed_game.winner_name)
-        team_1_key = _normalize_team_key(_resolve_slot_name(bracket_game.team_1))
-        team_2_key = _normalize_team_key(_resolve_slot_name(bracket_game.team_2))
+        if bracket_game.winner_team_id not in (None, completed_game.winner_team_id):
+            msg = (
+                f"Conflicting winners for {bracket_game.id}: "
+                f"{bracket_game.winner_team_id} vs {completed_game.winner_team_id}"
+            )
+            raise ValueError(msg)
 
-        if winner_key == team_1_key and bracket_game.team_1.team_id is not None:
-            bracket_game.winner_team_id = bracket_game.team_1.team_id
-            bracket_game.status = GameStatus.FINISHED
-            matched_games += 1
-        elif winner_key == team_2_key and bracket_game.team_2.team_id is not None:
-            bracket_game.winner_team_id = bracket_game.team_2.team_id
-            bracket_game.status = GameStatus.FINISHED
-            matched_games += 1
+        bracket_game.winner_team_id = completed_game.winner_team_id
+        bracket_game.status = GameStatus.FINISHED
+        _propagate_winner_to_parent(game_lookup, bracket_game)
+        matched_games += 1
 
+    _propagate_all_known_winners(reference_bracket)
     return matched_games
 
 
 def _completed_games_from_scoreboard_blob(espn_api_scoreboard_blob: Any) -> list[_CompletedScoreboardGame]:
-    """Extract the scoreboard's completed games into a smaller comparable shape."""
+    """Extract only completed scoreboard events with concrete ESPN team IDs."""
 
     completed_games: list[_CompletedScoreboardGame] = []
     for event in espn_api_scoreboard_blob.get("events", []):
@@ -309,120 +240,104 @@ def _completed_games_from_scoreboard_blob(espn_api_scoreboard_blob: Any) -> list
             continue
 
         competitors = sorted(competition["competitors"], key=lambda competitor: competitor["order"])
-        team_1_name = _scoreboard_team_name(competitors[0]["team"])
-        team_2_name = _scoreboard_team_name(competitors[1]["team"])
+        team_1_id = _scoreboard_team_id(competitors[0]["team"])
+        team_2_id = _scoreboard_team_id(competitors[1]["team"])
         winner = next(competitor for competitor in competitors if competitor.get("winner"))
-        winner_name = _scoreboard_team_name(winner["team"])
+        winner_team_id = _scoreboard_team_id(winner["team"])
+        if team_1_id is None or team_2_id is None or winner_team_id is None:
+            msg = f"Completed event {event['id']} was missing a concrete ESPN team ID."
+            raise ValueError(msg)
 
         completed_games.append(
             _CompletedScoreboardGame(
                 event_id=str(event["id"]),
-                team_1_name=team_1_name,
-                team_2_name=team_2_name,
-                winner_name=winner_name,
+                date=str(event["date"]),
+                team_1_id=team_1_id,
+                team_2_id=team_2_id,
+                winner_team_id=winner_team_id,
             )
         )
 
-    return completed_games
+    return sorted(completed_games, key=lambda game: (game.date, game.event_id))
 
 
-def _scoreboard_team_name(team_blob: dict[str, Any]) -> str:
-    """Choose the scoreboard team label that best matches the NCAA saved HTML."""
+def _scoreboard_team_id(team_blob: dict[str, Any]) -> str | None:
+    """Extract a concrete ESPN team ID from a scoreboard team blob."""
 
-    return (
-        team_blob.get("shortDisplayName")
-        or team_blob.get("location")
-        or team_blob.get("displayName")
-        or str(team_blob["id"])
-    )
+    team_id = str(team_blob["id"])
+    if team_id.startswith("-"):
+        return None
+    return team_id
 
 
-def _find_reference_game_for_scoreboard_result(
-    reference_bracket: Bracket,
-    completed_game: _CompletedScoreboardGame,
-) -> Game | None:
-    """Find the best matching reference game for one completed scoreboard result."""
+def _find_game_by_exact_team_ids(reference_bracket: Bracket, team_1_id: str, team_2_id: str) -> Game | None:
+    """Find the one canonical game whose two populated slots match both team IDs."""
 
-    for game in reference_bracket.games:
-        if game.id == completed_game.event_id:
-            return game
-
-    scoreboard_teams = {
-        _normalize_team_key(completed_game.team_1_name),
-        _normalize_team_key(completed_game.team_2_name),
-    }
+    target_team_ids = {team_1_id, team_2_id}
     matches: list[Game] = []
 
     for game in reference_bracket.games:
-        slot_name_1 = _resolve_slot_name(game.team_1)
-        slot_name_2 = _resolve_slot_name(game.team_2)
-        if slot_name_1 is None or slot_name_2 is None:
+        if game.round_id not in TRADITIONAL_SCORING_BY_ROUND:
             continue
-
-        reference_teams = {
-            _normalize_team_key(slot_name_1),
-            _normalize_team_key(slot_name_2),
-        }
-        if reference_teams == scoreboard_teams:
+        if game.team_1.team_id is None or game.team_2.team_id is None:
+            continue
+        if {game.team_1.team_id, game.team_2.team_id} == target_team_ids:
             matches.append(game)
 
-    if len(matches) == 1:
-        return matches[0]
-    return None
-
-
-def _resolve_slot_name(slot: GameSlot) -> str | None:
-    """Resolve a game slot into the display name used for scoreboard comparisons."""
-
-    if slot.team_id is None:
+    if not matches:
         return None
-    return _resolve_team_identifier_to_name(slot.team_id)
+    if len(matches) > 1:
+        msg = f"Multiple canonical games matched team IDs {team_1_id}/{team_2_id}: {[game.id for game in matches]!r}"
+        raise ValueError(msg)
+    return matches[0]
 
 
-@lru_cache(maxsize=1)
-def _load_team_id_to_name() -> dict[str, str]:
-    """Load the saved ESPN team lookup used by the scored bracket template."""
+def _propagate_all_known_winners(reference_bracket: Bracket) -> None:
+    """Propagate finished winners through the bracket graph until stable."""
 
-    if not TEAMS_PATH.exists():
-        return {}
-    teams = json.loads(TEAMS_PATH.read_text())
-    return {str(team["id"]): team["display_name"] for team in teams}
-
-
-def _resolve_team_identifier_to_name(team_identifier: str) -> str:
-    """Resolve either an ESPN team ID or a synthetic name-based ID to a name."""
-
-    team_id_to_name = _load_team_id_to_name()
-    return team_id_to_name.get(team_identifier, team_identifier)
+    game_lookup = {game.id: game for game in reference_bracket.games}
+    changed = True
+    while changed:
+        changed = False
+        for game in reference_bracket.games:
+            if game.winner_team_id is None:
+                continue
+            if _propagate_winner_to_parent(game_lookup, game):
+                changed = True
 
 
-def _normalize_team_key(team_name: str) -> str:
-    """Normalize team names so ESPN and NCAA labels compare cleanly."""
+def _propagate_winner_to_parent(game_lookup: dict[str, Game], game: Game) -> bool:
+    """Push one game's winner into the correct downstream slot, if any."""
 
-    normalized = team_name.lower()
-    replacements = {
-        "&": "and",
-        ".": "",
-        "'": "",
-        "(": " ",
-        ")": " ",
-        ",": " ",
-        "-": " ",
-    }
-    for old, new in replacements.items():
-        normalized = normalized.replace(old, new)
+    if game.winner_team_id is None or game.feeds_to_game_id is None:
+        return False
 
-    word_replacements = {
-        "saint": "st",
-        "state": "st",
-        "university": "u",
-        "ohio": "oh",
-    }
-    for old, new in word_replacements.items():
-        normalized = re.sub(rf"\b{old}\b", new, normalized)
+    parent_game = game_lookup[game.feeds_to_game_id]
+    winner_seed = canonical_team_seed_by_id().get(game.winner_team_id)
 
-    normalized = re.sub(r"\s+", "", normalized)
-    return normalized
+    if parent_game.team_1.from_game_id == game.id:
+        return _assign_slot_team(parent_game.team_1, game.winner_team_id, winner_seed, parent_game.id)
+    if parent_game.team_2.from_game_id == game.id:
+        return _assign_slot_team(parent_game.team_2, game.winner_team_id, winner_seed, parent_game.id)
+
+    msg = f"Game {game.id} did not match either incoming slot on parent {parent_game.id}"
+    raise ValueError(msg)
+
+
+def _assign_slot_team(slot: GameSlot, team_id: str, seed: str | None, parent_game_id: str) -> bool:
+    """Assign a propagated winner to one bracket slot with consistency checks."""
+
+    if slot.team_id not in (None, team_id):
+        msg = f"Conflicting team assignment on {parent_game_id}: {slot.team_id} vs {team_id}"
+        raise ValueError(msg)
+    if seed is not None and slot.seed not in (None, seed):
+        msg = f"Conflicting seed assignment on {parent_game_id}: {slot.seed} vs {seed}"
+        raise ValueError(msg)
+
+    changed = slot.team_id != team_id or slot.seed != seed
+    slot.team_id = team_id
+    slot.seed = seed
+    return changed
 
 
 def _traditional_points_for_round(round_id: int) -> int:
@@ -435,42 +350,41 @@ def _calculate_max_possible_score(reference_bracket: Bracket, user_bracket: User
     """Calculate the maximum score the user can still reach from the current state."""
 
     completed_winners = {
-        game_key: _game_winner_compare_key(game)
+        game_key: game.winner_team_id
         for game_key, game in _completed_reference_game_lookup(reference_bracket).items()
     }
     user_game_lookup = {game.game_key: game for game in user_bracket.bracket_picks.games}
 
-    @lru_cache(maxsize=None)
     def is_pick_alive(game_key: str) -> bool:
         game = user_game_lookup[game_key]
-        picked_winner_key = _normalize_team_key(game.picked_winner.team_name)
-        actual_winner_key = completed_winners.get(game_key)
+        picked_winner_id = _picked_winner_team_id(game)
+        actual_winner_id = completed_winners.get(game_key)
 
-        if actual_winner_key is not None:
-            return actual_winner_key == picked_winner_key
+        if picked_winner_id is None:
+            return False
+        if actual_winner_id is not None:
+            return actual_winner_id == picked_winner_id
 
-        child_game_keys = _child_game_keys_for(game_key)
+        child_game_keys = child_game_keys_for(game_key)
         if child_game_keys is None:
             return True
 
-        child_game_key_1, child_game_key_2 = child_game_keys
-        slot_1_key = _normalize_team_key(game.picked_team_1.team_name)
-        slot_2_key = _normalize_team_key(game.picked_team_2.team_name)
-
-        if picked_winner_key == slot_1_key:
-            return is_pick_alive(child_game_key_1)
-        if picked_winner_key == slot_2_key:
-            return is_pick_alive(child_game_key_2)
+        if game.picked_team_1.team_id == picked_winner_id:
+            return is_pick_alive(child_game_keys[0])
+        if game.picked_team_2.team_id == picked_winner_id:
+            return is_pick_alive(child_game_keys[1])
         return False
 
     max_possible_score = 0.0
     for game in user_bracket.bracket_picks.games:
-        actual_winner_key = completed_winners.get(game.game_key)
-        picked_winner_key = _normalize_team_key(game.picked_winner.team_name)
-        game_points = _traditional_points_for_round(game.round_id)
+        actual_winner_id = completed_winners.get(game.game_key)
+        picked_winner_id = _picked_winner_team_id(game)
+        if picked_winner_id is None:
+            continue
 
-        if actual_winner_key is not None:
-            if actual_winner_key == picked_winner_key:
+        game_points = _traditional_points_for_round(game.round_id)
+        if actual_winner_id is not None:
+            if actual_winner_id == picked_winner_id:
                 max_possible_score += game_points
             continue
 
@@ -480,126 +394,19 @@ def _calculate_max_possible_score(reference_bracket: Bracket, user_bracket: User
     return max_possible_score
 
 
-def _child_game_keys_for(game_key: str) -> tuple[str, str] | None:
-    """Return the two child game keys that feed into the given game key."""
+def _picked_winner_team_id(user_game: Any) -> str | None:
+    """Resolve the picked winner to an ESPN team ID from the user-bracket JSON."""
 
-    if game_key == "championship-1":
-        return ("final-four-1", "final-four-2")
-
-    if game_key.startswith("final-four-"):
-        matchup_index = int(game_key.rsplit("-", maxsplit=1)[1])
-        if matchup_index == 1:
-            return ("east-round-4-game-1", "south-round-4-game-1")
-        return ("west-round-4-game-1", "midwest-round-4-game-1")
-
-    match = re.fullmatch(r"(?P<region>[a-z]+)-round-(?P<round_id>\d+)-game-(?P<matchup>\d+)", game_key)
-    if match is None:
-        return None
-
-    region = match.group("region")
-    round_id = int(match.group("round_id"))
-    matchup_index = int(match.group("matchup"))
-    if round_id == 1:
-        return None
-
-    child_round_id = round_id - 1
-    child_matchup_1 = (matchup_index * 2) - 1
-    child_matchup_2 = matchup_index * 2
-    return (
-        f"{region}-round-{child_round_id}-game-{child_matchup_1}",
-        f"{region}-round-{child_round_id}-game-{child_matchup_2}",
-    )
+    if user_game.picked_winner.team_id is not None:
+        return user_game.picked_winner.team_id
+    if _picked_teams_match(user_game.picked_winner, user_game.picked_team_1):
+        return user_game.picked_team_1.team_id
+    if _picked_teams_match(user_game.picked_winner, user_game.picked_team_2):
+        return user_game.picked_team_2.team_id
+    return None
 
 
-def _build_saved_ncaa_reference_bracket() -> Bracket:
-    """Build a bracket template from one saved NCAA bracket page."""
+def _picked_teams_match(team_1: Any, team_2: Any) -> bool:
+    """Return whether two user-bracket pick objects represent the same team."""
 
-    source_page = next(path for path in sorted(BRACKETS_DIR.glob("*.html")) if path.name != "bracket-homepage.html")
-    iframe_path = source_page.with_name(f"{source_page.stem}_files") / "a.html"
-    parsed_page = _parse_saved_iframe_page(iframe_path)
-
-    grouped: dict[int, list[Any]] = {round_id: [] for round_id in ROUND_NAMES}
-    for matchup in parsed_page.matchups:
-        grouped[matchup.round_id].append(matchup)
-
-    games: list[Game] = []
-
-    for region_index, region in enumerate(REGION_ORDER, start=1):
-        for round_id in range(1, 5):
-            regional_matchups = [matchup for matchup in grouped[round_id] if matchup.region == region]
-            for matchup_index, matchup in enumerate(regional_matchups, start=1):
-                games.append(
-                    Game(
-                        id=_regional_game_key(region, round_id, matchup_index),
-                        round_id=round_id,
-                        round_name=ROUND_NAMES[round_id],
-                        bracket_location=matchup_index,
-                        region_id=region_index,
-                        region_name=region,
-                        status=GameStatus.FUTURE,
-                        team_1=GameSlot(team_id=_actual_slot_name(matchup.slot_1)),
-                        team_2=GameSlot(team_id=_actual_slot_name(matchup.slot_2)),
-                    )
-                )
-
-    semifinal_matchups = grouped[5]
-    for matchup_index, matchup in enumerate(semifinal_matchups, start=1):
-        games.append(
-            Game(
-                id=f"final-four-{matchup_index}",
-                round_id=5,
-                round_name=ROUND_NAMES[5],
-                bracket_location=matchup_index,
-                region_id=None,
-                region_name=None,
-                status=GameStatus.FUTURE,
-                team_1=GameSlot(team_id=_actual_slot_name(matchup.slot_1)),
-                team_2=GameSlot(team_id=_actual_slot_name(matchup.slot_2)),
-            )
-        )
-
-    championship_matchup = grouped[6][0]
-    games.append(
-        Game(
-            id="championship-1",
-            round_id=6,
-            round_name=ROUND_NAMES[6],
-            bracket_location=1,
-            region_id=None,
-            region_name=None,
-            status=GameStatus.FUTURE,
-            team_1=GameSlot(team_id=_actual_slot_name(championship_matchup.slot_1)),
-            team_2=GameSlot(team_id=_actual_slot_name(championship_matchup.slot_2)),
-        )
-    )
-
-    return Bracket(
-        id="saved-ncaa-reference",
-        name="Saved NCAA Bracket Reference",
-        season="2025-26",
-        league="NCAAM",
-        active_round=1,
-        regions=[
-            BracketRegion(id=index, name=region, slug=region.lower())
-            for index, region in enumerate(REGION_ORDER, start=1)
-        ],
-        rounds=[
-            BracketRound(id=round_id, name=round_name, num_games=len(grouped[round_id]))
-            for round_id, round_name in ROUND_NAMES.items()
-        ],
-        games=games,
-    )
-
-
-def _actual_slot_name(slot: Any) -> str | None:
-    """Return the actual team occupying a saved NCAA matchup slot, if known."""
-
-    if slot.actual is None:
-        return None
-    return slot.actual.name
-
-
-def _regional_game_key(region: str, round_id: int, matchup_index: int) -> str:
-    """Build the standardized game key used by the user bracket JSON exports."""
-
-    return f"{region.lower()}-round-{round_id}-game-{matchup_index}"
+    return team_1.team_name == team_2.team_name and team_1.seed == team_2.seed
