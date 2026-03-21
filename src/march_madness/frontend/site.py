@@ -27,6 +27,7 @@ from march_madness.user_brackets import UserBracket
 
 ROOT = Path(__file__).resolve().parents[3]
 SCOREBOARD_PATH = ROOT / "data" / "espn" / "api" / "scoreboard.json"
+USER_CATEGORY_FILTER_VALUES: tuple[str, ...] = ("all", "student", "staff")
 
 
 @dataclass(frozen=True)
@@ -36,13 +37,13 @@ class BracketLink:
     slug: str
     user_name: str
     entry_name: str
+    user_categories: tuple[str, ...]
 
 
 @dataclass(frozen=True)
 class StandingsRow:
     """Represent one row in the rendered standings table."""
 
-    rank: int
     slug: str
     user_name: str
     current_score: float
@@ -50,6 +51,7 @@ class StandingsRow:
     correctly_picked_games: int | None
     incorrectly_picked_games: int | None
     champion_pick: str
+    user_categories: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -79,6 +81,7 @@ def load_site_data() -> SiteData:
                     slug=path.stem,
                     user_name=user_bracket.bracket_metadata.user_name,
                     entry_name=user_bracket.bracket_metadata.entry_name,
+                    user_categories=tuple(user_bracket.bracket_metadata.user_categories),
                 )
                 for path, user_bracket in loaded_user_brackets
             ),
@@ -89,7 +92,6 @@ def load_site_data() -> SiteData:
 
     standings_rows = tuple(
         StandingsRow(
-            rank=rank,
             slug=path.stem,
             user_name=user_bracket.bracket_metadata.user_name,
             current_score=result.current_score,
@@ -97,10 +99,11 @@ def load_site_data() -> SiteData:
             correctly_picked_games=result.correctly_picked_games,
             incorrectly_picked_games=result.incorrectly_picked_games,
             champion_pick=user_bracket.bracket_picks.champion.team_name,
+            user_categories=tuple(user_bracket.bracket_metadata.user_categories),
         )
-        for rank, (path, user_bracket, result) in enumerate(
-            score_saved_user_brackets(reference_bracket, calculate_details=True),
-            start=1,
+        for path, user_bracket, result in score_saved_user_brackets(
+            reference_bracket,
+            calculate_details=True,
         )
     )
     standings_by_slug = {row.slug: row for row in standings_rows}
@@ -125,23 +128,41 @@ def default_bracket_slug() -> str:
     return site_data.bracket_links[0].slug
 
 
-def render_standings_page() -> str:
+def render_standings_page(user_category_filter: str = "all") -> str:
     """Render the current standings page."""
 
     site_data = load_site_data()
-    leader = site_data.standings[0]
-    highest_ceiling = max((row.max_possible_score or 0.0) for row in site_data.standings)
+    normalized_filter = _normalize_user_category_filter(user_category_filter)
+    filtered_rows = _filter_standings_rows(site_data.standings, normalized_filter)
+    leader = filtered_rows[0] if filtered_rows else None
+    highest_ceiling = max((row.max_possible_score or 0.0) for row in filtered_rows) if filtered_rows else 0.0
 
     summary_cards = "".join(
         (
-            _render_stat_card("Completed Games", f"{site_data.completed_game_count} of 63"),
-            _render_stat_card("Current Leader", leader.user_name),
-            _render_stat_card("Top Score", _format_score(leader.current_score)),
+            _render_stat_card("Viewing", _category_filter_label(normalized_filter)),
+            _render_stat_card("Visible Brackets", str(len(filtered_rows))),
             _render_stat_card("Highest Ceiling", _format_score(highest_ceiling)),
+            _render_stat_card("Completed Games", f"{site_data.completed_game_count} of 63"),
         )
     )
+    if leader is not None:
+        summary_cards = "".join(
+            (
+                summary_cards,
+                _render_stat_card("Current Leader", leader.user_name),
+                _render_stat_card("Top Score", _format_score(leader.current_score)),
+            )
+        )
 
-    rows_html = "".join(_render_standings_row(row) for row in site_data.standings)
+    rows_html = "".join(_render_standings_row(rank, row) for rank, row in enumerate(filtered_rows, start=1))
+    empty_state_html = ""
+    if not filtered_rows:
+        empty_state_html = """
+        <div class="empty-state">
+            <h3>No brackets in this category</h3>
+            <p>Try switching to a different standings filter.</p>
+        </div>
+        """
     body = f"""
     <section class="hero">
         <p class="eyebrow">Traditional scoring</p>
@@ -149,6 +170,9 @@ def render_standings_page() -> str:
         <p class="lede">
             Live standings computed from the local ESPN scoreboard snapshot and the saved NCAA bracket picks.
         </p>
+        <div class="filter-tabs">
+            {_render_standings_filter_tabs(normalized_filter)}
+        </div>
         <div class="stat-grid">{summary_cards}</div>
     </section>
     <section class="panel">
@@ -157,14 +181,16 @@ def render_standings_page() -> str:
                 <p class="section-kicker">Group table</p>
                 <h2>Standings Board</h2>
             </div>
-            <p class="panel-note">Current score, remaining ceiling, and pick accuracy.</p>
+            <p class="panel-note">Current score, remaining ceiling, pick accuracy, and category.</p>
         </div>
+        {empty_state_html}
         <div class="table-wrap">
             <table class="standings-table">
                 <thead>
                     <tr>
                         <th>Rank</th>
                         <th>Name</th>
+                        <th>Category</th>
                         <th>Score</th>
                         <th>Max Possible</th>
                         <th>Correct</th>
@@ -219,11 +245,19 @@ def render_bracket_page(bracket_slug: str) -> tuple[int, str]:
 
     champion = user_bracket.bracket_picks.champion
     tiebreaker = user_bracket.bracket_picks.tiebreaker
+    bracket_selector_html = _render_bracket_selector(site_data, bracket_slug)
+    category_badges = _render_category_badges(tuple(user_bracket.bracket_metadata.user_categories))
     body = f"""
     <section class="hero">
         <p class="eyebrow">Bracket viewer</p>
         <h1>{escape(user_bracket.bracket_metadata.user_name)}</h1>
-        <p class="lede">Entry name: {escape(user_bracket.bracket_metadata.entry_name)}</p>
+        <div class="hero-topline">
+            <p class="lede">Entry name: {escape(user_bracket.bracket_metadata.entry_name)}</p>
+            {category_badges}
+        </div>
+        <div class="hero-controls">
+            {bracket_selector_html}
+        </div>
         <div class="stat-grid">
             {_render_stat_card("Current Score", score_card)}
             {_render_stat_card("Max Possible", max_card)}
@@ -255,7 +289,6 @@ def render_bracket_page(bracket_slug: str) -> tuple[int, str]:
         title=f"{user_bracket.bracket_metadata.user_name} Bracket",
         active_path=f"/brackets/{bracket_slug}",
         page_body=body,
-        current_bracket_slug=bracket_slug,
     )
     return 200, html
 
@@ -336,12 +369,9 @@ def _render_page_shell(
     title: str,
     active_path: str,
     page_body: str,
-    current_bracket_slug: str | None = None,
 ) -> str:
     """Wrap page-specific HTML with the shared site shell."""
 
-    site_data = load_site_data()
-    menu_html = _render_menu(site_data, active_path=active_path, current_bracket_slug=current_bracket_slug)
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -363,7 +393,6 @@ def _render_page_shell(
         <nav class="desktop-nav">
             {_render_main_nav_links(active_path)}
         </nav>
-        {menu_html}
     </header>
     <main class="site-main">
         {page_body}
@@ -387,55 +416,32 @@ def _render_main_nav_links(active_path: str) -> str:
         for label, href, is_active in links
     )
 
+def _render_bracket_selector(site_data: SiteData, current_bracket_slug: str) -> str:
+    """Render the bracket-switcher form shown only on bracket pages."""
 
-def _render_menu(site_data: SiteData, *, active_path: str, current_bracket_slug: str | None) -> str:
-    """Render the no-JavaScript drawer used as the site menu."""
-
-    page_links = [
-        ("Brackets", f"/brackets/{default_bracket_slug()}", active_path.startswith("/brackets")),
-        ("Standings", "/standings", active_path == "/standings"),
-        ("Prediction", "/prediction", active_path == "/prediction"),
-        ("Historical", "/historical", active_path == "/historical"),
-    ]
-    page_links_html = "".join(
-        f'<a class="drawer-link{" is-active" if is_active else ""}" href="{escape(href)}">{escape(label)}</a>'
-        for label, href, is_active in page_links
-    )
-    bracket_links_html = "".join(
+    options_html = "".join(
         (
-            f'<a class="drawer-link bracket-link{" is-active" if current_bracket_slug == link.slug else ""}" '
-            f'href="/brackets/{escape(link.slug)}">'
-            f'<span>{escape(link.user_name)}</span>'
-            f'<small>{escape(link.entry_name)}</small>'
-            f"</a>"
+            f'<option value="{escape(link.slug)}"{" selected" if link.slug == current_bracket_slug else ""}>'
+            f'{escape(link.user_name)}'
+            f"</option>"
         )
         for link in site_data.bracket_links
     )
     return f"""
-    <details class="drawer">
-        <summary class="drawer-toggle" aria-label="Open site navigation">
-            <span class="drawer-line"></span>
-            <span class="drawer-line"></span>
-            <span class="drawer-line"></span>
-        </summary>
-        <div class="drawer-panel">
-            <section class="drawer-section">
-                <p class="drawer-heading">Pages</p>
-                {page_links_html}
-            </section>
-            <section class="drawer-section">
-                <p class="drawer-heading">Bracket Picks</p>
-                <div class="drawer-bracket-list">
-                    {bracket_links_html}
-                </div>
-            </section>
+    <form class="bracket-selector" action="/brackets" method="get">
+        <label for="bracket_slug">Switch bracket</label>
+        <div class="selector-row">
+            <select id="bracket_slug" name="bracket_slug">
+                {options_html}
+            </select>
+            <button type="submit">View</button>
         </div>
-    </details>
+    </form>
     """
 
 
 def _render_region_section(region: str, user_bracket: UserBracket, reference_lookup: dict[str, object]) -> str:
-    """Render one region's rounds in a four-column grid."""
+    """Render one region's rounds in a bracket-like four-column grid."""
 
     columns = "".join(
         _render_round_column(
@@ -452,7 +458,7 @@ def _render_region_section(region: str, user_bracket: UserBracket, reference_loo
             <p class="section-kicker">Region</p>
             <h3>{escape(region.title())}</h3>
         </div>
-        <div class="round-grid">{columns}</div>
+        <div class="round-grid bracket-round-grid">{columns}</div>
     </section>
     """
 
@@ -472,11 +478,24 @@ def _render_round_column(
         if game.region == region and game.round_id == round_id
     ]
     games.sort(key=lambda game: game.matchup_index)
-    cards_html = "".join(_render_game_card(game, reference_lookup) for game in games)
+    cards_html = "".join(
+        _render_game_card(
+            game,
+            reference_lookup,
+            slot_center=_region_round_slot_center(round_id, game.matchup_index),
+            show_left_connector=round_id > 1,
+            show_right_connector=round_id < 4,
+        )
+        for game in games
+    )
+    connectors_html = _render_round_connectors(round_id, len(games))
     return f"""
-    <section class="round-column">
+    <section class="round-column round-{round_id}">
         <h4>{escape(ROUND_NAMES[round_id])}</h4>
-        <div class="game-stack">{cards_html}</div>
+        <div class="round-ladder">
+            {cards_html}
+            {connectors_html}
+        </div>
     </section>
     """
 
@@ -493,70 +512,160 @@ def _render_final_rounds_section(user_bracket: UserBracket, reference_lookup: di
     final_four_games.sort(key=lambda game: game.matchup_index)
     championship_games.sort(key=lambda game: game.matchup_index)
 
-    final_four_cards = "".join(_render_game_card(game, reference_lookup) for game in final_four_games)
-    championship_cards = "".join(_render_game_card(game, reference_lookup) for game in championship_games)
+    left_semifinal = (
+        _render_game_card(
+            final_four_games[0],
+            reference_lookup,
+            slot_center=2,
+            show_left_connector=False,
+            show_right_connector=True,
+        )
+        if final_four_games
+        else ""
+    )
+    right_semifinal = (
+        _render_game_card(
+            final_four_games[1],
+            reference_lookup,
+            slot_center=6,
+            show_left_connector=True,
+            show_right_connector=False,
+        )
+        if len(final_four_games) > 1
+        else ""
+    )
+    championship_cards = "".join(
+        _render_game_card(
+            game,
+            reference_lookup,
+            slot_center=4,
+            show_left_connector=True,
+            show_right_connector=True,
+        )
+        for game in championship_games
+    )
     return f"""
-    <div class="round-grid final-round-grid">
-        <section class="round-column">
+    <div class="final-round-grid">
+        <section class="round-column final-round-column">
             <h4>Final Four</h4>
-            <div class="game-stack">{final_four_cards}</div>
+            <div class="final-round-ladder">{left_semifinal}</div>
         </section>
-        <section class="round-column">
+        <section class="round-column final-round-column championship-column">
             <h4>Championship</h4>
-            <div class="game-stack">{championship_cards}</div>
+            <div class="final-round-ladder">{championship_cards}</div>
+        </section>
+        <section class="round-column final-round-column">
+            <h4>Final Four</h4>
+            <div class="final-round-ladder">{right_semifinal}</div>
         </section>
     </div>
     """
 
 
-def _render_game_card(game: BracketGamePick, reference_lookup: dict[str, object]) -> str:
-    """Render a single picked game card with live-result status when available."""
+def _render_game_card(
+    game: BracketGamePick,
+    reference_lookup: dict[str, object],
+    *,
+    slot_center: int | None = None,
+    show_left_connector: bool = False,
+    show_right_connector: bool = False,
+) -> str:
+    """Render a single picked game node with live-result status when available."""
 
     reference_game = reference_lookup.get(game.game_key)
     status_class = "pending"
     status_label = "Pending"
-    result_html = '<p class="game-result muted">Actual winner: still pending</p>'
 
     if reference_game is not None and getattr(reference_game, "winner_team_id", None) is not None:
         actual_winner_id = getattr(reference_game, "winner_team_id")
-        actual_winner_name = canonical_team_name_by_id().get(actual_winner_id, actual_winner_id)
         if game.picked_winner.team_id == actual_winner_id:
             status_class = "correct"
             status_label = "Correct"
         else:
             status_class = "wrong"
             status_label = "Miss"
-        result_html = f'<p class="game-result">Actual winner: {escape(actual_winner_name)}</p>'
+    actual_winner_name = None
+    if reference_game is not None and getattr(reference_game, "winner_team_id", None) is not None:
+        actual_winner_id = getattr(reference_game, "winner_team_id")
+        actual_winner_name = canonical_team_name_by_id().get(actual_winner_id, actual_winner_id)
+
+    team_1_classes = "node-team"
+    team_2_classes = "node-team"
+    if game.picked_team_1.team_id == game.picked_winner.team_id:
+        team_1_classes += " is-picked-winner"
+    if game.picked_team_2.team_id == game.picked_winner.team_id:
+        team_2_classes += " is-picked-winner"
+
+    footer_label = f"Picked {game.picked_winner.team_name}"
+    if actual_winner_name is not None:
+        footer_label += f" • Actual {actual_winner_name}"
+
+    class_names = ["game-card", "bracket-node", status_class]
+    if show_left_connector:
+        class_names.append("has-left-connector")
+    if show_right_connector:
+        class_names.append("has-right-connector")
+    style_attribute = ""
+    if slot_center is not None:
+        style_attribute = f' style="--slot-center: {slot_center};"'
 
     return f"""
-    <article class="game-card {status_class}">
-        <div class="game-card-head">
+    <article class="{' '.join(class_names)}"{style_attribute}>
+        <div class="game-card-head node-head">
             <span class="game-index">Game {game.matchup_index}</span>
             <span class="status-pill {status_class}">{escape(status_label)}</span>
         </div>
-        <div class="team-row">
+        <div class="{team_1_classes}">
             <span class="seed-chip">{escape(game.picked_team_1.seed)}</span>
-            <span>{escape(game.picked_team_1.team_name)}</span>
+            <span class="team-name">{escape(game.picked_team_1.team_name)}</span>
         </div>
-        <div class="team-row">
+        <div class="{team_2_classes}">
             <span class="seed-chip">{escape(game.picked_team_2.seed)}</span>
-            <span>{escape(game.picked_team_2.team_name)}</span>
+            <span class="team-name">{escape(game.picked_team_2.team_name)}</span>
         </div>
-        <p class="picked-winner">Picked winner: {escape(game.picked_winner.team_name)}</p>
-        {result_html}
+        <p class="node-foot">{escape(footer_label)}</p>
     </article>
     """
 
 
-def _render_standings_row(row: StandingsRow) -> str:
+def _render_round_connectors(round_id: int, game_count: int) -> str:
+    """Render the vertical connector spines for one region-round column."""
+
+    if round_id >= 4 or game_count < 2:
+        return ""
+
+    connector_segments = []
+    for pair_index in range(game_count // 2):
+        top_matchup_index = (pair_index * 2) + 1
+        bottom_matchup_index = top_matchup_index + 1
+        connector_segments.append(
+            f"""
+            <span
+                class="round-connector-segment"
+                style="--connector-top-slot: {_region_round_slot_center(round_id, top_matchup_index)};
+                       --connector-bottom-slot: {_region_round_slot_center(round_id, bottom_matchup_index)};"
+            ></span>
+            """
+        )
+    return f'<div class="round-connector-layer">{"".join(connector_segments)}</div>'
+
+
+def _region_round_slot_center(round_id: int, matchup_index: int) -> int:
+    """Return the slot-center used to place one regional game in the bracket UI."""
+
+    return (2**round_id * matchup_index) - (2 ** (round_id - 1))
+
+
+def _render_standings_row(rank: int, row: StandingsRow) -> str:
     """Render one row in the standings table."""
 
     return f"""
     <tr>
-        <td>{row.rank}</td>
+        <td>{rank}</td>
         <td>
             <a class="standings-link" href="/brackets/{escape(row.slug)}">{escape(row.user_name)}</a>
         </td>
+        <td>{_render_table_category_badges(row.user_categories)}</td>
         <td>{_format_score(row.current_score)}</td>
         <td>{_format_score(row.max_possible_score)}</td>
         <td>{row.correctly_picked_games if row.correctly_picked_games is not None else "—"}</td>
@@ -575,6 +684,70 @@ def _render_stat_card(label: str, value: str) -> str:
         <strong>{escape(value)}</strong>
     </div>
     """
+
+
+def _render_standings_filter_tabs(active_filter: str) -> str:
+    """Render the standings category-filter tabs."""
+
+    return "".join(
+        (
+            f'<a class="filter-tab{" is-active" if value == active_filter else ""}" '
+            f'href="/standings{"?category=" + value if value != "all" else ""}">'
+            f"{escape(_category_filter_label(value))}"
+            f"</a>"
+        )
+        for value in USER_CATEGORY_FILTER_VALUES
+    )
+
+
+def _render_category_badges(user_categories: tuple[str, ...]) -> str:
+    """Render category badges for the bracket hero."""
+
+    if not user_categories:
+        return ""
+    badges_html = "".join(
+        f'<span class="category-badge">{escape(category.title())}</span>'
+        for category in user_categories
+    )
+    return f'<div class="category-badge-row">{badges_html}</div>'
+
+
+def _render_table_category_badges(user_categories: tuple[str, ...]) -> str:
+    """Render compact category badges for the standings table."""
+
+    if not user_categories:
+        return "—"
+    return "".join(
+        f'<span class="category-badge table-badge">{escape(category.title())}</span>'
+        for category in user_categories
+    )
+
+
+def _filter_standings_rows(standings: tuple[StandingsRow, ...], user_category_filter: str) -> list[StandingsRow]:
+    """Return standings rows that match the selected category filter."""
+
+    if user_category_filter == "all":
+        return list(standings)
+    return [row for row in standings if user_category_filter in row.user_categories]
+
+
+def _normalize_user_category_filter(value: str) -> str:
+    """Normalize the standings category filter to one supported value."""
+
+    normalized = value.strip().lower()
+    if normalized not in USER_CATEGORY_FILTER_VALUES:
+        return "all"
+    return normalized
+
+
+def _category_filter_label(value: str) -> str:
+    """Return the display label for a standings category filter."""
+
+    return {
+        "all": "Everyone",
+        "student": "Students",
+        "staff": "Staff",
+    }[value]
 
 
 def _format_team_label(seed: str, team_name: str) -> str:

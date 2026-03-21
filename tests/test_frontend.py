@@ -32,6 +32,10 @@ def test_bracket_index_redirects_to_default_bracket() -> None:
     assert response.status_code == 307
     assert response.headers["location"] == "/brackets/david-mayo"
 
+    selected_response = bracket_index_redirect("austin-jude")
+    assert selected_response.status_code == 307
+    assert selected_response.headers["location"] == "/brackets/austin-jude"
+
 
 def test_standings_page_renders_html() -> None:
     """The standings page should include the current table and bracket links."""
@@ -44,6 +48,21 @@ def test_standings_page_renders_html() -> None:
     assert "Standings Board" in html
     assert "/brackets/david-mayo" in html
     assert "Darren Boyd" in html
+    assert "Everyone" in html
+    assert "Switch bracket" not in html
+
+
+def test_standings_page_can_filter_students_and_staff() -> None:
+    """The standings page should support category-based filtering."""
+
+    student_html = standings_page("student").body.decode()
+    staff_html = standings_page("staff").body.decode()
+
+    assert "Austin Music" in student_html
+    assert "Darren Boyd" not in student_html
+
+    assert "Darren Boyd" in staff_html
+    assert "Austin Music" not in staff_html
 
 
 def test_bracket_page_renders_david_mayo() -> None:
@@ -57,6 +76,7 @@ def test_bracket_page_renders_david_mayo() -> None:
     assert "Basketball!" in html
     assert "Champion Pick" in html
     assert "Road To Indianapolis" in html
+    assert "Switch bracket" in html
 
 
 def test_invalid_bracket_page_returns_html_404() -> None:

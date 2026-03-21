@@ -35,17 +35,18 @@ def root_redirect() -> RedirectResponse:
 
 
 @app.get("/brackets", include_in_schema=False)
-def bracket_index_redirect() -> RedirectResponse:
+def bracket_index_redirect(bracket_slug: str | None = None) -> RedirectResponse:
     """Redirect the generic bracket route to the preferred default bracket."""
 
-    return RedirectResponse(url=f"/brackets/{default_bracket_slug()}", status_code=307)
+    selected_bracket_slug = bracket_slug or default_bracket_slug()
+    return RedirectResponse(url=f"/brackets/{selected_bracket_slug}", status_code=307)
 
 
 @app.get("/standings", response_class=HTMLResponse, include_in_schema=False)
-def standings_page() -> HTMLResponse:
+def standings_page(category: str = "all") -> HTMLResponse:
     """Serve the current standings page."""
 
-    return HTMLResponse(render_standings_page())
+    return HTMLResponse(render_standings_page(category))
 
 
 @app.get("/brackets/{bracket_slug}", response_class=HTMLResponse, include_in_schema=False)

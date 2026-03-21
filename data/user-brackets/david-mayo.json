@@ -2,7 +2,7 @@
     "bracket_metadata": {
         "user_name": "David Mayo",
         "entry_name": "Basketball!",
-        "user_categories": [],
+        "user_categories": ["staff"],
         "ncaa_com_id": 1181849,
         "ncaa_com_url": "https://play-prod.ncaa.com/mens-bracket-challenge/api/v2/ncaabracketchallenge/pdf/entry/1181849?name=Basketball!"
     },
