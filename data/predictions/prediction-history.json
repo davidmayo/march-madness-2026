@@ -1,10 +1,10 @@
 {
     "simulation_count": 1000,
     "random_seed": 20260321,
-    "completed_game_count_max": 32,
+    "completed_game_count_max": 33,
     "latest_winning_percentage_by_category": {
-        "staff": 49.7,
-        "student": 50.3
+        "staff": 48.9,
+        "student": 51.1
     },
     "checkpoints": [
         {
@@ -764,6 +764,46 @@
                 "401856497"
             ],
             "report_path": "checkpoints/032-games-complete.json"
+        },
+        {
+            "games_completed": 33,
+            "label": "MICH beats SLU",
+            "completed_scoreboard_event_ids": [
+                "401856479",
+                "401856489",
+                "401856482",
+                "401856480",
+                "401856478",
+                "401856488",
+                "401856481",
+                "401856483",
+                "401856490",
+                "401856486",
+                "401856484",
+                "401856492",
+                "401856491",
+                "401856487",
+                "401856493",
+                "401856485",
+                "401856525",
+                "401856520",
+                "401856529",
+                "401856526",
+                "401856524",
+                "401856521",
+                "401856528",
+                "401856527",
+                "401856522",
+                "401856494",
+                "401856496",
+                "401856519",
+                "401856523",
+                "401856495",
+                "401856518",
+                "401856497",
+                "401856532"
+            ],
+            "report_path": "checkpoints/033-games-complete.json"
         }
     ],
     "users": [
@@ -1302,6 +1342,22 @@
                     "category_winning_percentage": 33.7,
                     "winning_percentage_interval_lower": 14.570205554468405,
                     "winning_percentage_interval_upper": 17.54129278374377
+                },
+                {
+                    "games_completed": 33,
+                    "average_score": 97.488,
+                    "score_interval_lower": 67.0,
+                    "score_interval_upper": 137.0,
+                    "average_finishing_position": 3.188,
+                    "finishing_position_interval_lower": 1.0,
+                    "finishing_position_interval_upper": 5.0,
+                    "average_category_finishing_position": 2.039,
+                    "category_finishing_position_interval_lower": 1.0,
+                    "category_finishing_position_interval_upper": 3.0,
+                    "winning_percentage": 19.0,
+                    "category_winning_percentage": 38.3,
+                    "winning_percentage_interval_lower": 17.461473826029238,
+                    "winning_percentage_interval_upper": 20.640186423517154
                 }
             ]
         },
@@ -1840,6 +1896,22 @@
                     "category_winning_percentage": 20.0,
                     "winning_percentage_interval_lower": 9.700563954540737,
                     "winning_percentage_interval_upper": 12.227659134403263
+                },
+                {
+                    "games_completed": 33,
+                    "average_score": 96.512,
+                    "score_interval_lower": 64.0,
+                    "score_interval_upper": 136.0,
+                    "average_finishing_position": 3.704,
+                    "finishing_position_interval_lower": 2.0,
+                    "finishing_position_interval_upper": 6.0,
+                    "average_category_finishing_position": 2.438,
+                    "category_finishing_position_interval_lower": 1.0,
+                    "category_finishing_position_interval_upper": 4.0,
+                    "winning_percentage": 9.1,
+                    "category_winning_percentage": 20.3,
+                    "winning_percentage_interval_lower": 8.000518700160097,
+                    "winning_percentage_interval_upper": 10.333607241983369
                 }
             ]
         },
@@ -2378,6 +2450,22 @@
                     "category_winning_percentage": 52.400000000000006,
                     "winning_percentage_interval_lower": 20.562113504875988,
                     "winning_percentage_interval_upper": 23.9290527834269
+                },
+                {
+                    "games_completed": 33,
+                    "average_score": 94.242,
+                    "score_interval_lower": 63.0,
+                    "score_interval_upper": 131.0,
+                    "average_finishing_position": 4.275,
+                    "finishing_position_interval_lower": 1.0,
+                    "finishing_position_interval_upper": 9.0,
+                    "average_category_finishing_position": 1.792,
+                    "category_finishing_position_interval_lower": 1.0,
+                    "category_finishing_position_interval_upper": 3.0,
+                    "winning_percentage": 23.599999999999998,
+                    "category_winning_percentage": 55.50000000000001,
+                    "winning_percentage_interval_lower": 21.92332100708662,
+                    "winning_percentage_interval_upper": 25.363254173172233
                 }
             ]
         },
@@ -2916,6 +3004,22 @@
                     "category_winning_percentage": 26.0,
                     "winning_percentage_interval_lower": 10.935253652553781,
                     "winning_percentage_interval_upper": 13.588706264635048
+                },
+                {
+                    "games_completed": 33,
+                    "average_score": 91.708,
+                    "score_interval_lower": 60.0,
+                    "score_interval_upper": 130.0,
+                    "average_finishing_position": 5.052,
+                    "finishing_position_interval_lower": 1.0,
+                    "finishing_position_interval_upper": 9.0,
+                    "average_category_finishing_position": 3.464,
+                    "category_finishing_position_interval_lower": 1.0,
+                    "category_finishing_position_interval_upper": 6.0,
+                    "winning_percentage": 11.600000000000001,
+                    "category_winning_percentage": 21.3,
+                    "winning_percentage_interval_lower": 10.364749849706104,
+                    "winning_percentage_interval_upper": 12.96117768521588
                 }
             ]
         },
@@ -3454,6 +3558,22 @@
                     "category_winning_percentage": 18.5,
                     "winning_percentage_interval_lower": 10.935253652553781,
                     "winning_percentage_interval_upper": 13.588706264635048
+                },
+                {
+                    "games_completed": 33,
+                    "average_score": 86.922,
+                    "score_interval_lower": 61.0,
+                    "score_interval_upper": 125.0,
+                    "average_finishing_position": 5.088,
+                    "finishing_position_interval_lower": 1.0,
+                    "finishing_position_interval_upper": 9.0,
+                    "average_category_finishing_position": 2.355,
+                    "category_finishing_position_interval_lower": 1.0,
+                    "category_finishing_position_interval_upper": 4.0,
+                    "winning_percentage": 11.700000000000001,
+                    "category_winning_percentage": 17.299999999999997,
+                    "winning_percentage_interval_lower": 10.459759081721149,
+                    "winning_percentage_interval_upper": 13.065840516911978
                 }
             ]
         },
@@ -3986,6 +4106,22 @@
                     "finishing_position_interval_lower": 3.0,
                     "finishing_position_interval_upper": 9.0,
                     "average_category_finishing_position": 4.105,
+                    "category_finishing_position_interval_lower": 3.0,
+                    "category_finishing_position_interval_upper": 6.0,
+                    "winning_percentage": 0.0,
+                    "category_winning_percentage": 0.0,
+                    "winning_percentage_interval_lower": 0.0,
+                    "winning_percentage_interval_upper": 0.1639681444296707
+                },
+                {
+                    "games_completed": 33,
+                    "average_score": 90.21,
+                    "score_interval_lower": 60.0,
+                    "score_interval_upper": 130.0,
+                    "average_finishing_position": 5.679,
+                    "finishing_position_interval_lower": 3.0,
+                    "finishing_position_interval_upper": 9.0,
+                    "average_category_finishing_position": 4.055,
                     "category_finishing_position_interval_lower": 3.0,
                     "category_finishing_position_interval_upper": 6.0,
                     "winning_percentage": 0.0,
@@ -4530,6 +4666,22 @@
                     "category_winning_percentage": 20.5,
                     "winning_percentage_interval_lower": 9.795350939691382,
                     "winning_percentage_interval_upper": 12.332544212963757
+                },
+                {
+                    "games_completed": 33,
+                    "average_score": 73.498,
+                    "score_interval_lower": 57.0,
+                    "score_interval_upper": 95.0,
+                    "average_finishing_position": 6.823,
+                    "finishing_position_interval_lower": 2.0,
+                    "finishing_position_interval_upper": 10.0,
+                    "average_category_finishing_position": 3.1,
+                    "category_finishing_position_interval_lower": 1.0,
+                    "category_finishing_position_interval_upper": 5.0,
+                    "winning_percentage": 9.9,
+                    "category_winning_percentage": 21.2,
+                    "winning_percentage_interval_lower": 8.754593649377341,
+                    "winning_percentage_interval_upper": 11.176908802455253
                 }
             ]
         },
@@ -5068,6 +5220,22 @@
                     "category_winning_percentage": 3.6999999999999997,
                     "winning_percentage_interval_lower": 1.592647614273544,
                     "winning_percentage_interval_upper": 2.764433868090081
+                },
+                {
+                    "games_completed": 33,
+                    "average_score": 65.99,
+                    "score_interval_lower": 49.0,
+                    "score_interval_upper": 83.0,
+                    "average_finishing_position": 8.524,
+                    "finishing_position_interval_lower": 4.0,
+                    "finishing_position_interval_upper": 12.0,
+                    "average_category_finishing_position": 5.243,
+                    "category_finishing_position_interval_lower": 3.0,
+                    "category_finishing_position_interval_upper": 7.0,
+                    "winning_percentage": 1.4000000000000001,
+                    "category_winning_percentage": 3.0,
+                    "winning_percentage_interval_lower": 0.9973070441471381,
+                    "winning_percentage_interval_upper": 1.9620699922385016
                 }
             ]
         },
@@ -5606,6 +5774,22 @@
                     "category_winning_percentage": 3.2,
                     "winning_percentage_interval_lower": 1.0809394645762742,
                     "winning_percentage_interval_upper": 2.0781096355205064
+                },
+                {
+                    "games_completed": 33,
+                    "average_score": 62.062,
+                    "score_interval_lower": 50.0,
+                    "score_interval_upper": 74.0,
+                    "average_finishing_position": 9.394,
+                    "finishing_position_interval_lower": 6.0,
+                    "finishing_position_interval_upper": 12.0,
+                    "average_category_finishing_position": 4.221,
+                    "category_finishing_position_interval_lower": 3.0,
+                    "category_finishing_position_interval_upper": 6.0,
+                    "winning_percentage": 1.4000000000000001,
+                    "category_winning_percentage": 1.9,
+                    "winning_percentage_interval_lower": 0.9973070441471381,
+                    "winning_percentage_interval_upper": 1.9620699922385016
                 }
             ]
         },
@@ -6144,6 +6328,22 @@
                     "category_winning_percentage": 9.4,
                     "winning_percentage_interval_lower": 5.200192663219481,
                     "winning_percentage_interval_upper": 7.14377136758977
+                },
+                {
+                    "games_completed": 33,
+                    "average_score": 62.39,
+                    "score_interval_lower": 43.0,
+                    "score_interval_upper": 89.0,
+                    "average_finishing_position": 9.662,
+                    "finishing_position_interval_lower": 2.0,
+                    "finishing_position_interval_upper": 14.0,
+                    "average_category_finishing_position": 5.759,
+                    "category_finishing_position_interval_lower": 1.0,
+                    "category_finishing_position_interval_upper": 8.0,
+                    "winning_percentage": 7.3999999999999995,
+                    "category_winning_percentage": 10.9,
+                    "winning_percentage_interval_lower": 6.407563088269981,
+                    "winning_percentage_interval_upper": 8.532137770784095
                 }
             ]
         },
@@ -6682,6 +6882,22 @@
                     "category_winning_percentage": 4.8,
                     "winning_percentage_interval_lower": 1.334903753562117,
                     "winning_percentage_interval_upper": 2.423161537668085
+                },
+                {
+                    "games_completed": 33,
+                    "average_score": 59.556,
+                    "score_interval_lower": 47.0,
+                    "score_interval_upper": 77.0,
+                    "average_finishing_position": 10.047,
+                    "finishing_position_interval_lower": 5.0,
+                    "finishing_position_interval_upper": 13.0,
+                    "average_category_finishing_position": 5.966,
+                    "category_finishing_position_interval_lower": 3.0,
+                    "category_finishing_position_interval_upper": 8.0,
+                    "winning_percentage": 1.9,
+                    "category_winning_percentage": 5.1,
+                    "winning_percentage_interval_lower": 1.4204418759215016,
+                    "winning_percentage_interval_upper": 2.5372954790198414
                 }
             ]
         },
@@ -7218,6 +7434,22 @@
                     "category_finishing_position_interval_upper": 6.0,
                     "winning_percentage": 0.0,
                     "category_winning_percentage": 1.0,
+                    "winning_percentage_interval_lower": 0.0,
+                    "winning_percentage_interval_upper": 0.1639681444296707
+                },
+                {
+                    "games_completed": 33,
+                    "average_score": 57.646,
+                    "score_interval_lower": 39.0,
+                    "score_interval_upper": 77.0,
+                    "average_finishing_position": 10.63,
+                    "finishing_position_interval_lower": 7.0,
+                    "finishing_position_interval_upper": 14.0,
+                    "average_category_finishing_position": 4.589,
+                    "category_finishing_position_interval_lower": 3.0,
+                    "category_finishing_position_interval_upper": 6.0,
+                    "winning_percentage": 0.0,
+                    "category_winning_percentage": 0.4,
                     "winning_percentage_interval_lower": 0.0,
                     "winning_percentage_interval_upper": 0.1639681444296707
                 }
@@ -7758,6 +7990,22 @@
                     "category_winning_percentage": 4.3999999999999995,
                     "winning_percentage_interval_lower": 2.204901051369665,
                     "winning_percentage_interval_upper": 3.549884876971944
+                },
+                {
+                    "games_completed": 33,
+                    "average_score": 54.764,
+                    "score_interval_lower": 44.0,
+                    "score_interval_upper": 68.0,
+                    "average_finishing_position": 10.955,
+                    "finishing_position_interval_lower": 7.0,
+                    "finishing_position_interval_upper": 14.0,
+                    "average_category_finishing_position": 4.943,
+                    "category_finishing_position_interval_lower": 3.0,
+                    "category_finishing_position_interval_upper": 6.0,
+                    "winning_percentage": 2.3,
+                    "category_winning_percentage": 3.6999999999999997,
+                    "winning_percentage_interval_lower": 1.7661915142525568,
+                    "winning_percentage_interval_upper": 2.9902340955333484
                 }
             ]
         },
@@ -8296,6 +8544,22 @@
                     "category_winning_percentage": 2.4,
                     "winning_percentage_interval_lower": 0.8319056813199126,
                     "winning_percentage_interval_upper": 1.7281272276434458
+                },
+                {
+                    "games_completed": 33,
+                    "average_score": 50.648,
+                    "score_interval_lower": 41.0,
+                    "score_interval_upper": 63.0,
+                    "average_finishing_position": 11.979,
+                    "finishing_position_interval_lower": 9.0,
+                    "finishing_position_interval_upper": 14.0,
+                    "average_category_finishing_position": 7.036,
+                    "category_finishing_position_interval_lower": 5.0,
+                    "category_finishing_position_interval_upper": 8.0,
+                    "winning_percentage": 0.7000000000000001,
+                    "category_winning_percentage": 1.0999999999999999,
+                    "winning_percentage_interval_lower": 0.43369257307228104,
+                    "winning_percentage_interval_upper": 1.1279800173353742
                 }
             ]
         }
