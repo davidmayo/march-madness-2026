@@ -118,8 +118,14 @@ class UserPredictionHistoryPoint(BaseModel):
 
     games_completed: int
     average_score: float
+    score_interval_lower: float
+    score_interval_upper: float
     average_finishing_position: float
+    finishing_position_interval_lower: float
+    finishing_position_interval_upper: float
     winning_percentage: float
+    winning_percentage_interval_lower: float
+    winning_percentage_interval_upper: float
 
 
 class UserPredictionHistorySeries(BaseModel):
@@ -505,11 +511,9 @@ def _build_prediction_history_from_reports(
                 ),
             )
             series.points.append(
-                UserPredictionHistoryPoint(
-                    games_completed=checkpoint_report.games_completed,
-                    average_score=user_summary.average_score,
-                    average_finishing_position=user_summary.average_finishing_position,
-                    winning_percentage=user_summary.winning_percentage,
+                _build_user_prediction_history_point(
+                    checkpoint_report=checkpoint_report,
+                    user_summary=user_summary,
                 )
             )
 
@@ -526,6 +530,64 @@ def _build_prediction_history_from_reports(
         completed_game_count_max=checkpoint_reports[-1].games_completed if checkpoint_reports else 0,
         checkpoints=checkpoint_metadata,
         users=ordered_users,
+    )
+
+
+def _build_user_prediction_history_point(
+    *,
+    checkpoint_report: TournamentPredictionReport,
+    user_summary: UserPredictionSummary,
+) -> UserPredictionHistoryPoint:
+    """Convert one report summary into a graph-ready checkpoint point."""
+
+    winning_interval = _winning_percentage_interval(
+        winning_percentage=user_summary.winning_percentage,
+        simulation_count=checkpoint_report.simulation_count,
+    )
+    return UserPredictionHistoryPoint(
+        games_completed=checkpoint_report.games_completed,
+        average_score=user_summary.average_score,
+        score_interval_lower=user_summary.score_interval.lower,
+        score_interval_upper=user_summary.score_interval.upper,
+        average_finishing_position=user_summary.average_finishing_position,
+        finishing_position_interval_lower=user_summary.finishing_position_interval.lower,
+        finishing_position_interval_upper=user_summary.finishing_position_interval.upper,
+        winning_percentage=user_summary.winning_percentage,
+        winning_percentage_interval_lower=winning_interval.lower,
+        winning_percentage_interval_upper=winning_interval.upper,
+    )
+
+
+def _winning_percentage_interval(
+    *,
+    winning_percentage: float,
+    simulation_count: int,
+) -> PredictionInterval:
+    """Return an 80% Wilson interval for one simulated win percentage."""
+
+    if simulation_count <= 0:
+        msg = f"simulation_count must be positive, got {simulation_count}."
+        raise ValueError(msg)
+
+    z_score = 1.2815515655446004  # Two-sided 80% interval.
+    win_count = round((winning_percentage / 100.0) * simulation_count)
+    win_fraction = win_count / simulation_count
+    denominator = 1.0 + ((z_score**2) / simulation_count)
+    center = (
+        win_fraction
+        + ((z_score**2) / (2.0 * simulation_count))
+    ) / denominator
+    margin = (
+        z_score
+        * math.sqrt(
+            (
+                (win_fraction * (1.0 - win_fraction)) / simulation_count
+            ) + ((z_score**2) / (4.0 * (simulation_count**2)))
+        )
+    ) / denominator
+    return PredictionInterval(
+        lower=max(0.0, (center - margin) * 100.0),
+        upper=min(100.0, (center + margin) * 100.0),
     )
 
 

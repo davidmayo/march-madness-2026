@@ -385,6 +385,9 @@ def render_prediction_page() -> str:
         y_max=average_score_y_max,
         y_tick_values=average_score_ticks,
     )
+    winning_percentage_y_min, winning_percentage_y_max, winning_percentage_ticks = _winning_percentage_axis(
+        latest_series,
+    )
     winning_percentage_chart = _render_prediction_history_chart(
         chart_id="prediction-winning-percentage-chart",
         checkpoints=checkpoints,
@@ -392,9 +395,10 @@ def render_prediction_page() -> str:
         metric_name="winning_percentage",
         y_axis_label="Winning Percentage",
         hover_label="Winning Percentage",
-        y_min=0.0,
-        y_max=100.0,
-        y_tick_values=[0.0, 20.0, 40.0, 60.0, 80.0, 100.0],
+        y_min=winning_percentage_y_min,
+        y_max=winning_percentage_y_max,
+        y_tick_values=winning_percentage_ticks,
+        show_interval_band=False,
     )
     rows_html = "".join(_render_prediction_snapshot_row(series) for series in latest_series)
     body = f"""
@@ -465,6 +469,7 @@ def render_prediction_page() -> str:
         title="Prediction",
         active_path="/prediction",
         page_body=body,
+        extra_body_html=_render_prediction_plot_hover_script(),
     )
 
 
@@ -862,6 +867,7 @@ def _render_prediction_history_chart(
     y_tick_values: list[float],
     invert_y_axis: bool = False,
     include_plotlyjs: bool = False,
+    show_interval_band: bool = True,
 ) -> str:
     """Render one Plotly line chart for the prediction-history page."""
 
@@ -871,6 +877,8 @@ def _render_prediction_history_chart(
         for checkpoint in checkpoints
     }
     figure = go.Figure()
+    trace_map: list[dict[str, int]] = []
+    interval_lower_field, interval_upper_field = _prediction_interval_fields(metric_name)
 
     for index, series in enumerate(series_list):
         color = _prediction_series_color(index)
@@ -883,6 +891,17 @@ def _render_prediction_history_chart(
             label_by_games_completed[point.games_completed]
             for point in series.points
         ]
+        interval_lower_values = []
+        interval_upper_values = []
+        if show_interval_band:
+            interval_lower_values = [
+                getattr(point, interval_lower_field)
+                for point in series.points
+            ]
+            interval_upper_values = [
+                getattr(point, interval_upper_field)
+                for point in series.points
+            ]
         hover_template = (
             f"<b>{escape(series.user_name)}</b><br>"
             "%{x}<br>"
@@ -890,6 +909,7 @@ def _render_prediction_history_chart(
             f"{'%' if metric_name == 'winning_percentage' else ''}"
             "<extra></extra>"
         )
+        line_trace_index = len(figure.data)
         figure.add_trace(
             go.Scatter(
                 x=x_values,
@@ -907,6 +927,32 @@ def _render_prediction_history_chart(
                 },
                 hovertemplate=hover_template,
             )
+        )
+        band_trace_index: int | None = None
+        if show_interval_band:
+            band_trace_index = len(figure.data)
+            figure.add_trace(
+                go.Scatter(
+                    x=x_values + list(reversed(x_values)),
+                    y=interval_upper_values + list(reversed(interval_lower_values)),
+                    name=f"{series.user_name} 80% interval",
+                    mode="lines",
+                    line={
+                        "color": "rgba(0, 0, 0, 0)",
+                        "width": 0,
+                    },
+                    fill="toself",
+                    fillcolor=_prediction_series_fill_color(color),
+                    hoverinfo="skip",
+                    showlegend=False,
+                    visible=False,
+                )
+            )
+        trace_map.append(
+            {
+                "line": line_trace_index,
+                "band": band_trace_index,
+            }
         )
 
     y_axis_range = [y_max, y_min] if invert_y_axis else [y_min, y_max]
@@ -988,7 +1034,12 @@ def _render_prediction_history_chart(
         include_plotlyjs="inline" if include_plotlyjs else False,
         div_id=chart_id,
     )
-    return f'<div class="prediction-plot">{chart_html}</div>'
+    encoded_trace_map = escape(json.dumps(trace_map), quote=True)
+    return (
+        f'<div class="prediction-plot" data-ci-trace-map="{encoded_trace_map}">'
+        f"{chart_html}"
+        "</div>"
+    )
 
 
 def _prediction_series_color(index: int) -> str:
@@ -1021,6 +1072,36 @@ def _prediction_series_dash(series: UserPredictionHistorySeries) -> str:
     return "solid"
 
 
+def _prediction_series_fill_color(color: str) -> str:
+    """Return a faint rgba fill color for one series interval band."""
+
+    red = int(color[1:3], 16)
+    green = int(color[3:5], 16)
+    blue = int(color[5:7], 16)
+    return f"rgba({red}, {green}, {blue}, 0.12)"
+
+
+def _prediction_interval_fields(metric_name: str) -> tuple[str, str]:
+    """Return the history-point field names used for one chart interval."""
+
+    interval_fields_by_metric = {
+        "average_score": ("score_interval_lower", "score_interval_upper"),
+        "average_finishing_position": (
+            "finishing_position_interval_lower",
+            "finishing_position_interval_upper",
+        ),
+        "winning_percentage": (
+            "winning_percentage_interval_lower",
+            "winning_percentage_interval_upper",
+        ),
+    }
+    try:
+        return interval_fields_by_metric[metric_name]
+    except KeyError as error:
+        msg = f"Unsupported prediction metric: {metric_name!r}"
+        raise ValueError(msg) from error
+
+
 def _average_finish_tick_values(user_count: int) -> list[float]:
     """Return readable y-axis ticks for the average-finish chart."""
 
@@ -1044,9 +1125,10 @@ def _average_score_axis(
     """Return y-axis bounds and ticks for the average-score history chart."""
 
     score_values = [
-        point.average_score
+        interval_value
         for series in series_list
         for point in series.points
+        for interval_value in (point.score_interval_lower, point.score_interval_upper)
     ]
     if not score_values:
         return 0.0, 10.0, [0.0, 5.0, 10.0]
@@ -1072,6 +1154,51 @@ def _average_score_axis(
         current_value += step
     tick_values.append(y_maximum)
     return y_minimum, y_maximum, tick_values
+
+
+def _winning_percentage_axis(
+    series_list: list[UserPredictionHistorySeries],
+) -> tuple[float, float, list[float]]:
+    """Return y-axis bounds and ticks for the winning-percentage history chart."""
+
+    winning_percentage_values = [
+        point.winning_percentage
+        for series in series_list
+        for point in series.points
+    ]
+    if not winning_percentage_values:
+        return 0.0, 10.0, [0.0, 2.5, 5.0, 7.5, 10.0]
+
+    raw_maximum = max(winning_percentage_values)
+    padding = max(1.0, raw_maximum * 0.12)
+    y_minimum = 0.0
+    y_maximum = _next_nice_axis_stop(raw_maximum + padding)
+    if math.isclose(y_maximum, y_minimum):
+        y_maximum = 5.0
+
+    span = y_maximum - y_minimum
+    target_step = span / 4.0
+    step = _next_nice_axis_stop(target_step)
+    tick_values: list[float] = []
+    current_value = y_minimum
+    while current_value < y_maximum:
+        tick_values.append(current_value)
+        current_value += step
+    tick_values.append(y_maximum)
+    return y_minimum, y_maximum, tick_values
+
+
+def _next_nice_axis_stop(value: float) -> float:
+    """Round one axis value up to a readable chart stop."""
+
+    if value <= 1.0:
+        return 1.0
+    magnitude = 10.0 ** math.floor(math.log10(value))
+    normalized = value / magnitude
+    for nice_factor in (1.0, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0):
+        if normalized <= nice_factor:
+            return nice_factor * magnitude
+    return 10.0 * magnitude
 
 
 def _render_stat_card(label: str, value: str) -> str:
@@ -1170,3 +1297,134 @@ def _format_percent(value: float | None) -> str:
     if value is None:
         return "—"
     return f"{value:.1f}%"
+
+
+def _render_prediction_plot_hover_script() -> str:
+    """Render the script that toggles interval bands on Plotly hover."""
+
+    return """
+    <script>
+    (() => {
+        const wrappers = document.querySelectorAll(".prediction-plot[data-ci-trace-map]");
+        if (!wrappers.length || !window.Plotly) {
+            return;
+        }
+
+        const baseLineWidth = 3;
+        const activeLineWidth = 7;
+        const baseMarkerSize = 7;
+        const activeMarkerSize = 10;
+
+        const applyVisibility = (plotDiv, traceMap, activeLineIndex) => {
+            const bandTraceIndexes = traceMap
+                .filter((item) => item.band !== null)
+                .map((item) => item.band);
+            if (bandTraceIndexes.length) {
+                const bandVisibility = traceMap
+                    .filter((item) => item.band !== null)
+                    .map((item) => item.line === activeLineIndex);
+                window.Plotly.restyle(plotDiv, { visible: bandVisibility }, bandTraceIndexes);
+            }
+
+            const lineTraceIndexes = traceMap.map((item) => item.line);
+            const lineWidths = traceMap.map((item) => (
+                item.line === activeLineIndex ? activeLineWidth : baseLineWidth
+            ));
+            const markerSizes = traceMap.map((item) => (
+                item.line === activeLineIndex ? activeMarkerSize : baseMarkerSize
+            ));
+            window.Plotly.restyle(
+                plotDiv,
+                {
+                    "line.width": lineWidths,
+                    "marker.size": markerSizes,
+                },
+                lineTraceIndexes,
+            );
+        };
+
+        const clearVisibility = (plotDiv, traceMap) => {
+            const bandTraceIndexes = traceMap
+                .filter((item) => item.band !== null)
+                .map((item) => item.band);
+            if (bandTraceIndexes.length) {
+                window.Plotly.restyle(
+                    plotDiv,
+                    { visible: traceMap.filter((item) => item.band !== null).map(() => false) },
+                    bandTraceIndexes,
+                );
+            }
+
+            const lineTraceIndexes = traceMap.map((item) => item.line);
+            window.Plotly.restyle(
+                plotDiv,
+                {
+                    "line.width": traceMap.map(() => baseLineWidth),
+                    "marker.size": traceMap.map(() => baseMarkerSize),
+                },
+                lineTraceIndexes,
+            );
+        };
+
+        for (const wrapper of wrappers) {
+            const plotDiv = wrapper.querySelector(".plotly-graph-div");
+            if (!plotDiv) {
+                continue;
+            }
+
+            const traceMap = JSON.parse(wrapper.dataset.ciTraceMap || "[]");
+            if (!traceMap.length) {
+                continue;
+            }
+
+            let activeLegendLineIndex = null;
+            let activeHoverLineIndex = null;
+
+            const refreshActiveBand = () => {
+                const activeLineIndex = activeLegendLineIndex ?? activeHoverLineIndex;
+                if (activeLineIndex === null) {
+                    clearVisibility(plotDiv, traceMap);
+                    return;
+                }
+                applyVisibility(plotDiv, traceMap, activeLineIndex);
+            };
+
+            const bindLegendHover = () => {
+                const legendItems = plotDiv.querySelectorAll(".legend .traces");
+                legendItems.forEach((legendItem, index) => {
+                    if (legendItem.dataset.ciBound === "true") {
+                        return;
+                    }
+                    legendItem.dataset.ciBound = "true";
+                    const lineIndex = traceMap[index]?.line;
+                    if (lineIndex === undefined) {
+                        return;
+                    }
+                    legendItem.addEventListener("mouseenter", () => {
+                        activeLegendLineIndex = lineIndex;
+                        refreshActiveBand();
+                    });
+                    legendItem.addEventListener("mouseleave", () => {
+                        activeLegendLineIndex = null;
+                        refreshActiveBand();
+                    });
+                });
+            };
+
+            plotDiv.on("plotly_hover", (eventData) => {
+                if (!eventData || !eventData.points || !eventData.points.length) {
+                    return;
+                }
+                activeHoverLineIndex = eventData.points[0].curveNumber;
+                refreshActiveBand();
+            });
+            plotDiv.on("plotly_unhover", () => {
+                activeHoverLineIndex = null;
+                refreshActiveBand();
+            });
+            plotDiv.on("plotly_afterplot", bindLegendHover);
+            bindLegendHover();
+        }
+    })();
+    </script>
+    """
