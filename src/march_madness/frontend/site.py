@@ -9,10 +9,12 @@ This module keeps the web layer intentionally simple:
 from __future__ import annotations
 
 import json
+import posixpath
 from dataclasses import dataclass
 from functools import lru_cache
 from html import escape
 from pathlib import Path
+from pathlib import PurePosixPath
 import math
 
 import plotly.graph_objects as go
@@ -36,6 +38,67 @@ from march_madness.user_brackets import UserBracket
 ROOT = Path(__file__).resolve().parents[3]
 SCOREBOARD_PATH = ROOT / "data" / "espn" / "api" / "scoreboard.json"
 USER_CATEGORY_FILTER_VALUES: tuple[str, ...] = ("all", "student", "staff")
+
+
+@dataclass(frozen=True)
+class SiteUrlBuilder:
+    """Build internal site URLs for either the FastAPI app or static exports."""
+
+    page_output_path: PurePosixPath | None = None
+
+    def asset(self, asset_name: str) -> str:
+        """Return the URL for one static asset."""
+
+        if self.page_output_path is None:
+            return f"/static/{asset_name}"
+        return self._relative_url(PurePosixPath("static") / asset_name)
+
+    def home(self) -> str:
+        """Return the URL for the site home page."""
+
+        if self.page_output_path is None:
+            return "/standings"
+        return self._relative_url(PurePosixPath("index.html"))
+
+    def standings(self, user_category_filter: str = "all") -> str:
+        """Return the URL for the standings page for one category."""
+
+        normalized_filter = _normalize_user_category_filter(user_category_filter)
+        if self.page_output_path is None:
+            if normalized_filter == "all":
+                return "/standings"
+            return f"/standings?category={normalized_filter}"
+
+        target = PurePosixPath("standings") / "index.html"
+        if normalized_filter != "all":
+            target = PurePosixPath("standings") / normalized_filter / "index.html"
+        return self._relative_url(target)
+
+    def bracket(self, bracket_slug: str) -> str:
+        """Return the URL for one user bracket page."""
+
+        if self.page_output_path is None:
+            return f"/brackets/{bracket_slug}"
+        return self._relative_url(PurePosixPath("brackets") / bracket_slug / "index.html")
+
+    def prediction(self) -> str:
+        """Return the URL for the prediction page."""
+
+        if self.page_output_path is None:
+            return "/prediction"
+        return self._relative_url(PurePosixPath("prediction") / "index.html")
+
+    def _relative_url(self, target_path: PurePosixPath) -> str:
+        """Return a URL from the current page to a target output file."""
+
+        if self.page_output_path is None:
+            return str(target_path)
+
+        relative_path = posixpath.relpath(
+            str(target_path),
+            start=str(self.page_output_path.parent),
+        )
+        return relative_path
 
 
 @dataclass(frozen=True)
@@ -146,7 +209,18 @@ def default_bracket_slug() -> str:
 def render_standings_page(user_category_filter: str = "all") -> str:
     """Render the current standings page."""
 
+    return render_standings_page_with_urls(user_category_filter)
+
+
+def render_standings_page_with_urls(
+    user_category_filter: str = "all",
+    *,
+    url_builder: SiteUrlBuilder | None = None,
+) -> str:
+    """Render the current standings page with configurable internal URLs."""
+
     site_data = load_site_data()
+    urls = url_builder or SiteUrlBuilder()
     normalized_filter = _normalize_user_category_filter(user_category_filter)
     filtered_rows = _filter_standings_rows(site_data.standings, normalized_filter)
     leader = filtered_rows[0] if filtered_rows else None
@@ -169,7 +243,10 @@ def render_standings_page(user_category_filter: str = "all") -> str:
             )
         )
 
-    rows_html = "".join(_render_standings_row(rank, row) for rank, row in enumerate(filtered_rows, start=1))
+    rows_html = "".join(
+        _render_standings_row(rank, row, urls)
+        for rank, row in enumerate(filtered_rows, start=1)
+    )
     empty_state_html = ""
     if not filtered_rows:
         empty_state_html = """
@@ -186,7 +263,7 @@ def render_standings_page(user_category_filter: str = "all") -> str:
             Live standings computed from the local ESPN scoreboard snapshot and the saved NCAA bracket picks.
         </p>
         <div class="filter-tabs">
-            {_render_standings_filter_tabs(normalized_filter)}
+            {_render_standings_filter_tabs_with_urls(normalized_filter, urls)}
         </div>
         <div class="stat-grid">{summary_cards}</div>
     </section>
@@ -222,18 +299,31 @@ def render_standings_page(user_category_filter: str = "all") -> str:
         title="Standings",
         active_path="/standings",
         page_body=body,
+        url_builder=urls,
     )
 
 
 def render_bracket_page(bracket_slug: str) -> tuple[int, str]:
     """Render one user's bracket page and return ``(status_code, html)``."""
 
+    return render_bracket_page_with_urls(bracket_slug)
+
+
+def render_bracket_page_with_urls(
+    bracket_slug: str,
+    *,
+    url_builder: SiteUrlBuilder | None = None,
+) -> tuple[int, str]:
+    """Render one user's bracket page with configurable internal URLs."""
+
     site_data = load_site_data()
+    urls = url_builder or SiteUrlBuilder()
     user_bracket = site_data.bracket_lookup.get(bracket_slug)
     if user_bracket is None:
         html = render_not_found_page(
             title="Bracket Not Found",
             message=f"No saved bracket exists for {bracket_slug!r}.",
+            url_builder=urls,
         )
         return 404, html
 
@@ -260,7 +350,7 @@ def render_bracket_page(bracket_slug: str) -> tuple[int, str]:
 
     champion = user_bracket.bracket_picks.champion
     tiebreaker = user_bracket.bracket_picks.tiebreaker
-    bracket_selector_html = _render_bracket_selector(site_data, bracket_slug)
+    bracket_selector_html = _render_bracket_selector(site_data, bracket_slug, urls)
     category_badges = _render_category_badges(tuple(user_bracket.bracket_metadata.user_categories))
     body = f"""
     <section class="hero">
@@ -304,6 +394,7 @@ def render_bracket_page(bracket_slug: str) -> tuple[int, str]:
         title=f"{user_bracket.bracket_metadata.user_name} Bracket",
         active_path=f"/brackets/{bracket_slug}",
         page_body=body,
+        url_builder=urls,
     )
     return 200, html
 
@@ -311,7 +402,17 @@ def render_bracket_page(bracket_slug: str) -> tuple[int, str]:
 def render_prediction_page() -> str:
     """Render the Monte Carlo prediction-history page."""
 
+    return render_prediction_page_with_urls()
+
+
+def render_prediction_page_with_urls(
+    *,
+    url_builder: SiteUrlBuilder | None = None,
+) -> str:
+    """Render the prediction page with configurable internal URLs."""
+
     prediction_history = load_prediction_history_data()
+    urls = url_builder or SiteUrlBuilder()
     checkpoints = prediction_history.checkpoints
     chart_series = [series for series in prediction_history.users if series.points]
     chart_series.sort(
@@ -410,7 +511,10 @@ def render_prediction_page() -> str:
             series.user_name,
         ),
     )
-    rows_html = "".join(_render_prediction_snapshot_row(series) for series in default_table_series)
+    rows_html = "".join(
+        _render_prediction_snapshot_row(series, urls)
+        for series in default_table_series
+    )
     body = f"""
     <section class="hero">
         <p class="eyebrow">Monte Carlo history</p>
@@ -523,12 +627,19 @@ def render_prediction_page() -> str:
         title="Prediction",
         active_path="/prediction",
         page_body=body,
-        extra_body_html=_render_prediction_page_script(prediction_history),
+        extra_body_html=_render_prediction_page_script(prediction_history, urls),
+        url_builder=urls,
     )
 
-def render_not_found_page(title: str, message: str) -> str:
+def render_not_found_page(
+    title: str,
+    message: str,
+    *,
+    url_builder: SiteUrlBuilder | None = None,
+) -> str:
     """Render a simple site-styled not-found page."""
 
+    urls = url_builder or SiteUrlBuilder()
     body = f"""
     <section class="hero">
         <p class="eyebrow">Not found</p>
@@ -540,6 +651,7 @@ def render_not_found_page(title: str, message: str) -> str:
         title=title,
         active_path="",
         page_body=body,
+        url_builder=urls,
     )
 
 
@@ -549,21 +661,23 @@ def _render_page_shell(
     active_path: str,
     page_body: str,
     extra_body_html: str = "",
+    url_builder: SiteUrlBuilder | None = None,
 ) -> str:
     """Wrap page-specific HTML with the shared site shell."""
 
+    urls = url_builder or SiteUrlBuilder()
     return f"""<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{escape(title)} | March Madness 2026</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{escape(urls.asset('style.css'))}">
 </head>
 <body>
     <div class="page-noise"></div>
     <header class="site-header">
-        <a class="brand" href="/standings">
+        <a class="brand" href="{escape(urls.home())}">
             <span class="brand-mark">MM</span>
             <span class="brand-copy">
                 <span class="brand-title">March Madness 2026</span>
@@ -571,7 +685,7 @@ def _render_page_shell(
             </span>
         </a>
         <nav class="desktop-nav">
-            {_render_main_nav_links(active_path)}
+            {_render_main_nav_links(active_path, urls)}
         </nav>
     </header>
     <main class="site-main">
@@ -583,35 +697,49 @@ def _render_page_shell(
 """
 
 
-def _render_main_nav_links(active_path: str) -> str:
+def _render_main_nav_links(active_path: str, url_builder: SiteUrlBuilder) -> str:
     """Render the compact desktop nav."""
 
     links = [
-        ("Prediction", "/prediction", active_path == "/prediction"),
-        ("Brackets", f"/brackets/{default_bracket_slug()}", active_path.startswith("/brackets")),
-        ("Standings", "/standings", active_path == "/standings"),
+        ("Prediction", url_builder.prediction(), active_path == "/prediction"),
+        ("Brackets", url_builder.bracket(default_bracket_slug()), active_path.startswith("/brackets")),
+        ("Standings", url_builder.standings(), active_path == "/standings"),
     ]
     return "".join(
         f'<a class="nav-link{" is-active" if is_active else ""}" href="{escape(href)}">{escape(label)}</a>'
         for label, href, is_active in links
     )
 
-def _render_bracket_selector(site_data: SiteData, current_bracket_slug: str) -> str:
+def _render_bracket_selector(
+    site_data: SiteData,
+    current_bracket_slug: str,
+    url_builder: SiteUrlBuilder,
+) -> str:
     """Render the bracket-switcher form shown only on bracket pages."""
 
     options_html = "".join(
         (
-            f'<option value="{escape(link.slug)}"{" selected" if link.slug == current_bracket_slug else ""}>'
+            f'<option value="{escape(url_builder.bracket(link.slug))}"'
+            f'{" selected" if link.slug == current_bracket_slug else ""}>'
             f'{escape(link.user_name)}'
             f"</option>"
         )
         for link in site_data.bracket_links
     )
     return f"""
-    <form class="bracket-selector" action="/brackets" method="get">
+    <form
+        class="bracket-selector"
+        action="{escape(url_builder.bracket(current_bracket_slug))}"
+        method="get"
+        onsubmit="event.preventDefault(); window.location.href = document.getElementById('bracket_slug').value;"
+    >
         <label for="bracket_slug">Switch bracket</label>
         <div class="selector-row">
-            <select id="bracket_slug" name="bracket_slug">
+            <select
+                id="bracket_slug"
+                name="bracket_slug"
+                onchange="window.location.href = this.value;"
+            >
                 {options_html}
             </select>
             <button type="submit">View</button>
@@ -843,14 +971,14 @@ def _render_connector_segment(*, top_slot: int, bottom_slot: int) -> str:
     """
 
 
-def _render_standings_row(rank: int, row: StandingsRow) -> str:
+def _render_standings_row(rank: int, row: StandingsRow, url_builder: SiteUrlBuilder) -> str:
     """Render one row in the standings table."""
 
     return f"""
     <tr>
         <td>{rank}</td>
         <td>
-            <a class="standings-link" href="/brackets/{escape(row.slug)}">{escape(row.user_name)}</a>
+            <a class="standings-link" href="{escape(url_builder.bracket(row.slug))}">{escape(row.user_name)}</a>
         </td>
         <td>{_render_table_category_badges(row.user_categories)}</td>
         <td>{_format_score(row.current_score)}</td>
@@ -862,14 +990,17 @@ def _render_standings_row(rank: int, row: StandingsRow) -> str:
     """
 
 
-def _render_prediction_snapshot_row(series: UserPredictionHistorySeries) -> str:
+def _render_prediction_snapshot_row(
+    series: UserPredictionHistorySeries,
+    url_builder: SiteUrlBuilder,
+) -> str:
     """Render one row in the latest-checkpoint prediction snapshot table."""
 
     latest_point = series.points[-1]
     return f"""
     <tr>
         <td>
-            <a class="standings-link" href="/brackets/{escape(series.slug)}">{escape(series.user_name)}</a>
+            <a class="standings-link" href="{escape(url_builder.bracket(series.slug))}">{escape(series.user_name)}</a>
         </td>
         <td>{_render_table_category_badges(tuple(series.user_categories))}</td>
         <td>{_format_score(latest_point.average_score)}</td>
@@ -1272,10 +1403,20 @@ def _render_category_win_split(student_probability: float, staff_probability: fl
 def _render_standings_filter_tabs(active_filter: str) -> str:
     """Render the standings category-filter tabs."""
 
+    return _render_standings_filter_tabs_with_urls(active_filter)
+
+
+def _render_standings_filter_tabs_with_urls(
+    active_filter: str,
+    url_builder: SiteUrlBuilder | None = None,
+) -> str:
+    """Render the standings category-filter tabs with configurable URLs."""
+
+    urls = url_builder or SiteUrlBuilder()
     return "".join(
         (
             f'<a class="filter-tab{" is-active" if value == active_filter else ""}" '
-            f'href="/standings{"?category=" + value if value != "all" else ""}">'
+            f'href="{escape(urls.standings(value))}">'
             f"{escape(_category_filter_label(value))}"
             f"</a>"
         )
@@ -1356,25 +1497,34 @@ def _format_percent(value: float | None) -> str:
     return f"{value:.1f}%"
 
 
-def _render_prediction_page_script(prediction_history: TournamentPredictionHistory) -> str:
+def _render_prediction_page_script(
+    prediction_history: TournamentPredictionHistory,
+    url_builder: SiteUrlBuilder,
+) -> str:
     """Render the interactive script for prediction filters, charts, and sorting."""
 
     prediction_history_json = json.dumps(
         prediction_history.model_dump(mode="json"),
     ).replace("</", "<\\/")
+    bracket_href_template = json.dumps(url_builder.bracket("__BRACKET_SLUG__"))
     return (
         '<script id="prediction-history-data" type="application/json">'
         + prediction_history_json
+        + "</script>"
+        + '<script id="prediction-bracket-href-template" type="application/json">'
+        + bracket_href_template
         + "</script>"
         + """
     <script>
     (() => {
         const dataElement = document.getElementById("prediction-history-data");
-        if (!dataElement || !window.Plotly) {
+        const bracketHrefTemplateElement = document.getElementById("prediction-bracket-href-template");
+        if (!dataElement || !bracketHrefTemplateElement || !window.Plotly) {
             return;
         }
 
         const predictionHistory = JSON.parse(dataElement.textContent);
+        const bracketHrefTemplate = JSON.parse(bracketHrefTemplateElement.textContent);
         const scopeInputs = Array.from(document.querySelectorAll('input[name="prediction_scope"]'));
         const sortButtons = Array.from(document.querySelectorAll(".table-sort-button"));
         const snapshotBody = document.getElementById("prediction-snapshot-body");
@@ -2114,7 +2264,7 @@ def _render_prediction_page_script(prediction_history: TournamentPredictionHisto
             return `
                 <tr>
                     <td>
-                        <a class="standings-link" href="/brackets/${encodeURIComponent(series.slug)}">${escapeHtml(series.user_name)}</a>
+                        <a class="standings-link" href="${bracketHrefTemplate.replace('__BRACKET_SLUG__', encodeURIComponent(series.slug))}">${escapeHtml(series.user_name)}</a>
                     </td>
                     <td>${categoryHtml}</td>
                     <td>${formatScore(point.average_score)}</td>

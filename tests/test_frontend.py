@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from march_madness.deploy import build_static_site
 from march_madness.frontend.app import bracket_index_redirect
 from march_madness.frontend.app import bracket_page
 from march_madness.frontend.app import prediction_page
@@ -116,3 +117,29 @@ def test_prediction_page_renders() -> None:
     assert "Round 1, day 1" in prediction_html
     assert '"Current"' in prediction_html
     assert "Darren Boyd" in prediction_html
+
+
+def test_build_static_site_writes_github_pages_tree(tmp_path: Path) -> None:
+    """The deploy module should emit a GitHub Pages-friendly static tree."""
+
+    build_static_site(tmp_path)
+
+    root_index_html = (tmp_path / "index.html").read_text()
+    standings_html = (tmp_path / "standings" / "index.html").read_text()
+    student_standings_html = (tmp_path / "standings" / "student" / "index.html").read_text()
+    bracket_html = (tmp_path / "brackets" / "david-mayo" / "index.html").read_text()
+    prediction_html = (tmp_path / "prediction" / "index.html").read_text()
+    not_found_html = (tmp_path / "404.html").read_text()
+
+    assert (tmp_path / ".nojekyll").exists()
+    assert (tmp_path / "static" / "style.css").exists()
+    assert "Current Standings" in root_index_html
+    assert 'href="static/style.css"' in root_index_html
+    assert "Current Standings" in standings_html
+    assert "Austin Music" in student_standings_html
+    assert "Darren Boyd" not in student_standings_html
+    assert 'href="../../static/style.css"' in bracket_html
+    assert 'value="../austin-jude/index.html"' in bracket_html
+    assert 'href="../brackets/david-mayo/index.html"' in prediction_html
+    assert "Page Not Found" in not_found_html
+    assert 'href="./static/style.css"' not in not_found_html
