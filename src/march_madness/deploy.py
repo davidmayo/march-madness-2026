@@ -36,8 +36,7 @@ def build_static_site(output_dir: Path) -> None:
     _write_rendered_page(
         output_dir=output_dir,
         relative_output_path=PurePosixPath("index.html"),
-        html=render_standings_page_with_urls(
-            "all",
+        html=render_prediction_page_with_urls(
             url_builder=SiteUrlBuilder(PurePosixPath("index.html")),
         ),
     )

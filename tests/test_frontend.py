@@ -133,7 +133,7 @@ def test_build_static_site_writes_github_pages_tree(tmp_path: Path) -> None:
 
     assert (tmp_path / ".nojekyll").exists()
     assert (tmp_path / "static" / "style.css").exists()
-    assert "Current Standings" in root_index_html
+    assert "Prediction Engine" in root_index_html
     assert 'href="static/style.css"' in root_index_html
     assert "Current Standings" in standings_html
     assert "Austin Music" in student_standings_html
