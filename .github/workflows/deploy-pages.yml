@@ -1,0 +1,99 @@
+name: Deploy Pages
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every 10 minutes (UTC)
+    - cron: "*/10 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Out Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check Out Pages Branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin pages || true
+          if git show-ref --verify --quiet refs/remotes/origin/pages; then
+            git checkout -B pages origin/pages
+          else
+            # First-time setup: create pages branch from current HEAD
+            git checkout -B pages
+          fi
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Set Up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Preserve Previous Scoreboard
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f data/espn/api/scoreboard.json ]]; then
+            cp data/espn/api/scoreboard.json /tmp/scoreboard.previous.json
+          else
+            echo "{}" > /tmp/scoreboard.previous.json
+          fi
+
+      - name: Check Whether A New Update Is Needed
+        id: need
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Expected output: "true" or "false"
+          need="$(uv run -m march_madness.check_need)"
+          echo "update_needed=${need}" >> "$GITHUB_OUTPUT"
+
+      - name: Update Prediction Checkpoints
+        if: steps.need.outputs.update_needed == 'true'
+        id: update_predictions
+        shell: bash
+        run: |
+          set -euo pipefail
+          summary="$(uv run -m march_madness.update_predictions /tmp/scoreboard.previous.json)"
+          echo "summary=${summary}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Static Site
+        if: steps.need.outputs.update_needed == 'true'
+        run: uv run -m march_madness.deploy
+
+      - name: Commit And Push Updated Site
+        if: steps.need.outputs.update_needed == 'true'
+        env:
+          UPDATE_SUMMARY: ${{ steps.update_predictions.outputs.summary }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          completed_count="$(
+            uv run python -c 'import json, os; print(json.loads(os.environ["UPDATE_SUMMARY"])["last_completed_count"])'
+          )"
+
+          git commit -m "Update simulation after game ${completed_count}"
+          git push origin pages
