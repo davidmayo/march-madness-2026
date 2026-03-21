@@ -458,7 +458,9 @@ def _render_region_section(region: str, user_bracket: UserBracket, reference_loo
             <p class="section-kicker">Region</p>
             <h3>{escape(region.title())}</h3>
         </div>
-        <div class="round-grid bracket-round-grid">{columns}</div>
+        <div class="region-scroll">
+            <div class="round-grid bracket-round-grid">{columns}</div>
+        </div>
     </section>
     """
 
@@ -512,51 +514,39 @@ def _render_final_rounds_section(user_bracket: UserBracket, reference_lookup: di
     final_four_games.sort(key=lambda game: game.matchup_index)
     championship_games.sort(key=lambda game: game.matchup_index)
 
-    left_semifinal = (
+    final_four_cards = "".join(
         _render_game_card(
-            final_four_games[0],
+            game,
             reference_lookup,
-            slot_center=2,
+            slot_center=slot_center,
             show_left_connector=False,
             show_right_connector=True,
         )
-        if final_four_games
-        else ""
+        for game, slot_center in zip(final_four_games, (2, 6), strict=False)
     )
-    right_semifinal = (
-        _render_game_card(
-            final_four_games[1],
-            reference_lookup,
-            slot_center=6,
-            show_left_connector=True,
-            show_right_connector=False,
-        )
-        if len(final_four_games) > 1
-        else ""
-    )
+    final_four_connectors = _render_final_round_connectors(len(final_four_games))
     championship_cards = "".join(
         _render_game_card(
             game,
             reference_lookup,
             slot_center=4,
             show_left_connector=True,
-            show_right_connector=True,
+            show_right_connector=False,
         )
         for game in championship_games
     )
     return f"""
     <div class="final-round-grid">
-        <section class="round-column final-round-column">
+        <section class="round-column final-round-column final-four-column">
             <h4>Final Four</h4>
-            <div class="final-round-ladder">{left_semifinal}</div>
+            <div class="final-round-ladder">
+                {final_four_cards}
+                {final_four_connectors}
+            </div>
         </section>
         <section class="round-column final-round-column championship-column">
             <h4>Championship</h4>
             <div class="final-round-ladder">{championship_cards}</div>
-        </section>
-        <section class="round-column final-round-column">
-            <h4>Final Four</h4>
-            <div class="final-round-ladder">{right_semifinal}</div>
         </section>
     </div>
     """
@@ -639,13 +629,10 @@ def _render_round_connectors(round_id: int, game_count: int) -> str:
         top_matchup_index = (pair_index * 2) + 1
         bottom_matchup_index = top_matchup_index + 1
         connector_segments.append(
-            f"""
-            <span
-                class="round-connector-segment"
-                style="--connector-top-slot: {_region_round_slot_center(round_id, top_matchup_index)};
-                       --connector-bottom-slot: {_region_round_slot_center(round_id, bottom_matchup_index)};"
-            ></span>
-            """
+            _render_connector_segment(
+                top_slot=_region_round_slot_center(round_id, top_matchup_index),
+                bottom_slot=_region_round_slot_center(round_id, bottom_matchup_index),
+            )
         )
     return f'<div class="round-connector-layer">{"".join(connector_segments)}</div>'
 
@@ -654,6 +641,26 @@ def _region_round_slot_center(round_id: int, matchup_index: int) -> int:
     """Return the slot-center used to place one regional game in the bracket UI."""
 
     return (2**round_id * matchup_index) - (2 ** (round_id - 1))
+
+
+def _render_final_round_connectors(game_count: int) -> str:
+    """Render the connector spine between the two semifinal games."""
+
+    if game_count < 2:
+        return ""
+    return f'<div class="round-connector-layer">{_render_connector_segment(top_slot=2, bottom_slot=6)}</div>'
+
+
+def _render_connector_segment(*, top_slot: int, bottom_slot: int) -> str:
+    """Render one vertical connector segment between two game centers."""
+
+    return f"""
+    <span
+        class="round-connector-segment"
+        style="--connector-top-slot: {top_slot};
+               --connector-bottom-slot: {bottom_slot};"
+    ></span>
+    """
 
 
 def _render_standings_row(rank: int, row: StandingsRow) -> str:

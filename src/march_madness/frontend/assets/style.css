@@ -395,18 +395,24 @@ a {
     border-radius: calc(var(--radius-sm) + 2px);
     background: rgba(255, 255, 255, 0.58);
     border: 1px solid rgba(17, 27, 22, 0.06);
-    overflow-x: auto;
+    overflow: visible;
 }
 
 .region-header {
     margin-bottom: 0.85rem;
 }
 
+.region-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 0.35rem;
+}
+
 .round-grid {
     --column-width: 12.75rem;
     --connector-gap: 2.8rem;
-    --lane: 3.45rem;
-    --node-height: 6rem;
+    --lane: 4.2rem;
+    --node-height: 7.4rem;
     display: grid;
     grid-template-columns: repeat(4, var(--column-width));
     gap: 0 var(--connector-gap);
@@ -421,10 +427,10 @@ a {
     --lane: 3.45rem;
     --node-height: 6rem;
     display: grid;
-    grid-template-columns: repeat(3, var(--column-width));
+    grid-template-columns: repeat(2, var(--column-width));
     gap: 0 var(--connector-gap);
     justify-content: center;
-    min-width: calc((3 * var(--column-width)) + (2 * var(--connector-gap)));
+    min-width: calc((2 * var(--column-width)) + var(--connector-gap));
     margin-inline: auto;
 }
 
@@ -546,7 +552,7 @@ a {
     left: 0;
     right: 0;
     height: var(--node-height);
-    padding: 0.75rem 0.8rem;
+    padding: 0.7rem 0.8rem 0.8rem;
 }
 
 .bracket-node::before,
