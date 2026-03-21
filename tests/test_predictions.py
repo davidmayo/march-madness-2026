@@ -62,9 +62,13 @@ def test_build_prediction_report_summarizes_all_users() -> None:
     assert report.remaining_game_count == 35
     assert len(report.users) == 14
     assert {tuple(user.user_categories) for user in report.users} == {("student",), ("staff",)}
+    assert set(report.winning_percentage_by_category) == {"student", "staff"}
+    assert abs(sum(user.winning_percentage for user in report.users) - 100.0) < 1e-9
+    assert abs(sum(report.winning_percentage_by_category.values()) - 100.0) < 1e-9
     assert report.users[0].average_finishing_position <= report.users[-1].average_finishing_position
 
     category_sizes = {"student": 8, "staff": 6}
+    category_win_percentage_sums = {"student": 0.0, "staff": 0.0}
     for user in report.users:
         assert 0.0 <= user.average_score <= 192.0
         assert 0.0 <= user.winning_percentage <= 100.0
@@ -82,6 +86,10 @@ def test_build_prediction_report_summarizes_all_users() -> None:
             user.category_finishing_position_interval.lower
             <= user.category_finishing_position_interval.upper
         )
+        category_win_percentage_sums[user_category] += user.category_winning_percentage
+
+    assert abs(category_win_percentage_sums["student"] - 100.0) < 1e-9
+    assert abs(category_win_percentage_sums["staff"] - 100.0) < 1e-9
 
 
 def test_build_prediction_history_and_write_files(tmp_path: Path) -> None:
@@ -100,6 +108,8 @@ def test_build_prediction_history_and_write_files(tmp_path: Path) -> None:
     assert history.completed_game_count_max == len(completed_event_ids)
     assert len(history.checkpoints) == len(reports)
     assert len(history.users) == 14
+    assert set(history.latest_winning_percentage_by_category) == {"student", "staff"}
+    assert abs(sum(history.latest_winning_percentage_by_category.values()) - 100.0) < 1e-9
     for series in history.users:
         assert len(series.points) == len(reports)
         assert series.points[0].games_completed == 0

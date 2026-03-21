@@ -11,7 +11,6 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from march_madness.frontend.app import bracket_index_redirect
 from march_madness.frontend.app import bracket_page
-from march_madness.frontend.app import historical_page
 from march_madness.frontend.app import prediction_page
 from march_madness.frontend.app import root_redirect
 from march_madness.frontend.app import standings_page
@@ -89,11 +88,10 @@ def test_invalid_bracket_page_returns_html_404() -> None:
     assert "Bracket Not Found" in html
 
 
-def test_prediction_and_historical_pages_render() -> None:
-    """Prediction and historical pages should render cleanly."""
+def test_prediction_page_renders() -> None:
+    """The prediction page should render cleanly."""
 
     prediction_response = prediction_page()
-    historical_response = historical_page()
 
     assert prediction_response.status_code == 200
     prediction_html = prediction_response.body.decode()
@@ -108,9 +106,13 @@ def test_prediction_and_historical_pages_render() -> None:
     assert "prediction-average-finish-chart" in prediction_html
     assert "data-ci-trace-map" in prediction_html
     assert "prediction_scope" in prediction_html
+    assert "prediction_granularity" in prediction_html
+    assert "prediction_smoothness" in prediction_html
+    assert 'value="by_round" checked' in prediction_html
+    assert 'value="all_games" checked' in prediction_html
     assert "prediction-history-data" in prediction_html
     assert "table-sort-button" in prediction_html
+    assert "Student Vs Staff Win Probability" in prediction_html
+    assert "Round 1, day 1" in prediction_html
+    assert '"Current"' in prediction_html
     assert "Darren Boyd" in prediction_html
-
-    assert historical_response.status_code == 200
-    assert "Historical Results" in historical_response.body.decode()

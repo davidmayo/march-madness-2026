@@ -10,7 +10,6 @@ from fastapi.staticfiles import StaticFiles
 
 from march_madness.frontend.site import default_bracket_slug
 from march_madness.frontend.site import render_bracket_page
-from march_madness.frontend.site import render_historical_page
 from march_madness.frontend.site import render_prediction_page
 from march_madness.frontend.site import render_standings_page
 
@@ -59,13 +58,6 @@ def bracket_page(bracket_slug: str) -> HTMLResponse:
 
 @app.get("/prediction", response_class=HTMLResponse, include_in_schema=False)
 def prediction_page() -> HTMLResponse:
-    """Serve the placeholder prediction page."""
+    """Serve the prediction page."""
 
     return HTMLResponse(render_prediction_page())
-
-
-@app.get("/historical", response_class=HTMLResponse, include_in_schema=False)
-def historical_page() -> HTMLResponse:
-    """Serve the placeholder historical page."""
-
-    return HTMLResponse(render_historical_page())

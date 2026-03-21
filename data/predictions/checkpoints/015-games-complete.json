@@ -22,6 +22,10 @@
     "completed_game_count": 15,
     "remaining_game_count": 48,
     "kenpom_snapshot_name": "2026-03-21T01-00-00Z",
+    "winning_percentage_by_category": {
+        "staff": 50.6,
+        "student": 49.4
+    },
     "users": [
         {
             "slug": "john-asher",
@@ -30,13 +34,13 @@
             "user_categories": [
                 "student"
             ],
-            "average_score": 96.093,
-            "average_finishing_position": 3.28,
-            "winning_percentage": 16.400000000000002,
-            "average_category_finishing_position": 2.163,
-            "category_winning_percentage": 36.6,
+            "average_score": 94.923,
+            "average_finishing_position": 3.508,
+            "winning_percentage": 15.1,
+            "average_category_finishing_position": 2.29,
+            "category_winning_percentage": 32.300000000000004,
             "score_interval": {
-                "lower": 66.0,
+                "lower": 64.0,
                 "upper": 134.0
             },
             "finishing_position_interval": {
@@ -55,22 +59,22 @@
             "user_categories": [
                 "student"
             ],
-            "average_score": 94.603,
-            "average_finishing_position": 3.836,
-            "winning_percentage": 10.299999999999999,
-            "average_category_finishing_position": 2.539,
-            "category_winning_percentage": 20.200000000000003,
+            "average_score": 93.683,
+            "average_finishing_position": 4.04,
+            "winning_percentage": 8.5,
+            "average_category_finishing_position": 2.697,
+            "category_winning_percentage": 19.0,
             "score_interval": {
-                "lower": 64.0,
-                "upper": 135.0
+                "lower": 62.0,
+                "upper": 133.0
             },
             "finishing_position_interval": {
-                "lower": 1.0,
+                "lower": 2.0,
                 "upper": 7.0
             },
             "category_finishing_position_interval": {
                 "lower": 1.0,
-                "upper": 4.0
+                "upper": 5.0
             }
         },
         {
@@ -80,14 +84,14 @@
             "user_categories": [
                 "staff"
             ],
-            "average_score": 92.787,
-            "average_finishing_position": 4.344,
-            "winning_percentage": 25.6,
-            "average_category_finishing_position": 1.827,
-            "category_winning_percentage": 54.2,
+            "average_score": 91.437,
+            "average_finishing_position": 4.51,
+            "winning_percentage": 24.0,
+            "average_category_finishing_position": 1.875,
+            "category_winning_percentage": 54.300000000000004,
             "score_interval": {
                 "lower": 61.0,
-                "upper": 132.0
+                "upper": 131.0
             },
             "finishing_position_interval": {
                 "lower": 1.0,
@@ -95,7 +99,7 @@
             },
             "category_finishing_position_interval": {
                 "lower": 1.0,
-                "upper": 3.0
+                "upper": 4.0
             }
         },
         {
@@ -105,14 +109,14 @@
             "user_categories": [
                 "student"
             ],
-            "average_score": 90.949,
-            "average_finishing_position": 4.908,
-            "winning_percentage": 11.899999999999999,
-            "average_category_finishing_position": 3.323,
-            "category_winning_percentage": 25.2,
+            "average_score": 90.595,
+            "average_finishing_position": 4.933,
+            "winning_percentage": 12.7,
+            "average_category_finishing_position": 3.363,
+            "category_winning_percentage": 24.9,
             "score_interval": {
-                "lower": 61.0,
-                "upper": 129.0
+                "lower": 58.0,
+                "upper": 130.0
             },
             "finishing_position_interval": {
                 "lower": 1.0,
@@ -130,14 +134,14 @@
             "user_categories": [
                 "student"
             ],
-            "average_score": 90.525,
-            "average_finishing_position": 5.18,
-            "winning_percentage": 0.8999999999999999,
-            "average_category_finishing_position": 3.636,
-            "category_winning_percentage": 2.0,
+            "average_score": 89.717,
+            "average_finishing_position": 5.371,
+            "winning_percentage": 1.0,
+            "average_category_finishing_position": 3.812,
+            "category_winning_percentage": 2.4,
             "score_interval": {
-                "lower": 60.0,
-                "upper": 129.0
+                "lower": 58.0,
+                "upper": 130.0
             },
             "finishing_position_interval": {
                 "lower": 3.0,
@@ -145,7 +149,7 @@
             },
             "category_finishing_position_interval": {
                 "lower": 2.0,
-                "upper": 5.0
+                "upper": 6.0
             }
         },
         {
@@ -155,18 +159,18 @@
             "user_categories": [
                 "staff"
             ],
-            "average_score": 85.409,
-            "average_finishing_position": 5.196,
-            "winning_percentage": 12.5,
-            "average_category_finishing_position": 2.353,
-            "category_winning_percentage": 18.7,
+            "average_score": 83.679,
+            "average_finishing_position": 5.423,
+            "winning_percentage": 10.9,
+            "average_category_finishing_position": 2.473,
+            "category_winning_percentage": 16.1,
             "score_interval": {
                 "lower": 58.0,
-                "upper": 124.0
+                "upper": 121.0
             },
             "finishing_position_interval": {
                 "lower": 1.0,
-                "upper": 9.0
+                "upper": 10.0
             },
             "category_finishing_position_interval": {
                 "lower": 1.0,
@@ -180,14 +184,14 @@
             "user_categories": [
                 "staff"
             ],
-            "average_score": 73.821,
-            "average_finishing_position": 6.497,
-            "winning_percentage": 12.3,
-            "average_category_finishing_position": 2.995,
-            "category_winning_percentage": 24.2,
+            "average_score": 72.379,
+            "average_finishing_position": 6.699,
+            "winning_percentage": 11.3,
+            "average_category_finishing_position": 3.067,
+            "category_winning_percentage": 22.6,
             "score_interval": {
-                "lower": 55.0,
-                "upper": 98.0
+                "lower": 54.0,
+                "upper": 96.0
             },
             "finishing_position_interval": {
                 "lower": 1.0,
@@ -205,47 +209,22 @@
             "user_categories": [
                 "student"
             ],
-            "average_score": 65.371,
-            "average_finishing_position": 8.408,
-            "winning_percentage": 1.7999999999999998,
-            "average_category_finishing_position": 5.207,
-            "category_winning_percentage": 3.4000000000000004,
+            "average_score": 65.191,
+            "average_finishing_position": 8.479,
+            "winning_percentage": 1.7000000000000002,
+            "average_category_finishing_position": 5.25,
+            "category_winning_percentage": 4.1000000000000005,
             "score_interval": {
-                "lower": 49.0,
-                "upper": 84.0
+                "lower": 48.0,
+                "upper": 85.0
             },
             "finishing_position_interval": {
                 "lower": 4.0,
                 "upper": 12.0
             },
             "category_finishing_position_interval": {
-                "lower": 3.0,
-                "upper": 7.0
-            }
-        },
-        {
-            "slug": "austin-jude",
-            "user_name": "Austin Jude",
-            "entry_name": "Austin Jude2343623",
-            "user_categories": [
-                "student"
-            ],
-            "average_score": 62.881,
-            "average_finishing_position": 9.301,
-            "winning_percentage": 7.1,
-            "average_category_finishing_position": 5.596,
-            "category_winning_percentage": 10.6,
-            "score_interval": {
-                "lower": 44.0,
-                "upper": 87.0
-            },
-            "finishing_position_interval": {
                 "lower": 2.0,
-                "upper": 13.0
-            },
-            "category_finishing_position_interval": {
-                "lower": 1.0,
-                "upper": 8.0
+                "upper": 7.0
             }
         },
         {
@@ -255,22 +234,47 @@
             "user_categories": [
                 "staff"
             ],
-            "average_score": 59.751,
-            "average_finishing_position": 9.624,
-            "winning_percentage": 1.0999999999999999,
-            "average_category_finishing_position": 4.303,
-            "category_winning_percentage": 1.7000000000000002,
+            "average_score": 59.919,
+            "average_finishing_position": 9.499,
+            "winning_percentage": 1.3,
+            "average_category_finishing_position": 4.226,
+            "category_winning_percentage": 2.1999999999999997,
             "score_interval": {
                 "lower": 47.0,
                 "upper": 72.0
             },
             "finishing_position_interval": {
-                "lower": 7.0,
+                "lower": 6.0,
                 "upper": 13.0
             },
             "category_finishing_position_interval": {
                 "lower": 3.0,
                 "upper": 6.0
+            }
+        },
+        {
+            "slug": "austin-jude",
+            "user_name": "Austin Jude",
+            "entry_name": "Austin Jude2343623",
+            "user_categories": [
+                "student"
+            ],
+            "average_score": 62.117,
+            "average_finishing_position": 9.541,
+            "winning_percentage": 6.7,
+            "average_category_finishing_position": 5.738,
+            "category_winning_percentage": 9.5,
+            "score_interval": {
+                "lower": 42.0,
+                "upper": 88.0
+            },
+            "finishing_position_interval": {
+                "lower": 3.0,
+                "upper": 14.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 2.0,
+                "upper": 8.0
             }
         },
         {
@@ -280,17 +284,17 @@
             "user_categories": [
                 "student"
             ],
-            "average_score": 59.139,
-            "average_finishing_position": 9.978,
-            "winning_percentage": 2.1,
-            "average_category_finishing_position": 5.979,
-            "category_winning_percentage": 5.3,
+            "average_score": 59.263,
+            "average_finishing_position": 9.926,
+            "winning_percentage": 2.7,
+            "average_category_finishing_position": 5.95,
+            "category_winning_percentage": 5.8999999999999995,
             "score_interval": {
                 "lower": 45.0,
-                "upper": 77.0
+                "upper": 79.0
             },
             "finishing_position_interval": {
-                "lower": 5.0,
+                "lower": 4.0,
                 "upper": 13.0
             },
             "category_finishing_position_interval": {
@@ -305,14 +309,14 @@
             "user_categories": [
                 "staff"
             ],
-            "average_score": 57.057,
-            "average_finishing_position": 10.529,
-            "winning_percentage": 0.0,
-            "average_category_finishing_position": 4.509,
-            "category_winning_percentage": 0.8999999999999999,
+            "average_score": 56.331,
+            "average_finishing_position": 10.661,
+            "winning_percentage": 0.1,
+            "average_category_finishing_position": 4.55,
+            "category_winning_percentage": 0.5,
             "score_interval": {
-                "lower": 39.0,
-                "upper": 76.0
+                "lower": 38.0,
+                "upper": 75.0
             },
             "finishing_position_interval": {
                 "lower": 7.0,
@@ -330,11 +334,11 @@
             "user_categories": [
                 "staff"
             ],
-            "average_score": 54.923,
-            "average_finishing_position": 10.723,
+            "average_score": 54.753,
+            "average_finishing_position": 10.73,
             "winning_percentage": 3.0,
-            "average_category_finishing_position": 4.785,
-            "category_winning_percentage": 4.6,
+            "average_category_finishing_position": 4.809,
+            "category_winning_percentage": 4.3,
             "score_interval": {
                 "lower": 43.0,
                 "upper": 68.0
@@ -355,11 +359,11 @@
             "user_categories": [
                 "student"
             ],
-            "average_score": 50.587,
-            "average_finishing_position": 11.718,
-            "winning_percentage": 0.6,
-            "average_category_finishing_position": 6.927,
-            "category_winning_percentage": 1.2,
+            "average_score": 50.567,
+            "average_finishing_position": 11.68,
+            "winning_percentage": 1.0,
+            "average_category_finishing_position": 6.9,
+            "category_winning_percentage": 1.9,
             "score_interval": {
                 "lower": 40.0,
                 "upper": 63.0

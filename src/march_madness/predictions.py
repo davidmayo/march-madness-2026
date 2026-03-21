@@ -7,6 +7,9 @@ for scoring:
 - every simulated winner is propagated through the explicit bracket tree
 - each completed simulated bracket is scored with the existing traditional
   scoring logic
+- tied bracket scores are broken with a uniform random shuffle inside each
+  equal-score group, so every simulation has one unique overall winner and one
+  unique winner within each category
 """
 
 from __future__ import annotations
@@ -109,6 +112,7 @@ class TournamentPredictionReport(BaseModel):
     completed_game_count: int
     remaining_game_count: int
     kenpom_snapshot_name: str
+    winning_percentage_by_category: dict[UserCategory, float]
     users: list[UserPredictionSummary]
 
 
@@ -164,6 +168,7 @@ class TournamentPredictionHistory(BaseModel):
     simulation_count: int
     random_seed: int
     completed_game_count_max: int
+    latest_winning_percentage_by_category: dict[UserCategory, float]
     checkpoints: list[PredictionHistoryCheckpoint]
     users: list[UserPredictionHistorySeries]
 
@@ -291,6 +296,7 @@ def build_prediction_report(
         slug: _UserSimulationAccumulator()
         for slug, _user_bracket, _user_category in user_records
     }
+    category_win_counts: Counter[UserCategory] = Counter()
 
     for _simulation_index in range(simulation_count):
         simulated_bracket = simulate_remaining_tournament(
@@ -307,11 +313,24 @@ def build_prediction_report(
             category_by_slug[slug] = user_category
             accumulators[slug].scores.append(user_score.current_score)
 
-        global_ranks = _competition_ranks(score_by_slug)
+        # Tied scores are shuffled inside each score bucket so this report uses
+        # one unique finishing order per simulation instead of shared ranks.
+        global_ranks = _randomized_ordinal_ranks(
+            score_by_slug,
+            random_generator=random_generator,
+        )
         for slug, rank in global_ranks.items():
             accumulators[slug].finishing_positions.append(rank)
             if rank == 1:
                 accumulators[slug].wins += 1
+        overall_winner_slug = next(
+            slug
+            for slug, rank in global_ranks.items()
+            if rank == 1
+        )
+        overall_winner_category = category_by_slug[overall_winner_slug]
+        if overall_winner_category is not None:
+            category_win_counts[overall_winner_category] += 1
 
         for user_category in sorted({category for category in category_by_slug.values() if category is not None}):
             category_scores = {
@@ -319,7 +338,10 @@ def build_prediction_report(
                 for slug, user_score in score_by_slug.items()
                 if category_by_slug[slug] == user_category
             }
-            category_ranks = _competition_ranks(category_scores)
+            category_ranks = _randomized_ordinal_ranks(
+                category_scores,
+                random_generator=random_generator,
+            )
             for slug, rank in category_ranks.items():
                 accumulators[slug].category_finishing_positions.append(rank)
                 if rank == 1:
@@ -360,6 +382,10 @@ def build_prediction_report(
         completed_game_count=completed_game_count,
         remaining_game_count=total_scored_games - completed_game_count,
         kenpom_snapshot_name=kenpom_snapshot_path.stem,
+        winning_percentage_by_category={
+            user_category: (category_win_counts[user_category] / simulation_count) * 100.0
+            for user_category in sorted({category for _slug, _user_bracket, category in user_records if category is not None})
+        },
         users=user_summaries,
     )
 
@@ -541,6 +567,11 @@ def _build_prediction_history_from_reports(
         simulation_count=simulation_count,
         random_seed=random_seed,
         completed_game_count_max=checkpoint_reports[-1].games_completed if checkpoint_reports else 0,
+        latest_winning_percentage_by_category=(
+            checkpoint_reports[-1].winning_percentage_by_category
+            if checkpoint_reports
+            else {}
+        ),
         checkpoints=checkpoint_metadata,
         users=ordered_users,
     )
@@ -716,21 +747,26 @@ def _team_1_win_probability(*, team_1_rating: float, team_2_rating: float) -> fl
     return 1.0 / (1.0 + (10.0 ** (team_2_scoring_margin / KENPOM_SCALE_FACTOR)))
 
 
-def _competition_ranks(score_by_slug: dict[str, float]) -> dict[str, int]:
-    """Assign shared-place ranks where ties occupy the same finishing position."""
+def _randomized_ordinal_ranks(
+    score_by_slug: dict[str, float],
+    *,
+    random_generator: random.Random,
+) -> dict[str, int]:
+    """Assign unique ranks after uniformly shuffling users inside tied-score groups."""
 
-    score_counts = Counter(score_by_slug.values())
-    rank_by_score: dict[float, int] = {}
-    higher_score_count = 0
+    slugs_by_score: dict[float, list[str]] = {}
+    for slug, score_value in score_by_slug.items():
+        slugs_by_score.setdefault(score_value, []).append(slug)
 
-    for score_value in sorted(score_counts, reverse=True):
-        rank_by_score[score_value] = higher_score_count + 1
-        higher_score_count += score_counts[score_value]
-
-    return {
-        slug: rank_by_score[user_score]
-        for slug, user_score in score_by_slug.items()
-    }
+    rank_by_slug: dict[str, int] = {}
+    next_rank = 1
+    for score_value in sorted(slugs_by_score, reverse=True):
+        tied_slugs = list(slugs_by_score[score_value])
+        random_generator.shuffle(tied_slugs)
+        for slug in tied_slugs:
+            rank_by_slug[slug] = next_rank
+            next_rank += 1
+    return rank_by_slug
 
 
 def _nearest_rank_percentile(values: list[float] | list[int], percentile: float) -> float | int:

@@ -328,6 +328,8 @@ def render_prediction_page() -> str:
         key=lambda series: series.points[-1].winning_percentage,
         default=None,
     )
+    student_win_probability = prediction_history.latest_winning_percentage_by_category.get("student", 0.0)
+    staff_win_probability = prediction_history.latest_winning_percentage_by_category.get("staff", 0.0)
     summary_cards = "".join(
         (
             _render_stat_card("Simulations Per Checkpoint", _format_score(float(prediction_history.simulation_count))),
@@ -417,21 +419,50 @@ def render_prediction_page() -> str:
             {prediction_history.simulation_count:,} KenPom-driven simulations were rerun after every completed game,
             starting from the untouched bracket and continuing through the latest scoreboard snapshot.
         </p>
-        <fieldset class="prediction-scope-controls" aria-label="Prediction scope">
-            <legend>View Scope</legend>
-            <label class="prediction-scope-option">
-                <input type="radio" name="prediction_scope" value="all" checked>
-                <span>Everyone</span>
-            </label>
-            <label class="prediction-scope-option">
-                <input type="radio" name="prediction_scope" value="student">
-                <span>Students</span>
-            </label>
-            <label class="prediction-scope-option">
-                <input type="radio" name="prediction_scope" value="staff">
-                <span>Staff</span>
-            </label>
-        </fieldset>
+        <div class="prediction-filter-row">
+            <fieldset class="prediction-filter-controls prediction-scope-controls" aria-label="Prediction scope">
+                <legend>View Scope</legend>
+                <label class="prediction-filter-option prediction-scope-option">
+                    <input type="radio" name="prediction_scope" value="all" checked>
+                    <span>Everyone</span>
+                </label>
+                <label class="prediction-filter-option prediction-scope-option">
+                    <input type="radio" name="prediction_scope" value="student">
+                    <span>Students</span>
+                </label>
+                <label class="prediction-filter-option prediction-scope-option">
+                    <input type="radio" name="prediction_scope" value="staff">
+                    <span>Staff</span>
+                </label>
+            </fieldset>
+            <fieldset class="prediction-filter-controls prediction-granularity-controls" aria-label="Prediction granularity">
+                <legend>Granularity</legend>
+                <label class="prediction-filter-option prediction-granularity-option">
+                    <input type="radio" name="prediction_granularity" value="by_game">
+                    <span>By Game</span>
+                </label>
+                <label class="prediction-filter-option prediction-granularity-option">
+                    <input type="radio" name="prediction_granularity" value="by_round" checked>
+                    <span>By Round</span>
+                </label>
+                <label class="prediction-filter-option prediction-granularity-option">
+                    <input type="radio" name="prediction_granularity" value="by_day">
+                    <span>By Day</span>
+                </label>
+            </fieldset>
+            <fieldset class="prediction-filter-controls prediction-smoothness-controls" aria-label="Prediction smoothness">
+                <legend>Smoothness</legend>
+                <label class="prediction-filter-option prediction-smoothness-option">
+                    <input type="radio" name="prediction_smoothness" value="all_games" checked>
+                    <span>All Games</span>
+                </label>
+                <label class="prediction-filter-option prediction-smoothness-option">
+                    <input type="radio" name="prediction_smoothness" value="smooth">
+                    <span>Smooth</span>
+                </label>
+            </fieldset>
+        </div>
+        {_render_category_win_split(student_win_probability, staff_win_probability)}
         <div class="stat-grid">{summary_cards}</div>
     </section>
     <section class="panel">
@@ -440,7 +471,7 @@ def render_prediction_page() -> str:
                 <p class="section-kicker">Trend graph</p>
                 <h2>Average Finish Over Time</h2>
             </div>
-            <p class="panel-note">Each checkpoint is labeled by the newly completed winner, with first place shown at the top.</p>
+            <p class="panel-note">Switch between game, round, and day views while keeping first place at the top.</p>
         </div>
         {average_finish_chart}
     </section>
@@ -460,7 +491,7 @@ def render_prediction_page() -> str:
                 <p class="section-kicker">Win equity</p>
                 <h2>Winning Percentage Over Time</h2>
             </div>
-            <p class="panel-note">A win counts any simulation where a user shared first place.</p>
+            <p class="panel-note">A win counts simulations where a user won the random tiebreak for first place.</p>
         </div>
         {winning_percentage_chart}
     </section>
@@ -470,7 +501,7 @@ def render_prediction_page() -> str:
                 <p class="section-kicker">Latest checkpoint</p>
                 <h2>Current Forecast Snapshot</h2>
             </div>
-            <p class="panel-note">Sorted by the most recent average finishing position.</p>
+            <p class="panel-note">Click a column header to sort. The default view is Winning % descending.</p>
         </div>
         <div class="table-wrap">
             <table class="standings-table prediction-table">
@@ -494,34 +525,6 @@ def render_prediction_page() -> str:
         page_body=body,
         extra_body_html=_render_prediction_page_script(prediction_history),
     )
-
-
-def render_historical_page() -> str:
-    """Render the placeholder historical page."""
-
-    body = """
-    <section class="hero">
-        <p class="eyebrow">Archive</p>
-        <h1>Historical Results</h1>
-        <p class="lede">
-            This page will eventually collect prior scoreboard snapshots, leaderboard movement,
-            and bracket-elimination history over time.
-        </p>
-    </section>
-    <section class="panel placeholder-panel">
-        <h2>Planned Content</h2>
-        <p>
-            The intended direction is a static-friendly archive of daily standings, completed games,
-            and notable swings in each user bracket's maximum possible score.
-        </p>
-    </section>
-    """
-    return _render_page_shell(
-        title="Historical",
-        active_path="/historical",
-        page_body=body,
-    )
-
 
 def render_not_found_page(title: str, message: str) -> str:
     """Render a simple site-styled not-found page."""
@@ -584,10 +587,9 @@ def _render_main_nav_links(active_path: str) -> str:
     """Render the compact desktop nav."""
 
     links = [
+        ("Prediction", "/prediction", active_path == "/prediction"),
         ("Brackets", f"/brackets/{default_bracket_slug()}", active_path.startswith("/brackets")),
         ("Standings", "/standings", active_path == "/standings"),
-        ("Prediction", "/prediction", active_path == "/prediction"),
-        ("Historical", "/historical", active_path == "/historical"),
     ]
     return "".join(
         f'<a class="nav-link{" is-active" if is_active else ""}" href="{escape(href)}">{escape(label)}</a>'
@@ -1233,6 +1235,40 @@ def _render_stat_card(label: str, value: str) -> str:
     """
 
 
+def _render_category_win_split(student_probability: float, staff_probability: float) -> str:
+    """Render the latest student-vs-staff win-probability split."""
+
+    total_probability = student_probability + staff_probability
+    student_share = 50.0
+    if total_probability > 0.0:
+        student_share = (student_probability / total_probability) * 100.0
+
+    return f"""
+    <section class="category-win-split">
+        <div class="category-win-split-copy">
+            <p class="section-kicker">Current category edge</p>
+            <h2>Student Vs Staff Win Probability</h2>
+        </div>
+        <div class="category-win-split-bar" aria-hidden="true">
+            <span class="category-win-split-fill student" style="width: {student_share:.2f}%;"></span>
+            <span class="category-win-split-fill staff" style="width: {100.0 - student_share:.2f}%;"></span>
+        </div>
+        <div class="category-win-split-legend">
+            <div class="category-win-split-value">
+                <span class="category-dot student"></span>
+                <span>Students</span>
+                <strong>{_format_percent(student_probability)}</strong>
+            </div>
+            <div class="category-win-split-value">
+                <span class="category-dot staff"></span>
+                <span>Staff</span>
+                <strong>{_format_percent(staff_probability)}</strong>
+            </div>
+        </div>
+    </section>
+    """
+
+
 def _render_standings_filter_tabs(active_filter: str) -> str:
     """Render the standings category-filter tabs."""
 
@@ -1350,6 +1386,9 @@ def _render_prediction_page_script(prediction_history: TournamentPredictionHisto
         const checkpointLabelByGamesCompleted = Object.fromEntries(
             predictionHistory.checkpoints.map((checkpoint) => [checkpoint.games_completed, checkpoint.label]),
         );
+        const checkpointIndexByGamesCompleted = Object.fromEntries(
+            predictionHistory.checkpoints.map((checkpoint, index) => [checkpoint.games_completed, index]),
+        );
         const chartConfigs = [
             {
                 chartId: "prediction-average-finish-chart",
@@ -1376,6 +1415,28 @@ def _render_prediction_page_script(prediction_history: TournamentPredictionHisto
                 showIntervalBand: false,
             },
         ];
+        const roundGranularityAnchors = [
+            { label: "Initial", gamesCompleted: 0 },
+            { label: "Round 1", gamesCompleted: 32 },
+            { label: "Round 2", gamesCompleted: 48 },
+            { label: "Sweet Sixteen", gamesCompleted: 56 },
+            { label: "Elite Eight", gamesCompleted: 60 },
+            { label: "Final Four", gamesCompleted: 62 },
+            { label: "Championship", gamesCompleted: 63 },
+        ];
+        const dayGranularityAnchors = [
+            { label: "Initial", gamesCompleted: 0 },
+            { label: "Round 1, day 1", gamesCompleted: 16 },
+            { label: "Round 1, day 2", gamesCompleted: 32 },
+            { label: "Round 2, day 1", gamesCompleted: 40 },
+            { label: "Round 2, day 2", gamesCompleted: 48 },
+            { label: "Sweet Sixteen, day 1", gamesCompleted: 52 },
+            { label: "Sweet Sixteen, day 2", gamesCompleted: 56 },
+            { label: "Elite Eight, day 1", gamesCompleted: 58 },
+            { label: "Elite Eight, day 2", gamesCompleted: 60 },
+            { label: "Final Four", gamesCompleted: 62 },
+            { label: "Championship", gamesCompleted: 63 },
+        ];
         const palette = [
             "#0a6a4a",
             "#b85c38",
@@ -1398,9 +1459,12 @@ def _render_prediction_page_script(prediction_history: TournamentPredictionHisto
         };
         const state = {
             scope: "all",
+            granularity: "by_round",
+            smoothness: "all_games",
             sortKey: "winning_percentage",
             descending: true,
         };
+        const currentGamesCompleted = predictionHistory.completed_game_count_max;
         const baseLineWidth = 3;
         const activeLineWidth = 7;
         const baseMarkerSize = 7;
@@ -1436,9 +1500,136 @@ def _render_prediction_page_script(prediction_history: TournamentPredictionHisto
 
         const latestPoint = (series) => series.points[series.points.length - 1];
 
+        const checkedRadioValue = (name, fallbackValue) => {
+            const checkedInput = document.querySelector(`input[name="${name}"]:checked`);
+            if (!(checkedInput instanceof HTMLInputElement)) {
+                return fallbackValue;
+            }
+            return checkedInput.value;
+        };
+
         const visibleUsers = (scope) => predictionHistory.users.filter((series) => (
             scope === "all" || (series.user_categories || []).includes(scope)
         ));
+
+        const numericAxisRange = (lastPosition) => {
+            if (lastPosition <= 0) {
+                return [-0.5, 0.5];
+            }
+            return [-0.2, lastPosition + 0.2];
+        };
+
+        const hasExactAnchor = (anchors, gamesCompleted) => anchors.some((anchor) => (
+            anchor.gamesCompleted === gamesCompleted
+        ));
+
+        const interpolateGranularityPosition = (gamesCompleted, anchors) => {
+            if (!anchors.length || gamesCompleted <= anchors[0].gamesCompleted) {
+                return 0;
+            }
+            for (let index = 0; index < anchors.length - 1; index += 1) {
+                const leftAnchor = anchors[index];
+                const rightAnchor = anchors[index + 1];
+                if (gamesCompleted <= rightAnchor.gamesCompleted) {
+                    const span = rightAnchor.gamesCompleted - leftAnchor.gamesCompleted;
+                    if (span <= 0) {
+                        return index;
+                    }
+                    return index + ((gamesCompleted - leftAnchor.gamesCompleted) / span);
+                }
+            }
+            return anchors.length - 1;
+        };
+
+        const granularityAxis = (granularity) => {
+            if (granularity === "by_game") {
+                const tickvals = predictionHistory.checkpoints.map((_unused, index) => index);
+                return {
+                    granularity,
+                    title: "Games Completed",
+                    anchors: predictionHistory.checkpoints.map((checkpoint, index) => ({
+                        label: checkpoint.label,
+                        gamesCompleted: checkpoint.games_completed,
+                        x: index,
+                    })),
+                    currentX: null,
+                    tickvals,
+                    ticktext: checkpointLabels,
+                    tickangle: -45,
+                    range: numericAxisRange(Math.max(tickvals.length - 1, 0)),
+                    shapes: [],
+                    positionForGamesCompleted: (gamesCompleted) => checkpointIndexByGamesCompleted[gamesCompleted],
+                };
+            }
+
+            const anchors = granularity === "by_day"
+                ? dayGranularityAnchors
+                : roundGranularityAnchors;
+            const ticks = anchors.map((anchor, index) => ({
+                x: index,
+                label: anchor.label,
+            }));
+            const currentX = hasExactAnchor(anchors, currentGamesCompleted)
+                ? null
+                : interpolateGranularityPosition(currentGamesCompleted, anchors);
+            if (currentX !== null) {
+                ticks.push({
+                    x: currentX,
+                    label: "Current",
+                });
+            }
+            ticks.sort((leftTick, rightTick) => leftTick.x - rightTick.x);
+            return {
+                granularity,
+                title: "Tournament Progress",
+                anchors: anchors.map((anchor, index) => ({
+                    label: anchor.label,
+                    gamesCompleted: anchor.gamesCompleted,
+                    x: index,
+                })),
+                currentX,
+                tickvals: ticks.map((tick) => tick.x),
+                ticktext: ticks.map((tick) => tick.label),
+                tickangle: granularity === "by_day" ? -32 : -24,
+                range: numericAxisRange(Math.max(anchors.length - 1, 0)),
+                shapes: currentX === null ? [] : [
+                    {
+                        type: "line",
+                        xref: "x",
+                        yref: "paper",
+                        x0: currentX,
+                        x1: currentX,
+                        y0: 0,
+                        y1: 1,
+                        line: {
+                            color: "rgba(17, 27, 22, 0.24)",
+                            width: 2,
+                            dash: "dot",
+                        },
+                    },
+                ],
+                positionForGamesCompleted: (gamesCompleted) => interpolateGranularityPosition(gamesCompleted, anchors),
+            };
+        };
+
+        const chartPointsForSeries = (series, xAxis, smoothness) => {
+            if (smoothness !== "smooth" || xAxis.granularity === "by_game") {
+                return series.points;
+            }
+
+            const anchoredGamesCompleted = new Set(
+                xAxis.anchors
+                    .filter((anchor) => anchor.gamesCompleted <= currentGamesCompleted)
+                    .map((anchor) => anchor.gamesCompleted),
+            );
+            return series.points.filter((point) => (
+                anchoredGamesCompleted.has(point.games_completed)
+                || (
+                    point.games_completed === currentGamesCompleted
+                    && !anchoredGamesCompleted.has(point.games_completed)
+                )
+            ));
+        };
 
         const metricValue = (point, metric, scope) => {
             if (metric === "average_score") {
@@ -1588,7 +1779,7 @@ def _render_prediction_page_script(prediction_history: TournamentPredictionHisto
             return `rgba(${red}, ${green}, ${blue}, 0.12)`;
         };
 
-        const buildChartTraces = (metric, users, scope, showIntervalBand) => {
+        const buildChartTraces = (config, users, scope, xAxis, smoothness) => {
             const traces = [];
             const traceMap = [];
 
@@ -1598,16 +1789,22 @@ def _render_prediction_page_script(prediction_history: TournamentPredictionHisto
                 const yValues = [];
                 const lowerValues = [];
                 const upperValues = [];
+                const hoverLabels = [];
 
-                for (const point of series.points) {
-                    const value = metricValue(point, metric, scope);
+                for (const point of chartPointsForSeries(series, xAxis, smoothness)) {
+                    const value = metricValue(point, config.metric, scope);
                     if (value === null || value === undefined) {
                         continue;
                     }
-                    xValues.push(checkpointLabelByGamesCompleted[point.games_completed]);
+                    const xValue = xAxis.positionForGamesCompleted(point.games_completed);
+                    if (xValue === undefined || xValue === null) {
+                        continue;
+                    }
+                    xValues.push(xValue);
                     yValues.push(value);
-                    if (showIntervalBand) {
-                        const [intervalLower, intervalUpper] = metricIntervalBounds(point, metric, scope);
+                    hoverLabels.push(checkpointLabelByGamesCompleted[point.games_completed] ?? "Checkpoint");
+                    if (config.showIntervalBand) {
+                        const [intervalLower, intervalUpper] = metricIntervalBounds(point, config.metric, scope);
                         if (intervalLower === null || intervalUpper === null) {
                             continue;
                         }
@@ -1635,11 +1832,12 @@ def _render_prediction_page_script(prediction_history: TournamentPredictionHisto
                         size: baseMarkerSize,
                         color,
                     },
-                    hovertemplate: `<b>${escapeHtml(series.user_name)}</b><br>%{x}<br>${escapeHtml(metric === "winning_percentage" ? "Winning Percentage" : metric === "average_score" ? "Average Points" : "Average Finish")}: %{y:.1f}${metric === "winning_percentage" ? "%" : ""}<extra></extra>`,
+                    customdata: hoverLabels,
+                    hovertemplate: `<b>${escapeHtml(series.user_name)}</b><br>%{customdata}<br>${escapeHtml(config.hoverLabel)}: %{y:.1f}${config.metric === "winning_percentage" ? "%" : ""}<extra></extra>`,
                 });
 
                 let bandIndex = null;
-                if (showIntervalBand && lowerValues.length === xValues.length && upperValues.length === xValues.length) {
+                if (config.showIntervalBand && lowerValues.length === xValues.length && upperValues.length === xValues.length) {
                     bandIndex = traces.length;
                     traces.push({
                         x: xValues.concat([...xValues].reverse()),
@@ -1667,7 +1865,7 @@ def _render_prediction_page_script(prediction_history: TournamentPredictionHisto
             return { traces, traceMap };
         };
 
-        const buildChartLayout = (config, users, scope) => {
+        const buildChartLayout = (config, users, scope, xAxis) => {
             const yAxis = axisConfig(config.metric, users, scope);
             return {
                 height: 520,
@@ -1697,15 +1895,17 @@ def _render_prediction_page_script(prediction_history: TournamentPredictionHisto
                 },
                 xaxis: {
                     title: {
-                        text: "Games Completed",
+                        text: xAxis.title,
                         font: {
                             size: 13,
                         },
                     },
-                    type: "category",
-                    categoryorder: "array",
-                    categoryarray: checkpointLabels,
-                    tickangle: -45,
+                    type: "linear",
+                    tickmode: "array",
+                    tickvals: xAxis.tickvals,
+                    ticktext: xAxis.ticktext,
+                    range: xAxis.range,
+                    tickangle: xAxis.tickangle,
                     automargin: true,
                     showgrid: true,
                     showline: true,
@@ -1735,6 +1935,7 @@ def _render_prediction_page_script(prediction_history: TournamentPredictionHisto
                         color: "#5e665d",
                     },
                 },
+                shapes: xAxis.shapes,
             };
         };
 
@@ -1857,13 +2058,15 @@ def _render_prediction_page_script(prediction_history: TournamentPredictionHisto
             }
 
             const users = visibleUsers(state.scope);
+            const xAxis = granularityAxis(state.granularity);
             const { traces, traceMap } = buildChartTraces(
-                config.metric,
+                config,
                 users,
                 state.scope,
-                config.showIntervalBand,
+                xAxis,
+                state.smoothness,
             );
-            const layout = buildChartLayout(config, users, state.scope);
+            const layout = buildChartLayout(config, users, state.scope, xAxis);
 
             return window.Plotly.react(plotDiv, traces, layout, plotConfig).then(() => {
                 wrapper.__traceMap = traceMap;
@@ -1948,6 +2151,9 @@ def _render_prediction_page_script(prediction_history: TournamentPredictionHisto
         };
 
         const renderPredictionView = () => {
+            state.scope = checkedRadioValue("prediction_scope", state.scope);
+            state.granularity = checkedRadioValue("prediction_granularity", state.granularity);
+            state.smoothness = checkedRadioValue("prediction_smoothness", state.smoothness);
             Promise.all(chartConfigs.map((config) => renderChart(config))).then(() => {
                 renderTable();
             });
@@ -1959,6 +2165,30 @@ def _render_prediction_page_script(prediction_history: TournamentPredictionHisto
                     return;
                 }
                 state.scope = input.value;
+                renderPredictionView();
+            });
+        });
+
+        const granularityInputs = Array.from(document.querySelectorAll('input[name="prediction_granularity"]'));
+
+        granularityInputs.forEach((input) => {
+            input.addEventListener("change", () => {
+                if (!input.checked) {
+                    return;
+                }
+                state.granularity = input.value;
+                renderPredictionView();
+            });
+        });
+
+        const smoothnessInputs = Array.from(document.querySelectorAll('input[name="prediction_smoothness"]'));
+
+        smoothnessInputs.forEach((input) => {
+            input.addEventListener("change", () => {
+                if (!input.checked) {
+                    return;
+                }
+                state.smoothness = input.value;
                 renderPredictionView();
             });
         });
