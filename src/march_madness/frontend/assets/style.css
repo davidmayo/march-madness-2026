@@ -224,6 +224,55 @@ a {
     transform: translateY(-1px);
 }
 
+.prediction-scope-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin: 1.2rem 0 0;
+    padding: 0;
+    border: 0;
+}
+
+.prediction-scope-controls legend {
+    width: 100%;
+    margin-bottom: 0.1rem;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.prediction-scope-option {
+    position: relative;
+}
+
+.prediction-scope-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.prediction-scope-option span {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.72rem 1rem;
+    border: 1px solid rgba(17, 27, 22, 0.08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.66);
+    color: var(--muted);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.prediction-scope-option span:hover,
+.prediction-scope-option input:checked + span {
+    background: linear-gradient(135deg, rgba(10, 106, 74, 0.12), rgba(214, 156, 47, 0.16));
+    color: var(--ink);
+    transform: translateY(-1px);
+}
+
 .bracket-selector {
     display: grid;
     gap: 0.5rem;
@@ -364,6 +413,41 @@ a {
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+}
+
+.table-sort-button {
+    appearance: none;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+}
+
+.table-sort-button::after {
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 0.35rem;
+    border-left: 0.26rem solid transparent;
+    border-right: 0.26rem solid transparent;
+    opacity: 0.45;
+}
+
+.table-sort-button.is-desc::after {
+    border-top: 0.4rem solid currentColor;
+}
+
+.table-sort-button.is-asc::after {
+    border-bottom: 0.4rem solid currentColor;
+}
+
+.table-sort-button.is-active {
+    color: var(--accent-deep);
 }
 
 .empty-state {

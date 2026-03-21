@@ -107,6 +107,9 @@ def test_prediction_and_historical_pages_render() -> None:
     assert "Plotly.newPlot" in prediction_html
     assert "prediction-average-finish-chart" in prediction_html
     assert "data-ci-trace-map" in prediction_html
+    assert "prediction_scope" in prediction_html
+    assert "prediction-history-data" in prediction_html
+    assert "table-sort-button" in prediction_html
     assert "Darren Boyd" in prediction_html
 
     assert historical_response.status_code == 200

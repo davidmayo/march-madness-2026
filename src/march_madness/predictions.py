@@ -91,6 +91,7 @@ class UserPredictionSummary(BaseModel):
     average_finishing_position: float
     winning_percentage: float
     average_category_finishing_position: float | None = None
+    category_winning_percentage: float | None = None
     score_interval: PredictionInterval
     finishing_position_interval: PredictionInterval
     category_finishing_position_interval: PredictionInterval | None = None
@@ -123,7 +124,11 @@ class UserPredictionHistoryPoint(BaseModel):
     average_finishing_position: float
     finishing_position_interval_lower: float
     finishing_position_interval_upper: float
+    average_category_finishing_position: float | None = None
+    category_finishing_position_interval_lower: float | None = None
+    category_finishing_position_interval_upper: float | None = None
     winning_percentage: float
+    category_winning_percentage: float | None = None
     winning_percentage_interval_lower: float
     winning_percentage_interval_upper: float
 
@@ -171,6 +176,7 @@ class _UserSimulationAccumulator:
     finishing_positions: list[int] = field(default_factory=list)
     category_finishing_positions: list[int] = field(default_factory=list)
     wins: int = 0
+    category_wins: int = 0
 
 
 def load_latest_kenpom_ratings(
@@ -316,6 +322,8 @@ def build_prediction_report(
             category_ranks = _competition_ranks(category_scores)
             for slug, rank in category_ranks.items():
                 accumulators[slug].category_finishing_positions.append(rank)
+                if rank == 1:
+                    accumulators[slug].category_wins += 1
 
     user_summaries = [
         _build_user_prediction_summary(
@@ -449,8 +457,12 @@ def _build_user_prediction_summary(
 
     category_interval: PredictionInterval | None = None
     average_category_finishing_position: float | None = None
+    category_winning_percentage: float | None = None
     if accumulator.category_finishing_positions:
         average_category_finishing_position = fmean(accumulator.category_finishing_positions)
+        category_winning_percentage = (
+            accumulator.category_wins / len(accumulator.category_finishing_positions)
+        ) * 100.0
         category_interval = PredictionInterval(
             lower=float(_nearest_rank_percentile(accumulator.category_finishing_positions, 0.10)),
             upper=float(_nearest_rank_percentile(accumulator.category_finishing_positions, 0.90)),
@@ -465,6 +477,7 @@ def _build_user_prediction_summary(
         average_finishing_position=fmean(accumulator.finishing_positions),
         winning_percentage=(accumulator.wins / len(accumulator.finishing_positions)) * 100.0,
         average_category_finishing_position=average_category_finishing_position,
+        category_winning_percentage=category_winning_percentage,
         score_interval=PredictionInterval(
             lower=float(_nearest_rank_percentile(accumulator.scores, 0.10)),
             upper=float(_nearest_rank_percentile(accumulator.scores, 0.90)),
@@ -552,7 +565,19 @@ def _build_user_prediction_history_point(
         average_finishing_position=user_summary.average_finishing_position,
         finishing_position_interval_lower=user_summary.finishing_position_interval.lower,
         finishing_position_interval_upper=user_summary.finishing_position_interval.upper,
+        average_category_finishing_position=user_summary.average_category_finishing_position,
+        category_finishing_position_interval_lower=(
+            user_summary.category_finishing_position_interval.lower
+            if user_summary.category_finishing_position_interval is not None
+            else None
+        ),
+        category_finishing_position_interval_upper=(
+            user_summary.category_finishing_position_interval.upper
+            if user_summary.category_finishing_position_interval is not None
+            else None
+        ),
         winning_percentage=user_summary.winning_percentage,
+        category_winning_percentage=user_summary.category_winning_percentage,
         winning_percentage_interval_lower=winning_interval.lower,
         winning_percentage_interval_upper=winning_interval.upper,
     )

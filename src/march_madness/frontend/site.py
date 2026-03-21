@@ -313,8 +313,8 @@ def render_prediction_page() -> str:
 
     prediction_history = load_prediction_history_data()
     checkpoints = prediction_history.checkpoints
-    latest_series = [series for series in prediction_history.users if series.points]
-    latest_series.sort(
+    chart_series = [series for series in prediction_history.users if series.points]
+    chart_series.sort(
         key=lambda series: (
             series.points[-1].average_finishing_position,
             -series.points[-1].winning_percentage,
@@ -322,9 +322,9 @@ def render_prediction_page() -> str:
         )
     )
 
-    current_leader = latest_series[0] if latest_series else None
+    current_leader = chart_series[0] if chart_series else None
     win_probability_leader = max(
-        latest_series,
+        chart_series,
         key=lambda series: series.points[-1].winning_percentage,
         default=None,
     )
@@ -361,23 +361,23 @@ def render_prediction_page() -> str:
     average_finish_chart = _render_prediction_history_chart(
         chart_id="prediction-average-finish-chart",
         checkpoints=checkpoints,
-        series_list=latest_series,
+        series_list=chart_series,
         metric_name="average_finishing_position",
         y_axis_label="Average Finish",
         hover_label="Average Finish",
         y_min=1.0,
-        y_max=float(max(len(latest_series), 1)),
-        y_tick_values=_average_finish_tick_values(len(latest_series)),
+        y_max=float(max(len(chart_series), 1)),
+        y_tick_values=_average_finish_tick_values(len(chart_series)),
         invert_y_axis=True,
         include_plotlyjs=True,
     )
     average_score_y_min, average_score_y_max, average_score_ticks = _average_score_axis(
-        latest_series,
+        chart_series,
     )
     average_score_chart = _render_prediction_history_chart(
         chart_id="prediction-average-points-chart",
         checkpoints=checkpoints,
-        series_list=latest_series,
+        series_list=chart_series,
         metric_name="average_score",
         y_axis_label="Average Points",
         hover_label="Average Points",
@@ -386,12 +386,12 @@ def render_prediction_page() -> str:
         y_tick_values=average_score_ticks,
     )
     winning_percentage_y_min, winning_percentage_y_max, winning_percentage_ticks = _winning_percentage_axis(
-        latest_series,
+        chart_series,
     )
     winning_percentage_chart = _render_prediction_history_chart(
         chart_id="prediction-winning-percentage-chart",
         checkpoints=checkpoints,
-        series_list=latest_series,
+        series_list=chart_series,
         metric_name="winning_percentage",
         y_axis_label="Winning Percentage",
         hover_label="Winning Percentage",
@@ -400,7 +400,15 @@ def render_prediction_page() -> str:
         y_tick_values=winning_percentage_ticks,
         show_interval_band=False,
     )
-    rows_html = "".join(_render_prediction_snapshot_row(series) for series in latest_series)
+    default_table_series = sorted(
+        chart_series,
+        key=lambda series: (
+            -series.points[-1].winning_percentage,
+            series.points[-1].average_finishing_position,
+            series.user_name,
+        ),
+    )
+    rows_html = "".join(_render_prediction_snapshot_row(series) for series in default_table_series)
     body = f"""
     <section class="hero">
         <p class="eyebrow">Monte Carlo history</p>
@@ -409,6 +417,21 @@ def render_prediction_page() -> str:
             {prediction_history.simulation_count:,} KenPom-driven simulations were rerun after every completed game,
             starting from the untouched bracket and continuing through the latest scoreboard snapshot.
         </p>
+        <fieldset class="prediction-scope-controls" aria-label="Prediction scope">
+            <legend>View Scope</legend>
+            <label class="prediction-scope-option">
+                <input type="radio" name="prediction_scope" value="all" checked>
+                <span>Everyone</span>
+            </label>
+            <label class="prediction-scope-option">
+                <input type="radio" name="prediction_scope" value="student">
+                <span>Students</span>
+            </label>
+            <label class="prediction-scope-option">
+                <input type="radio" name="prediction_scope" value="staff">
+                <span>Staff</span>
+            </label>
+        </fieldset>
         <div class="stat-grid">{summary_cards}</div>
     </section>
     <section class="panel">
@@ -453,14 +476,14 @@ def render_prediction_page() -> str:
             <table class="standings-table prediction-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Avg Points</th>
-                        <th>Avg Finish</th>
-                        <th>Winning %</th>
+                        <th><button class="table-sort-button" type="button" data-sort-key="user_name" data-default-direction="asc">Name</button></th>
+                        <th><button class="table-sort-button" type="button" data-sort-key="category" data-default-direction="asc">Category</button></th>
+                        <th><button class="table-sort-button" type="button" data-sort-key="average_score" data-default-direction="desc">Avg Points</button></th>
+                        <th><button class="table-sort-button" type="button" data-sort-key="average_finish" data-default-direction="asc">Avg Finish</button></th>
+                        <th><button class="table-sort-button is-active is-desc" type="button" data-sort-key="winning_percentage" data-default-direction="desc">Winning %</button></th>
                     </tr>
                 </thead>
-                <tbody>{rows_html}</tbody>
+                <tbody id="prediction-snapshot-body">{rows_html}</tbody>
             </table>
         </div>
     </section>
@@ -469,7 +492,7 @@ def render_prediction_page() -> str:
         title="Prediction",
         active_path="/prediction",
         page_body=body,
-        extra_body_html=_render_prediction_plot_hover_script(),
+        extra_body_html=_render_prediction_page_script(prediction_history),
     )
 
 
@@ -1067,8 +1090,6 @@ def _prediction_series_color(index: int) -> str:
 def _prediction_series_dash(series: UserPredictionHistorySeries) -> str:
     """Return the Plotly dash pattern for one user's chart line."""
 
-    if "staff" in series.user_categories:
-        return "dash"
     return "solid"
 
 
@@ -1299,23 +1320,426 @@ def _format_percent(value: float | None) -> str:
     return f"{value:.1f}%"
 
 
-def _render_prediction_plot_hover_script() -> str:
-    """Render the script that toggles interval bands on Plotly hover."""
+def _render_prediction_page_script(prediction_history: TournamentPredictionHistory) -> str:
+    """Render the interactive script for prediction filters, charts, and sorting."""
 
-    return """
+    prediction_history_json = json.dumps(
+        prediction_history.model_dump(mode="json"),
+    ).replace("</", "<\\/")
+    return (
+        '<script id="prediction-history-data" type="application/json">'
+        + prediction_history_json
+        + "</script>"
+        + """
     <script>
     (() => {
-        const wrappers = document.querySelectorAll(".prediction-plot[data-ci-trace-map]");
-        if (!wrappers.length || !window.Plotly) {
+        const dataElement = document.getElementById("prediction-history-data");
+        if (!dataElement || !window.Plotly) {
             return;
         }
 
+        const predictionHistory = JSON.parse(dataElement.textContent);
+        const scopeInputs = Array.from(document.querySelectorAll('input[name="prediction_scope"]'));
+        const sortButtons = Array.from(document.querySelectorAll(".table-sort-button"));
+        const snapshotBody = document.getElementById("prediction-snapshot-body");
+        if (!snapshotBody) {
+            return;
+        }
+
+        const checkpointLabels = predictionHistory.checkpoints.map((checkpoint) => checkpoint.label);
+        const checkpointLabelByGamesCompleted = Object.fromEntries(
+            predictionHistory.checkpoints.map((checkpoint) => [checkpoint.games_completed, checkpoint.label]),
+        );
+        const chartConfigs = [
+            {
+                chartId: "prediction-average-finish-chart",
+                metric: "average_finish",
+                yAxisLabel: "Average Finish",
+                hoverLabel: "Average Finish",
+                invertYAxis: true,
+                showIntervalBand: true,
+            },
+            {
+                chartId: "prediction-average-points-chart",
+                metric: "average_score",
+                yAxisLabel: "Average Points",
+                hoverLabel: "Average Points",
+                invertYAxis: false,
+                showIntervalBand: true,
+            },
+            {
+                chartId: "prediction-winning-percentage-chart",
+                metric: "winning_percentage",
+                yAxisLabel: "Winning Percentage",
+                hoverLabel: "Winning Percentage",
+                invertYAxis: false,
+                showIntervalBand: false,
+            },
+        ];
+        const palette = [
+            "#0a6a4a",
+            "#b85c38",
+            "#28536b",
+            "#d69c2f",
+            "#8b3d3d",
+            "#5a7d2b",
+            "#6b4e9b",
+            "#0e7490",
+            "#c2410c",
+            "#4f46e5",
+            "#047857",
+            "#9f1239",
+            "#7c2d12",
+            "#1d4ed8",
+        ];
+        const plotConfig = {
+            displayModeBar: false,
+            responsive: true,
+        };
+        const state = {
+            scope: "all",
+            sortKey: "winning_percentage",
+            descending: true,
+        };
         const baseLineWidth = 3;
         const activeLineWidth = 7;
         const baseMarkerSize = 7;
         const activeMarkerSize = 10;
 
-        const applyVisibility = (plotDiv, traceMap, activeLineIndex) => {
+        const escapeHtml = (value) => String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#39;");
+
+        const formatScore = (value) => {
+            if (value === null || value === undefined || Number.isNaN(value)) {
+                return "—";
+            }
+            return Number.isInteger(value) ? String(value) : value.toFixed(1);
+        };
+
+        const formatPercent = (value) => {
+            if (value === null || value === undefined || Number.isNaN(value)) {
+                return "—";
+            }
+            return `${value.toFixed(1)}%`;
+        };
+
+        const titleCase = (value) => {
+            if (!value) {
+                return "";
+            }
+            return value.charAt(0).toUpperCase() + value.slice(1);
+        };
+
+        const latestPoint = (series) => series.points[series.points.length - 1];
+
+        const visibleUsers = (scope) => predictionHistory.users.filter((series) => (
+            scope === "all" || (series.user_categories || []).includes(scope)
+        ));
+
+        const metricValue = (point, metric, scope) => {
+            if (metric === "average_score") {
+                return point.average_score;
+            }
+            if (metric === "average_finish") {
+                return scope === "all"
+                    ? point.average_finishing_position
+                    : point.average_category_finishing_position;
+            }
+            if (metric === "winning_percentage") {
+                return scope === "all"
+                    ? point.winning_percentage
+                    : point.category_winning_percentage;
+            }
+            return null;
+        };
+
+        const metricIntervalBounds = (point, metric, scope) => {
+            if (metric === "average_score") {
+                return [point.score_interval_lower, point.score_interval_upper];
+            }
+            if (metric === "average_finish") {
+                if (scope === "all") {
+                    return [
+                        point.finishing_position_interval_lower,
+                        point.finishing_position_interval_upper,
+                    ];
+                }
+                return [
+                    point.category_finishing_position_interval_lower,
+                    point.category_finishing_position_interval_upper,
+                ];
+            }
+            return [null, null];
+        };
+
+        const nextNiceAxisStop = (value) => {
+            if (value <= 1) {
+                return 1;
+            }
+            const magnitude = 10 ** Math.floor(Math.log10(value));
+            const normalized = value / magnitude;
+            for (const niceFactor of [1, 2, 2.5, 3, 4, 5, 6, 8, 10]) {
+                if (normalized <= niceFactor) {
+                    return niceFactor * magnitude;
+                }
+            }
+            return 10 * magnitude;
+        };
+
+        const averageFinishTicks = (userCount) => {
+            const maxFinish = Math.max(userCount, 1);
+            if (maxFinish <= 5) {
+                return Array.from({ length: maxFinish }, (_unused, index) => index + 1);
+            }
+
+            const ticks = [1];
+            const step = Math.max(1, Math.ceil((maxFinish - 1) / 4));
+            let current = 1 + step;
+            while (current < maxFinish) {
+                ticks.push(current);
+                current += step;
+            }
+            ticks.push(maxFinish);
+            return ticks;
+        };
+
+        const averageScoreAxis = (users) => {
+            const values = users.flatMap((series) => (
+                series.points.flatMap((point) => [
+                    point.score_interval_lower,
+                    point.score_interval_upper,
+                ])
+            ));
+            if (!values.length) {
+                return { min: 0, max: 10, ticks: [0, 5, 10] };
+            }
+
+            const rawMinimum = Math.min(...values);
+            const rawMaximum = Math.max(...values);
+            const padding = rawMinimum === rawMaximum
+                ? Math.max(4, rawMaximum * 0.1)
+                : Math.max(4, (rawMaximum - rawMinimum) * 0.15);
+            const minimum = Math.max(0, Math.floor((rawMinimum - padding) / 5) * 5);
+            let maximum = Math.ceil((rawMaximum + padding) / 5) * 5;
+            if (minimum === maximum) {
+                maximum = minimum + 5;
+            }
+            const span = maximum - minimum;
+            const step = Math.max(5, Math.ceil((span / 4) / 5) * 5);
+            const ticks = [];
+            for (let current = minimum; current < maximum; current += step) {
+                ticks.push(current);
+            }
+            ticks.push(maximum);
+            return { min: minimum, max: maximum, ticks };
+        };
+
+        const winningPercentageAxis = (users, scope) => {
+            const values = users.flatMap((series) => (
+                series.points
+                    .map((point) => metricValue(point, "winning_percentage", scope))
+                    .filter((value) => value !== null && value !== undefined)
+            ));
+            if (!values.length) {
+                return { min: 0, max: 10, ticks: [0, 2.5, 5, 7.5, 10] };
+            }
+
+            const rawMaximum = Math.max(...values);
+            const padding = Math.max(1, rawMaximum * 0.12);
+            const minimum = 0;
+            let maximum = nextNiceAxisStop(rawMaximum + padding);
+            if (maximum === minimum) {
+                maximum = 5;
+            }
+            const span = maximum - minimum;
+            const step = nextNiceAxisStop(span / 4);
+            const ticks = [];
+            for (let current = minimum; current < maximum; current += step) {
+                ticks.push(current);
+            }
+            ticks.push(maximum);
+            return { min: minimum, max: maximum, ticks };
+        };
+
+        const axisConfig = (metric, users, scope) => {
+            if (metric === "average_finish") {
+                return {
+                    min: 1,
+                    max: Math.max(users.length, 1),
+                    ticks: averageFinishTicks(users.length),
+                };
+            }
+            if (metric === "average_score") {
+                return averageScoreAxis(users);
+            }
+            return winningPercentageAxis(users, scope);
+        };
+
+        const seriesColor = (index) => palette[index % palette.length];
+
+        const seriesFillColor = (hexColor) => {
+            const red = parseInt(hexColor.slice(1, 3), 16);
+            const green = parseInt(hexColor.slice(3, 5), 16);
+            const blue = parseInt(hexColor.slice(5, 7), 16);
+            return `rgba(${red}, ${green}, ${blue}, 0.12)`;
+        };
+
+        const buildChartTraces = (metric, users, scope, showIntervalBand) => {
+            const traces = [];
+            const traceMap = [];
+
+            users.forEach((series, index) => {
+                const color = seriesColor(index);
+                const xValues = [];
+                const yValues = [];
+                const lowerValues = [];
+                const upperValues = [];
+
+                for (const point of series.points) {
+                    const value = metricValue(point, metric, scope);
+                    if (value === null || value === undefined) {
+                        continue;
+                    }
+                    xValues.push(checkpointLabelByGamesCompleted[point.games_completed]);
+                    yValues.push(value);
+                    if (showIntervalBand) {
+                        const [intervalLower, intervalUpper] = metricIntervalBounds(point, metric, scope);
+                        if (intervalLower === null || intervalUpper === null) {
+                            continue;
+                        }
+                        lowerValues.push(intervalLower);
+                        upperValues.push(intervalUpper);
+                    }
+                }
+
+                if (!xValues.length) {
+                    return;
+                }
+
+                const lineIndex = traces.length;
+                traces.push({
+                    x: xValues,
+                    y: yValues,
+                    name: series.user_name,
+                    mode: "lines+markers",
+                    line: {
+                        color,
+                        width: baseLineWidth,
+                        dash: "solid",
+                    },
+                    marker: {
+                        size: baseMarkerSize,
+                        color,
+                    },
+                    hovertemplate: `<b>${escapeHtml(series.user_name)}</b><br>%{x}<br>${escapeHtml(metric === "winning_percentage" ? "Winning Percentage" : metric === "average_score" ? "Average Points" : "Average Finish")}: %{y:.1f}${metric === "winning_percentage" ? "%" : ""}<extra></extra>`,
+                });
+
+                let bandIndex = null;
+                if (showIntervalBand && lowerValues.length === xValues.length && upperValues.length === xValues.length) {
+                    bandIndex = traces.length;
+                    traces.push({
+                        x: xValues.concat([...xValues].reverse()),
+                        y: upperValues.concat([...lowerValues].reverse()),
+                        name: `${series.user_name} 80% interval`,
+                        mode: "lines",
+                        line: {
+                            color: "rgba(0, 0, 0, 0)",
+                            width: 0,
+                        },
+                        fill: "toself",
+                        fillcolor: seriesFillColor(color),
+                        hoverinfo: "skip",
+                        showlegend: false,
+                        visible: false,
+                    });
+                }
+
+                traceMap.push({
+                    line: lineIndex,
+                    band: bandIndex,
+                });
+            });
+
+            return { traces, traceMap };
+        };
+
+        const buildChartLayout = (config, users, scope) => {
+            const yAxis = axisConfig(config.metric, users, scope);
+            return {
+                height: 520,
+                margin: {
+                    l: 74,
+                    r: 24,
+                    t: 24,
+                    b: 150,
+                },
+                paper_bgcolor: "rgba(0, 0, 0, 0)",
+                plot_bgcolor: "rgba(255, 252, 247, 0.78)",
+                hovermode: "closest",
+                showlegend: true,
+                legend: {
+                    orientation: "h",
+                    x: 0,
+                    xanchor: "left",
+                    y: -0.34,
+                    yanchor: "top",
+                    font: {
+                        size: 10,
+                    },
+                },
+                font: {
+                    size: 13,
+                    color: "#111b16",
+                },
+                xaxis: {
+                    title: {
+                        text: "Games Completed",
+                        font: {
+                            size: 13,
+                        },
+                    },
+                    type: "category",
+                    categoryorder: "array",
+                    categoryarray: checkpointLabels,
+                    tickangle: -45,
+                    automargin: true,
+                    showgrid: true,
+                    showline: true,
+                    gridcolor: "rgba(17, 27, 22, 0.08)",
+                    linecolor: "rgba(17, 27, 22, 0.2)",
+                    tickfont: {
+                        size: 10,
+                        color: "#5e665d",
+                    },
+                },
+                yaxis: {
+                    title: {
+                        text: config.yAxisLabel,
+                        font: {
+                            size: 13,
+                        },
+                    },
+                    range: config.invertYAxis ? [yAxis.max, yAxis.min] : [yAxis.min, yAxis.max],
+                    tickvals: yAxis.ticks,
+                    showgrid: true,
+                    showline: true,
+                    gridcolor: "rgba(17, 27, 22, 0.08)",
+                    linecolor: "rgba(17, 27, 22, 0.2)",
+                    zeroline: false,
+                    tickfont: {
+                        size: 11,
+                        color: "#5e665d",
+                    },
+                },
+            };
+        };
+
+        const applyHighlight = (wrapper, plotDiv, activeLineIndex) => {
+            const traceMap = wrapper.__traceMap || [];
             const bandTraceIndexes = traceMap
                 .filter((item) => item.band !== null)
                 .map((item) => item.band);
@@ -1327,23 +1751,22 @@ def _render_prediction_plot_hover_script() -> str:
             }
 
             const lineTraceIndexes = traceMap.map((item) => item.line);
-            const lineWidths = traceMap.map((item) => (
-                item.line === activeLineIndex ? activeLineWidth : baseLineWidth
-            ));
-            const markerSizes = traceMap.map((item) => (
-                item.line === activeLineIndex ? activeMarkerSize : baseMarkerSize
-            ));
             window.Plotly.restyle(
                 plotDiv,
                 {
-                    "line.width": lineWidths,
-                    "marker.size": markerSizes,
+                    "line.width": traceMap.map((item) => (
+                        item.line === activeLineIndex ? activeLineWidth : baseLineWidth
+                    )),
+                    "marker.size": traceMap.map((item) => (
+                        item.line === activeLineIndex ? activeMarkerSize : baseMarkerSize
+                    )),
                 },
                 lineTraceIndexes,
             );
         };
 
-        const clearVisibility = (plotDiv, traceMap) => {
+        const clearHighlight = (wrapper, plotDiv) => {
+            const traceMap = wrapper.__traceMap || [];
             const bandTraceIndexes = traceMap
                 .filter((item) => item.band !== null)
                 .map((item) => item.band);
@@ -1366,65 +1789,197 @@ def _render_prediction_plot_hover_script() -> str:
             );
         };
 
-        for (const wrapper of wrappers) {
-            const plotDiv = wrapper.querySelector(".plotly-graph-div");
-            if (!plotDiv) {
-                continue;
+        const refreshActiveHighlight = (wrapper, plotDiv) => {
+            const activeLineIndex = wrapper.__activeLegendLineIndex ?? wrapper.__activeHoverLineIndex;
+            if (activeLineIndex === null || activeLineIndex === undefined) {
+                clearHighlight(wrapper, plotDiv);
+                return;
             }
+            applyHighlight(wrapper, plotDiv, activeLineIndex);
+        };
 
-            const traceMap = JSON.parse(wrapper.dataset.ciTraceMap || "[]");
-            if (!traceMap.length) {
-                continue;
-            }
-
-            let activeLegendLineIndex = null;
-            let activeHoverLineIndex = null;
-
-            const refreshActiveBand = () => {
-                const activeLineIndex = activeLegendLineIndex ?? activeHoverLineIndex;
-                if (activeLineIndex === null) {
-                    clearVisibility(plotDiv, traceMap);
+        const bindLegendHover = (wrapper, plotDiv) => {
+            const traceMap = wrapper.__traceMap || [];
+            const legendItems = plotDiv.querySelectorAll(".legend .traces");
+            legendItems.forEach((legendItem, index) => {
+                if (legendItem.dataset.predictionLegendBound === "true") {
                     return;
                 }
-                applyVisibility(plotDiv, traceMap, activeLineIndex);
-            };
-
-            const bindLegendHover = () => {
-                const legendItems = plotDiv.querySelectorAll(".legend .traces");
-                legendItems.forEach((legendItem, index) => {
-                    if (legendItem.dataset.ciBound === "true") {
-                        return;
-                    }
-                    legendItem.dataset.ciBound = "true";
-                    const lineIndex = traceMap[index]?.line;
-                    if (lineIndex === undefined) {
-                        return;
-                    }
-                    legendItem.addEventListener("mouseenter", () => {
-                        activeLegendLineIndex = lineIndex;
-                        refreshActiveBand();
-                    });
-                    legendItem.addEventListener("mouseleave", () => {
-                        activeLegendLineIndex = null;
-                        refreshActiveBand();
-                    });
+                legendItem.dataset.predictionLegendBound = "true";
+                const lineIndex = traceMap[index]?.line;
+                if (lineIndex === undefined) {
+                    return;
+                }
+                legendItem.addEventListener("mouseenter", () => {
+                    wrapper.__activeLegendLineIndex = lineIndex;
+                    refreshActiveHighlight(wrapper, plotDiv);
                 });
-            };
+                legendItem.addEventListener("mouseleave", () => {
+                    wrapper.__activeLegendLineIndex = null;
+                    refreshActiveHighlight(wrapper, plotDiv);
+                });
+            });
+        };
+
+        const bindChartInteractions = (wrapper, plotDiv) => {
+            if (wrapper.dataset.predictionInteractionsBound === "true") {
+                bindLegendHover(wrapper, plotDiv);
+                return;
+            }
+
+            wrapper.dataset.predictionInteractionsBound = "true";
+            wrapper.__activeLegendLineIndex = null;
+            wrapper.__activeHoverLineIndex = null;
 
             plotDiv.on("plotly_hover", (eventData) => {
                 if (!eventData || !eventData.points || !eventData.points.length) {
                     return;
                 }
-                activeHoverLineIndex = eventData.points[0].curveNumber;
-                refreshActiveBand();
+                wrapper.__activeHoverLineIndex = eventData.points[0].curveNumber;
+                refreshActiveHighlight(wrapper, plotDiv);
             });
             plotDiv.on("plotly_unhover", () => {
-                activeHoverLineIndex = null;
-                refreshActiveBand();
+                wrapper.__activeHoverLineIndex = null;
+                refreshActiveHighlight(wrapper, plotDiv);
             });
-            plotDiv.on("plotly_afterplot", bindLegendHover);
-            bindLegendHover();
-        }
+            plotDiv.on("plotly_afterplot", () => bindLegendHover(wrapper, plotDiv));
+            bindLegendHover(wrapper, plotDiv);
+        };
+
+        const renderChart = (config) => {
+            const plotDiv = document.getElementById(config.chartId);
+            if (!plotDiv) {
+                return Promise.resolve();
+            }
+            const wrapper = plotDiv.closest(".prediction-plot");
+            if (!wrapper) {
+                return Promise.resolve();
+            }
+
+            const users = visibleUsers(state.scope);
+            const { traces, traceMap } = buildChartTraces(
+                config.metric,
+                users,
+                state.scope,
+                config.showIntervalBand,
+            );
+            const layout = buildChartLayout(config, users, state.scope);
+
+            return window.Plotly.react(plotDiv, traces, layout, plotConfig).then(() => {
+                wrapper.__traceMap = traceMap;
+                wrapper.__activeLegendLineIndex = null;
+                wrapper.__activeHoverLineIndex = null;
+                bindChartInteractions(wrapper, plotDiv);
+                clearHighlight(wrapper, plotDiv);
+            });
+        };
+
+        const sortValue = (series, sortKey, scope) => {
+            const point = latestPoint(series);
+            if (sortKey === "user_name") {
+                return series.user_name.toLowerCase();
+            }
+            if (sortKey === "category") {
+                return (series.user_categories || []).join(",").toLowerCase();
+            }
+            if (sortKey === "average_score") {
+                return point.average_score;
+            }
+            if (sortKey === "average_finish") {
+                return metricValue(point, "average_finish", scope) ?? Number.POSITIVE_INFINITY;
+            }
+            if (sortKey === "winning_percentage") {
+                return metricValue(point, "winning_percentage", scope) ?? Number.NEGATIVE_INFINITY;
+            }
+            return "";
+        };
+
+        const compareValues = (leftValue, rightValue, descending) => {
+            if (typeof leftValue === "string" || typeof rightValue === "string") {
+                const comparison = String(leftValue).localeCompare(String(rightValue));
+                return descending ? -comparison : comparison;
+            }
+            const difference = Number(leftValue) - Number(rightValue);
+            return descending ? -difference : difference;
+        };
+
+        const renderTableRow = (series, scope) => {
+            const point = latestPoint(series);
+            const categoryHtml = (series.user_categories || []).map((category) => (
+                `<span class="category-badge table-badge">${escapeHtml(titleCase(category))}</span>`
+            )).join("") || "—";
+            return `
+                <tr>
+                    <td>
+                        <a class="standings-link" href="/brackets/${encodeURIComponent(series.slug)}">${escapeHtml(series.user_name)}</a>
+                    </td>
+                    <td>${categoryHtml}</td>
+                    <td>${formatScore(point.average_score)}</td>
+                    <td>${formatScore(metricValue(point, "average_finish", scope))}</td>
+                    <td>${formatPercent(metricValue(point, "winning_percentage", scope))}</td>
+                </tr>
+            `;
+        };
+
+        const updateSortButtons = () => {
+            sortButtons.forEach((button) => {
+                const isActive = button.dataset.sortKey === state.sortKey;
+                button.classList.toggle("is-active", isActive);
+                button.classList.toggle("is-desc", isActive && state.descending);
+                button.classList.toggle("is-asc", isActive && !state.descending);
+            });
+        };
+
+        const renderTable = () => {
+            const users = visibleUsers(state.scope).slice();
+            users.sort((leftSeries, rightSeries) => {
+                const comparison = compareValues(
+                    sortValue(leftSeries, state.sortKey, state.scope),
+                    sortValue(rightSeries, state.sortKey, state.scope),
+                    state.descending,
+                );
+                if (comparison !== 0) {
+                    return comparison;
+                }
+                return leftSeries.user_name.localeCompare(rightSeries.user_name);
+            });
+            snapshotBody.innerHTML = users.map((series) => renderTableRow(series, state.scope)).join("");
+            updateSortButtons();
+        };
+
+        const renderPredictionView = () => {
+            Promise.all(chartConfigs.map((config) => renderChart(config))).then(() => {
+                renderTable();
+            });
+        };
+
+        scopeInputs.forEach((input) => {
+            input.addEventListener("change", () => {
+                if (!input.checked) {
+                    return;
+                }
+                state.scope = input.value;
+                renderPredictionView();
+            });
+        });
+
+        sortButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const nextSortKey = button.dataset.sortKey;
+                const defaultDescending = button.dataset.defaultDirection === "desc";
+                if (state.sortKey === nextSortKey) {
+                    state.descending = !state.descending;
+                } else {
+                    state.sortKey = nextSortKey;
+                    state.descending = defaultDescending;
+                }
+                renderTable();
+            });
+        });
+
+        updateSortButtons();
+        renderPredictionView();
     })();
     </script>
     """
+    )

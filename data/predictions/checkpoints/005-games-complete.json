@@ -24,6 +24,7 @@
             "average_finishing_position": 3.474,
             "winning_percentage": 13.200000000000001,
             "average_category_finishing_position": 2.296,
+            "category_winning_percentage": 32.1,
             "score_interval": {
                 "lower": 63.0,
                 "upper": 132.0
@@ -48,6 +49,7 @@
             "average_finishing_position": 3.928,
             "winning_percentage": 28.299999999999997,
             "average_category_finishing_position": 1.667,
+            "category_winning_percentage": 58.699999999999996,
             "score_interval": {
                 "lower": 62.0,
                 "upper": 135.0
@@ -72,6 +74,7 @@
             "average_finishing_position": 4.154,
             "winning_percentage": 7.8,
             "average_category_finishing_position": 2.794,
+            "category_winning_percentage": 16.2,
             "score_interval": {
                 "lower": 61.0,
                 "upper": 130.0
@@ -96,6 +99,7 @@
             "average_finishing_position": 4.467,
             "winning_percentage": 5.0,
             "average_category_finishing_position": 3.07,
+            "category_winning_percentage": 11.5,
             "score_interval": {
                 "lower": 61.0,
                 "upper": 129.0
@@ -120,6 +124,7 @@
             "average_finishing_position": 5.158,
             "winning_percentage": 13.200000000000001,
             "average_category_finishing_position": 2.384,
+            "category_winning_percentage": 18.099999999999998,
             "score_interval": {
                 "lower": 57.0,
                 "upper": 126.0
@@ -144,6 +149,7 @@
             "average_finishing_position": 5.205,
             "winning_percentage": 10.8,
             "average_category_finishing_position": 3.546,
+            "category_winning_percentage": 22.400000000000002,
             "score_interval": {
                 "lower": 58.0,
                 "upper": 128.0
@@ -168,6 +174,7 @@
             "average_finishing_position": 6.996,
             "winning_percentage": 9.6,
             "average_category_finishing_position": 3.189,
+            "category_winning_percentage": 17.8,
             "score_interval": {
                 "lower": 52.0,
                 "upper": 94.0
@@ -192,6 +199,7 @@
             "average_finishing_position": 8.526,
             "winning_percentage": 2.3,
             "average_category_finishing_position": 5.308,
+            "category_winning_percentage": 4.2,
             "score_interval": {
                 "lower": 48.0,
                 "upper": 83.0
@@ -216,6 +224,7 @@
             "average_finishing_position": 8.73,
             "winning_percentage": 7.8,
             "average_category_finishing_position": 5.253,
+            "category_winning_percentage": 13.200000000000001,
             "score_interval": {
                 "lower": 46.0,
                 "upper": 88.0
@@ -240,6 +249,7 @@
             "average_finishing_position": 9.919,
             "winning_percentage": 1.4000000000000001,
             "average_category_finishing_position": 5.984,
+            "category_winning_percentage": 5.1,
             "score_interval": {
                 "lower": 44.0,
                 "upper": 77.0
@@ -264,6 +274,7 @@
             "average_finishing_position": 10.11,
             "winning_percentage": 0.0,
             "average_category_finishing_position": 4.307,
+            "category_winning_percentage": 0.6,
             "score_interval": {
                 "lower": 40.0,
                 "upper": 77.0
@@ -288,6 +299,7 @@
             "average_finishing_position": 10.235,
             "winning_percentage": 1.0999999999999999,
             "average_category_finishing_position": 4.527,
+            "category_winning_percentage": 1.7000000000000002,
             "score_interval": {
                 "lower": 43.0,
                 "upper": 69.0
@@ -312,6 +324,7 @@
             "average_finishing_position": 10.645,
             "winning_percentage": 4.2,
             "average_category_finishing_position": 4.738,
+            "category_winning_percentage": 5.800000000000001,
             "score_interval": {
                 "lower": 42.0,
                 "upper": 69.0
@@ -336,6 +349,7 @@
             "average_finishing_position": 11.959,
             "winning_percentage": 0.8,
             "average_category_finishing_position": 7.077,
+            "category_winning_percentage": 1.7999999999999998,
             "score_interval": {
                 "lower": 38.0,
                 "upper": 60.0

@@ -74,8 +74,10 @@ def test_build_prediction_report_summarizes_all_users() -> None:
 
         user_category = user.user_categories[0]
         assert user.average_category_finishing_position is not None
+        assert user.category_winning_percentage is not None
         assert user.category_finishing_position_interval is not None
         assert 1.0 <= user.average_category_finishing_position <= category_sizes[user_category]
+        assert 0.0 <= user.category_winning_percentage <= 100.0
         assert (
             user.category_finishing_position_interval.lower
             <= user.category_finishing_position_interval.upper
@@ -107,6 +109,12 @@ def test_build_prediction_history_and_write_files(tmp_path: Path) -> None:
             series.points[0].finishing_position_interval_lower
             <= series.points[0].finishing_position_interval_upper
         )
+        assert series.points[0].average_category_finishing_position is not None
+        assert (
+            series.points[0].category_finishing_position_interval_lower
+            <= series.points[0].category_finishing_position_interval_upper
+        )
+        assert series.points[0].category_winning_percentage is not None
         assert (
             series.points[0].winning_percentage_interval_lower
             <= series.points[0].winning_percentage_interval_upper
