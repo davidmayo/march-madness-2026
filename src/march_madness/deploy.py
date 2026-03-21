@@ -19,7 +19,7 @@ from march_madness.frontend.site import render_standings_page_with_urls
 PACKAGE_ROOT = Path(__file__).resolve().parent
 FRONTEND_ROOT = PACKAGE_ROOT / "frontend"
 ASSETS_DIR = FRONTEND_ROOT / "assets"
-DEFAULT_OUTPUT_DIR = PACKAGE_ROOT.parent.parent / "dist"
+DEFAULT_OUTPUT_DIR = PACKAGE_ROOT.parent.parent / "docs"
 
 
 def build_static_site(output_dir: Path) -> None:
