@@ -10,6 +10,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from march_madness.scoring import get_bracket_from_scoreboard_data
+from march_madness.scoring import load_user_bracket
+from march_madness.scoring import score
+from march_madness.scoring import score_saved_user_brackets
 from march_madness.user_brackets import export_saved_user_brackets
 from march_madness.user_brackets import parse_homepage_real_names
 from march_madness.user_brackets import parse_saved_user_bracket
@@ -78,3 +82,49 @@ def test_export_saved_user_brackets(tmp_path: Path) -> None:
     assert set(exported) == {"bracket_metadata", "bracket_picks"}
     assert exported["bracket_metadata"]["user_name"] == "Austin Jude"
     assert len(exported["bracket_picks"]["games"]) == 63
+
+
+def test_scoreboard_reference_bracket_uses_completed_games_only() -> None:
+    """Build the current reference bracket from the scoreboard snapshot."""
+
+    scoreboard_blob = json.loads((ROOT / "data" / "espn" / "api" / "scoreboard.json").read_text())
+    reference_bracket = get_bracket_from_scoreboard_data(scoreboard_blob)
+
+    completed_games = [game for game in reference_bracket.games if game.winner_team_id is not None]
+    completed_game_ids = {game.id for game in completed_games}
+
+    assert len(completed_games) == 8
+    assert "west-round-1-game-1" in completed_game_ids
+    assert "midwest-round-1-game-8" in completed_game_ids
+
+
+def test_traditional_score_for_austin_jude() -> None:
+    """Score Austin's exported bracket with traditional round scoring."""
+
+    scoreboard_blob = json.loads((ROOT / "data" / "espn" / "api" / "scoreboard.json").read_text())
+    reference_bracket = get_bracket_from_scoreboard_data(scoreboard_blob)
+    austin_bracket = load_user_bracket(ROOT / "data" / "user-brackets" / "austin-jude.json")
+
+    result = score(reference_bracket, austin_bracket, calculate_details=True)
+
+    assert result.current_score == 6.0
+    assert result.max_possible_score == 190.0
+    assert result.correctly_picked_games == 6
+    assert result.incorrectly_picked_games == 2
+    assert float(result) == 6.0
+
+
+def test_scoring_all_saved_user_brackets() -> None:
+    """Score all saved brackets and verify the best traditional score so far."""
+
+    scoreboard_blob = json.loads((ROOT / "data" / "espn" / "api" / "scoreboard.json").read_text())
+    reference_bracket = get_bracket_from_scoreboard_data(scoreboard_blob)
+
+    scored = score_saved_user_brackets(reference_bracket, calculate_details=True)
+
+    assert len(scored) == 14
+    assert scored[0][2].current_score == 8.0
+    assert {scored[0][1].bracket_metadata.user_name, scored[1][1].bracket_metadata.user_name} == {
+        "Chloe Hart",
+        "Mitchell Mcculley",
+    }

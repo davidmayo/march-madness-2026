@@ -665,8 +665,10 @@ def _choose_user_name(file_stem: str, entry_name: str, homepage_real_name: str |
     """Choose the best available human-facing name for the bracket owner."""
 
     fallback_name = _humanize_file_stem(file_stem)
-    if homepage_real_name and " " in homepage_real_name.strip():
-        return homepage_real_name.strip()
+    if homepage_real_name:
+        tokens = [token for token in homepage_real_name.strip().split() if token]
+        if len(tokens) >= 2 and all(len(token) > 1 for token in tokens):
+            return homepage_real_name.strip()
 
     # If the entry name already looks like a person's full name, it is usually
     # more faithful than the title-cased file stem.
