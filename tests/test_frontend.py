@@ -89,14 +89,18 @@ def test_invalid_bracket_page_returns_html_404() -> None:
     assert "Bracket Not Found" in html
 
 
-def test_placeholder_pages_render() -> None:
-    """Prediction and historical placeholder pages should render cleanly."""
+def test_prediction_and_historical_pages_render() -> None:
+    """Prediction and historical pages should render cleanly."""
 
     prediction_response = prediction_page()
     historical_response = historical_page()
 
     assert prediction_response.status_code == 200
-    assert "Prediction Engine" in prediction_response.body.decode()
+    prediction_html = prediction_response.body.decode()
+    assert "Prediction Engine" in prediction_html
+    assert "Monte Carlo forecast" in prediction_html
+    assert "Score 80% CI" in prediction_html
+    assert "Darren Boyd" in prediction_html
 
     assert historical_response.status_code == 200
     assert "Historical Results" in historical_response.body.decode()

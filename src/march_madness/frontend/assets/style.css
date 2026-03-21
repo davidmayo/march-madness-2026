@@ -346,11 +346,16 @@ a {
     min-width: 42rem;
 }
 
+.prediction-table {
+    min-width: 74rem;
+}
+
 .standings-table th,
 .standings-table td {
     padding: 0.9rem 0.8rem;
     border-bottom: 1px solid var(--line);
     text-align: left;
+    vertical-align: top;
 }
 
 .standings-table th {
@@ -387,6 +392,10 @@ a {
 .standings-link:hover {
     text-decoration: underline;
     text-decoration-color: rgba(7, 73, 51, 0.4);
+}
+
+.interval-cell {
+    white-space: nowrap;
 }
 
 .region-card {

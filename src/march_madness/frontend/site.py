@@ -17,6 +17,11 @@ from pathlib import Path
 from march_madness.canonical_bracket import REGION_ORDER
 from march_madness.canonical_bracket import ROUND_NAMES
 from march_madness.canonical_bracket import canonical_team_name_by_id
+from march_madness.predictions import DEFAULT_SIMULATION_COUNT
+from march_madness.predictions import PredictionInterval
+from march_madness.predictions import TournamentPredictionReport
+from march_madness.predictions import UserPredictionSummary
+from march_madness.predictions import build_prediction_report
 from march_madness.scoring import get_bracket_from_scoreboard_data
 from march_madness.scoring import load_saved_user_brackets
 from march_madness.scoring import score_saved_user_brackets
@@ -116,6 +121,18 @@ def load_site_data() -> SiteData:
         standings_by_slug=standings_by_slug,
         reference_bracket=reference_bracket,
         completed_game_count=completed_game_count,
+    )
+
+
+@lru_cache(maxsize=1)
+def load_prediction_report() -> TournamentPredictionReport:
+    """Load the cached Monte Carlo prediction report for the frontend."""
+
+    scoreboard_blob = json.loads(SCOREBOARD_PATH.read_text())
+    reference_bracket = get_bracket_from_scoreboard_data(scoreboard_blob)
+    return build_prediction_report(
+        reference_bracket,
+        simulation_count=DEFAULT_SIMULATION_COUNT,
     )
 
 
@@ -294,23 +311,68 @@ def render_bracket_page(bracket_slug: str) -> tuple[int, str]:
 
 
 def render_prediction_page() -> str:
-    """Render the placeholder prediction page."""
+    """Render the Monte Carlo prediction page."""
 
-    body = """
+    prediction_report = load_prediction_report()
+    projected_leader = prediction_report.users[0] if prediction_report.users else None
+
+    summary_cards = "".join(
+        (
+            _render_stat_card("Simulations", _format_score(float(prediction_report.simulation_count))),
+            _render_stat_card("Completed Games", f"{prediction_report.completed_game_count} of 63"),
+            _render_stat_card("Remaining Games", _format_score(float(prediction_report.remaining_game_count))),
+            _render_stat_card("KenPom Snapshot", prediction_report.kenpom_snapshot_name),
+        )
+    )
+    if projected_leader is not None:
+        summary_cards = "".join(
+            (
+                summary_cards,
+                _render_stat_card("Best Avg Finish", projected_leader.user_name),
+                _render_stat_card("Projected Avg Score", _format_score(projected_leader.average_score)),
+            )
+        )
+
+    rows_html = "".join(
+        _render_prediction_row(prediction)
+        for prediction in prediction_report.users
+    )
+    body = f"""
     <section class="hero">
-        <p class="eyebrow">Coming next</p>
+        <p class="eyebrow">Monte Carlo forecast</p>
         <h1>Prediction Engine</h1>
         <p class="lede">
-            This page will eventually surface model-based tournament predictions, scenario comparisons,
-            and bracket win odds.
+            {prediction_report.simulation_count:,} KenPom-driven tournament simulations from the current bracket state.
+            Finished games are locked to actual results, remaining games are simulated, and tied scores share the same
+            finishing place without any tiebreaker.
         </p>
+        <div class="stat-grid">{summary_cards}</div>
     </section>
-    <section class="panel placeholder-panel">
-        <h2>Planned Content</h2>
-        <p>
-            The data pipeline is already in place for bracket state and historical scores. The next step is to
-            layer in simulation outputs and render them here.
-        </p>
+    <section class="panel">
+        <div class="section-heading">
+            <div>
+                <p class="section-kicker">Forecast table</p>
+                <h2>Bracket Outcome Ranges</h2>
+            </div>
+            <p class="panel-note">80% intervals are the 10th to 90th percentile across simulations.</p>
+        </div>
+        <div class="table-wrap">
+            <table class="standings-table prediction-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Avg Score</th>
+                        <th>Score 80% CI</th>
+                        <th>Avg Finish</th>
+                        <th>Finish 80% CI</th>
+                        <th>Avg Category Finish</th>
+                        <th>Category Finish 80% CI</th>
+                    </tr>
+                </thead>
+                <tbody>{rows_html}</tbody>
+            </table>
+        </div>
     </section>
     """
     return _render_page_shell(
@@ -682,6 +744,25 @@ def _render_standings_row(rank: int, row: StandingsRow) -> str:
     """
 
 
+def _render_prediction_row(prediction: UserPredictionSummary) -> str:
+    """Render one row in the Monte Carlo prediction table."""
+
+    return f"""
+    <tr>
+        <td>
+            <a class="standings-link" href="/brackets/{escape(prediction.slug)}">{escape(prediction.user_name)}</a>
+        </td>
+        <td>{_render_table_category_badges(tuple(prediction.user_categories))}</td>
+        <td>{_format_score(prediction.average_score)}</td>
+        <td class="interval-cell">{escape(_format_prediction_interval(prediction.score_interval))}</td>
+        <td>{_format_score(prediction.average_finishing_position)}</td>
+        <td class="interval-cell">{escape(_format_prediction_interval(prediction.finishing_position_interval))}</td>
+        <td>{_format_optional_number(prediction.average_category_finishing_position)}</td>
+        <td class="interval-cell">{escape(_format_optional_interval(prediction.category_finishing_position_interval))}</td>
+    </tr>
+    """
+
+
 def _render_stat_card(label: str, value: str) -> str:
     """Render a compact summary card."""
 
@@ -771,3 +852,25 @@ def _format_score(value: float | None) -> str:
     if float(value).is_integer():
         return str(int(value))
     return f"{value:.1f}"
+
+
+def _format_prediction_interval(interval: PredictionInterval) -> str:
+    """Render one prediction interval using the shared numeric formatter."""
+
+    return f"{_format_score(interval.lower)} to {_format_score(interval.upper)}"
+
+
+def _format_optional_number(value: float | None) -> str:
+    """Render an optional number field in a prediction table cell."""
+
+    if value is None:
+        return "—"
+    return _format_score(value)
+
+
+def _format_optional_interval(interval: PredictionInterval | None) -> str:
+    """Render an optional prediction interval in a table cell."""
+
+    if interval is None:
+        return "—"
+    return _format_prediction_interval(interval)

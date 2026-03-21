@@ -1,0 +1,449 @@
+"""Run Monte Carlo tournament simulations from the current bracket state.
+
+The prediction flow intentionally reuses the same canonical bracket graph used
+for scoring:
+- completed games come from the local ESPN scoreboard snapshot
+- unfinished games are simulated with KenPom net ratings
+- every simulated winner is propagated through the explicit bracket tree
+- each completed simulated bracket is scored with the existing traditional
+  scoring logic
+"""
+
+from __future__ import annotations
+
+import json
+import math
+import random
+from collections import Counter
+from dataclasses import dataclass, field
+from pathlib import Path
+from statistics import fmean
+
+from pydantic import BaseModel, ConfigDict
+
+from march_madness.canonical_bracket import REGION_ORDER
+from march_madness.canonical_bracket import canonical_team_name_by_id
+from march_madness.canonical_bracket import canonical_team_seed_by_id
+from march_madness.scoring import TRADITIONAL_SCORING_BY_ROUND
+from march_madness.scoring import load_saved_user_brackets
+from march_madness.scoring import score
+from march_madness.scrape import KENPOM_INDEX_PATH
+from march_madness.scrape import KENPOM_SNAPSHOTS_DIR
+from march_madness.scrape import Bracket
+from march_madness.scrape import Game
+from march_madness.scrape import GameSlot
+from march_madness.scrape import GameStatus
+from march_madness.scrape import KenPomRating
+from march_madness.scrape import parse_kenpom_rows
+from march_madness.user_brackets import USER_BRACKETS_DIR
+from march_madness.user_brackets import UserBracket
+from march_madness.user_brackets import UserCategory
+
+
+AVERAGE_TEMPO = 70.0
+KENPOM_SCALE_FACTOR = 13.7420
+DEFAULT_SIMULATION_COUNT = 1_000
+DEFAULT_RANDOM_SEED = 20260321
+
+# The saved KenPom snapshot is keyed by the team IDs that were available in the
+# ESPN team dump at scrape time. A handful of tournament teams were missing from
+# that dump, so those IDs need an explicit fallback to the raw KenPom table.
+EXPLICIT_KENPOM_NAME_BY_CANONICAL_TEAM_ID: dict[str, str] = {
+    "139": "Saint Louis",
+    "158": "Nebraska",
+    "194": "Ohio St.",
+    "219": "Penn",
+    "338": "Kennesaw St.",
+    "2390": "Miami FL",
+    "2449": "North Dakota St.",
+    "2561": "Siena",
+    "2628": "TCU",
+}
+
+
+class PredictionInterval(BaseModel):
+    """Store the lower and upper bounds for one 80% prediction interval."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    lower: float
+    upper: float
+
+
+class UserPredictionSummary(BaseModel):
+    """Store the Monte Carlo summary for one saved user bracket."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    slug: str
+    user_name: str
+    entry_name: str
+    user_categories: list[UserCategory]
+    average_score: float
+    average_finishing_position: float
+    average_category_finishing_position: float | None = None
+    score_interval: PredictionInterval
+    finishing_position_interval: PredictionInterval
+    category_finishing_position_interval: PredictionInterval | None = None
+
+
+class TournamentPredictionReport(BaseModel):
+    """Store the full Monte Carlo forecast used by the prediction page."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    simulation_count: int
+    random_seed: int
+    completed_game_count: int
+    remaining_game_count: int
+    kenpom_snapshot_name: str
+    users: list[UserPredictionSummary]
+
+
+@dataclass
+class _UserSimulationAccumulator:
+    """Collect per-simulation score and finish samples for one user."""
+
+    scores: list[float] = field(default_factory=list)
+    finishing_positions: list[int] = field(default_factory=list)
+    category_finishing_positions: list[int] = field(default_factory=list)
+
+
+def load_latest_kenpom_ratings(
+    kenpom_snapshot_dir: Path = KENPOM_SNAPSHOTS_DIR,
+) -> tuple[Path, dict[str, float]]:
+    """Load the newest saved KenPom snapshot as a team-ID lookup."""
+
+    snapshot_paths = sorted(kenpom_snapshot_dir.glob("*.json"))
+    if not snapshot_paths:
+        msg = f"No KenPom snapshots were found in {kenpom_snapshot_dir}."
+        raise FileNotFoundError(msg)
+
+    snapshot_path = snapshot_paths[-1]
+    ratings = [
+        KenPomRating.model_validate(item)
+        for item in json.loads(snapshot_path.read_text())
+    ]
+    ratings_by_team_id = {rating.team_id: rating.net_rating for rating in ratings}
+
+    raw_rows_by_name = {
+        row.team_name: row.net_rating
+        for row in parse_kenpom_rows(KENPOM_INDEX_PATH)
+    }
+    for team_id, kenpom_name in EXPLICIT_KENPOM_NAME_BY_CANONICAL_TEAM_ID.items():
+        if team_id in ratings_by_team_id:
+            continue
+        try:
+            ratings_by_team_id[team_id] = raw_rows_by_name[kenpom_name]
+        except KeyError as error:
+            msg = f"Explicit KenPom fallback name {kenpom_name!r} was missing from the raw table."
+            raise ValueError(msg) from error
+
+    return snapshot_path, ratings_by_team_id
+
+
+def simulate_remaining_tournament(
+    reference_bracket: Bracket,
+    kenpom_ratings_by_team_id: dict[str, float],
+    *,
+    random_generator: random.Random,
+) -> Bracket:
+    """Simulate every unfinished game in a copied bracket and return it."""
+
+    _validate_kenpom_coverage(kenpom_ratings_by_team_id)
+
+    simulated_bracket = reference_bracket.model_copy(deep=True)
+    game_lookup = {game.id: game for game in simulated_bracket.games}
+
+    # The scoreboard builder already propagates completed winners, but this
+    # keeps the simulator robust if a partially populated bracket is passed in.
+    _propagate_all_known_winners(simulated_bracket)
+
+    for game in sorted(simulated_bracket.games, key=_simulation_game_sort_key):
+        if game.round_id not in TRADITIONAL_SCORING_BY_ROUND:
+            continue
+        if game.winner_team_id is not None:
+            continue
+
+        team_1_id = game.team_1.team_id
+        team_2_id = game.team_2.team_id
+        if team_1_id is None or team_2_id is None:
+            msg = f"Game {game.id} was missing a populated matchup before simulation."
+            raise ValueError(msg)
+
+        team_1_win_probability = _team_1_win_probability(
+            team_1_rating=kenpom_ratings_by_team_id[team_1_id],
+            team_2_rating=kenpom_ratings_by_team_id[team_2_id],
+        )
+        winner_team_id = team_1_id if random_generator.random() < team_1_win_probability else team_2_id
+
+        game.winner_team_id = winner_team_id
+        game.status = GameStatus.SIMULATED
+        _propagate_winner_to_parent(game_lookup, game)
+
+    for game in simulated_bracket.games:
+        if game.round_id in TRADITIONAL_SCORING_BY_ROUND and game.winner_team_id is None:
+            msg = f"Simulation did not produce a winner for {game.id}."
+            raise ValueError(msg)
+
+    return simulated_bracket
+
+
+def build_prediction_report(
+    reference_bracket: Bracket,
+    *,
+    simulation_count: int = DEFAULT_SIMULATION_COUNT,
+    random_seed: int = DEFAULT_RANDOM_SEED,
+    user_brackets_dir: Path = USER_BRACKETS_DIR,
+    kenpom_snapshot_dir: Path = KENPOM_SNAPSHOTS_DIR,
+) -> TournamentPredictionReport:
+    """Run repeated tournament simulations and summarize every bracket."""
+
+    if simulation_count <= 0:
+        msg = f"simulation_count must be positive, got {simulation_count}."
+        raise ValueError(msg)
+
+    kenpom_snapshot_path, kenpom_ratings_by_team_id = load_latest_kenpom_ratings(kenpom_snapshot_dir)
+    loaded_user_brackets = load_saved_user_brackets(user_brackets_dir)
+    random_generator = random.Random(random_seed)
+
+    user_records: list[tuple[str, UserBracket, UserCategory | None]] = [
+        (
+            path.stem,
+            user_bracket,
+            _primary_user_category(user_bracket),
+        )
+        for path, user_bracket in loaded_user_brackets
+    ]
+    accumulators = {
+        slug: _UserSimulationAccumulator()
+        for slug, _user_bracket, _user_category in user_records
+    }
+
+    for _simulation_index in range(simulation_count):
+        simulated_bracket = simulate_remaining_tournament(
+            reference_bracket,
+            kenpom_ratings_by_team_id,
+            random_generator=random_generator,
+        )
+
+        score_by_slug: dict[str, float] = {}
+        category_by_slug: dict[str, UserCategory | None] = {}
+        for slug, user_bracket, user_category in user_records:
+            user_score = score(simulated_bracket, user_bracket)
+            score_by_slug[slug] = user_score.current_score
+            category_by_slug[slug] = user_category
+            accumulators[slug].scores.append(user_score.current_score)
+
+        global_ranks = _competition_ranks(score_by_slug)
+        for slug, rank in global_ranks.items():
+            accumulators[slug].finishing_positions.append(rank)
+
+        for user_category in sorted({category for category in category_by_slug.values() if category is not None}):
+            category_scores = {
+                slug: user_score
+                for slug, user_score in score_by_slug.items()
+                if category_by_slug[slug] == user_category
+            }
+            category_ranks = _competition_ranks(category_scores)
+            for slug, rank in category_ranks.items():
+                accumulators[slug].category_finishing_positions.append(rank)
+
+    user_summaries = [
+        _build_user_prediction_summary(
+            slug=slug,
+            user_bracket=user_bracket,
+            accumulator=accumulators[slug],
+        )
+        for slug, user_bracket, _user_category in user_records
+    ]
+    user_summaries.sort(
+        key=lambda summary: (
+            summary.average_finishing_position,
+            -summary.average_score,
+            summary.user_name,
+        )
+    )
+
+    completed_game_count = sum(
+        1
+        for game in reference_bracket.games
+        if game.round_id in TRADITIONAL_SCORING_BY_ROUND and game.winner_team_id is not None
+    )
+    total_scored_games = sum(
+        1
+        for game in reference_bracket.games
+        if game.round_id in TRADITIONAL_SCORING_BY_ROUND
+    )
+
+    return TournamentPredictionReport(
+        simulation_count=simulation_count,
+        random_seed=random_seed,
+        completed_game_count=completed_game_count,
+        remaining_game_count=total_scored_games - completed_game_count,
+        kenpom_snapshot_name=kenpom_snapshot_path.stem,
+        users=user_summaries,
+    )
+
+
+def _build_user_prediction_summary(
+    *,
+    slug: str,
+    user_bracket: UserBracket,
+    accumulator: _UserSimulationAccumulator,
+) -> UserPredictionSummary:
+    """Convert collected simulation samples into one user-facing summary."""
+
+    category_interval: PredictionInterval | None = None
+    average_category_finishing_position: float | None = None
+    if accumulator.category_finishing_positions:
+        average_category_finishing_position = fmean(accumulator.category_finishing_positions)
+        category_interval = PredictionInterval(
+            lower=float(_nearest_rank_percentile(accumulator.category_finishing_positions, 0.10)),
+            upper=float(_nearest_rank_percentile(accumulator.category_finishing_positions, 0.90)),
+        )
+
+    return UserPredictionSummary(
+        slug=slug,
+        user_name=user_bracket.bracket_metadata.user_name,
+        entry_name=user_bracket.bracket_metadata.entry_name,
+        user_categories=list(user_bracket.bracket_metadata.user_categories),
+        average_score=fmean(accumulator.scores),
+        average_finishing_position=fmean(accumulator.finishing_positions),
+        average_category_finishing_position=average_category_finishing_position,
+        score_interval=PredictionInterval(
+            lower=float(_nearest_rank_percentile(accumulator.scores, 0.10)),
+            upper=float(_nearest_rank_percentile(accumulator.scores, 0.90)),
+        ),
+        finishing_position_interval=PredictionInterval(
+            lower=float(_nearest_rank_percentile(accumulator.finishing_positions, 0.10)),
+            upper=float(_nearest_rank_percentile(accumulator.finishing_positions, 0.90)),
+        ),
+        category_finishing_position_interval=category_interval,
+    )
+
+
+def _primary_user_category(user_bracket: UserBracket) -> UserCategory | None:
+    """Return the single configured category for a user bracket, if present."""
+
+    user_categories = user_bracket.bracket_metadata.user_categories
+    if not user_categories:
+        return None
+    return user_categories[0]
+
+
+def _validate_kenpom_coverage(kenpom_ratings_by_team_id: dict[str, float]) -> None:
+    """Ensure every canonical tournament team has a KenPom rating."""
+
+    missing_team_ids = sorted(
+        team_id
+        for team_id in canonical_team_name_by_id()
+        if team_id not in kenpom_ratings_by_team_id
+    )
+    if not missing_team_ids:
+        return
+
+    missing_team_names = [
+        canonical_team_name_by_id()[team_id]
+        for team_id in missing_team_ids
+    ]
+    msg = f"KenPom ratings were missing for canonical tournament teams: {missing_team_names!r}"
+    raise ValueError(msg)
+
+
+def _simulation_game_sort_key(game: Game) -> tuple[int, int, int]:
+    """Order games so every child matchup is simulated before its parent."""
+
+    region_order = {region: index for index, region in enumerate(REGION_ORDER, start=1)}
+    return (
+        game.round_id,
+        region_order.get(game.region_name or "", len(region_order) + 1),
+        game.bracket_location,
+    )
+
+
+def _team_1_win_probability(*, team_1_rating: float, team_2_rating: float) -> float:
+    """Calculate the team-1 win probability from two KenPom net ratings."""
+
+    team_2_scoring_margin = (team_2_rating - team_1_rating) * (AVERAGE_TEMPO / 100.0)
+    return 1.0 / (1.0 + (10.0 ** (team_2_scoring_margin / KENPOM_SCALE_FACTOR)))
+
+
+def _competition_ranks(score_by_slug: dict[str, float]) -> dict[str, int]:
+    """Assign shared-place ranks where ties occupy the same finishing position."""
+
+    score_counts = Counter(score_by_slug.values())
+    rank_by_score: dict[float, int] = {}
+    higher_score_count = 0
+
+    for score_value in sorted(score_counts, reverse=True):
+        rank_by_score[score_value] = higher_score_count + 1
+        higher_score_count += score_counts[score_value]
+
+    return {
+        slug: rank_by_score[user_score]
+        for slug, user_score in score_by_slug.items()
+    }
+
+
+def _nearest_rank_percentile(values: list[float] | list[int], percentile: float) -> float | int:
+    """Return one percentile using the nearest-rank definition."""
+
+    if not values:
+        msg = "Cannot calculate a percentile from an empty sample."
+        raise ValueError(msg)
+    if not 0.0 <= percentile <= 1.0:
+        msg = f"percentile must be between 0 and 1 inclusive, got {percentile}."
+        raise ValueError(msg)
+
+    ordered_values = sorted(values)
+    index = max(0, math.ceil(percentile * len(ordered_values)) - 1)
+    return ordered_values[index]
+
+
+def _propagate_all_known_winners(bracket: Bracket) -> None:
+    """Propagate every known winner through downstream bracket slots."""
+
+    game_lookup = {game.id: game for game in bracket.games}
+    changed = True
+    while changed:
+        changed = False
+        for game in bracket.games:
+            if game.winner_team_id is None:
+                continue
+            if _propagate_winner_to_parent(game_lookup, game):
+                changed = True
+
+
+def _propagate_winner_to_parent(game_lookup: dict[str, Game], game: Game) -> bool:
+    """Push one winner into the exact downstream slot fed by that game."""
+
+    if game.winner_team_id is None or game.feeds_to_game_id is None:
+        return False
+
+    parent_game = game_lookup[game.feeds_to_game_id]
+    winner_seed = canonical_team_seed_by_id().get(game.winner_team_id)
+
+    if parent_game.team_1.from_game_id == game.id:
+        return _assign_slot_team(parent_game.team_1, game.winner_team_id, winner_seed, parent_game.id)
+    if parent_game.team_2.from_game_id == game.id:
+        return _assign_slot_team(parent_game.team_2, game.winner_team_id, winner_seed, parent_game.id)
+
+    msg = f"Game {game.id} did not match either incoming slot on parent {parent_game.id}."
+    raise ValueError(msg)
+
+
+def _assign_slot_team(slot: GameSlot, team_id: str, seed: str | None, parent_game_id: str) -> bool:
+    """Assign a propagated team into a bracket slot with consistency checks."""
+
+    if slot.team_id not in (None, team_id):
+        msg = f"Conflicting team assignment on {parent_game_id}: {slot.team_id} vs {team_id}"
+        raise ValueError(msg)
+    if seed is not None and slot.seed not in (None, seed):
+        msg = f"Conflicting seed assignment on {parent_game_id}: {slot.seed} vs {seed}"
+        raise ValueError(msg)
+
+    changed = slot.team_id != team_id or slot.seed != seed
+    slot.team_id = team_id
+    slot.seed = seed
+    return changed
