@@ -1,0 +1,470 @@
+[
+  {
+    "team_id": "2",
+    "net_rating": 18.87
+  },
+  {
+    "team_id": "5",
+    "net_rating": 3.5
+  },
+  {
+    "team_id": "6",
+    "net_rating": -2.86
+  },
+  {
+    "team_id": "8",
+    "net_rating": 26.29
+  },
+  {
+    "team_id": "9",
+    "net_rating": 12.55
+  },
+  {
+    "team_id": "12",
+    "net_rating": 37.82
+  },
+  {
+    "team_id": "13",
+    "net_rating": -3.87
+  },
+  {
+    "team_id": "16",
+    "net_rating": -8.52
+  },
+  {
+    "team_id": "21",
+    "net_rating": 16.54
+  },
+  {
+    "team_id": "23",
+    "net_rating": -4.87
+  },
+  {
+    "team_id": "24",
+    "net_rating": 13.2
+  },
+  {
+    "team_id": "25",
+    "net_rating": 11.67
+  },
+  {
+    "team_id": "26",
+    "net_rating": 21.69
+  },
+  {
+    "team_id": "27",
+    "net_rating": -7.94
+  },
+  {
+    "team_id": "28",
+    "net_rating": 4.3
+  },
+  {
+    "team_id": "30",
+    "net_rating": 10.83
+  },
+  {
+    "team_id": "36",
+    "net_rating": 9.05
+  },
+  {
+    "team_id": "38",
+    "net_rating": 12.11
+  },
+  {
+    "team_id": "41",
+    "net_rating": 27.77
+  },
+  {
+    "team_id": "43",
+    "net_rating": 10.13
+  },
+  {
+    "team_id": "44",
+    "net_rating": -6.38
+  },
+  {
+    "team_id": "45",
+    "net_rating": 10.21
+  },
+  {
+    "team_id": "46",
+    "net_rating": 10.76
+  },
+  {
+    "team_id": "47",
+    "net_rating": -2.58
+  },
+  {
+    "team_id": "48",
+    "net_rating": -11.08
+  },
+  {
+    "team_id": "50",
+    "net_rating": -12.8
+  },
+  {
+    "team_id": "52",
+    "net_rating": 13.27
+  },
+  {
+    "team_id": "55",
+    "net_rating": -3.21
+  },
+  {
+    "team_id": "56",
+    "net_rating": -12.49
+  },
+  {
+    "team_id": "57",
+    "net_rating": 33.87
+  },
+  {
+    "team_id": "58",
+    "net_rating": 16.6
+  },
+  {
+    "team_id": "59",
+    "net_rating": 0.38
+  },
+  {
+    "team_id": "61",
+    "net_rating": 19.43
+  },
+  {
+    "team_id": "62",
+    "net_rating": 5.63
+  },
+  {
+    "team_id": "66",
+    "net_rating": 32.65
+  },
+  {
+    "team_id": "68",
+    "net_rating": 13.31
+  },
+  {
+    "team_id": "70",
+    "net_rating": 1.04
+  },
+  {
+    "team_id": "71",
+    "net_rating": 3.05
+  },
+  {
+    "team_id": "77",
+    "net_rating": 13.46
+  },
+  {
+    "team_id": "79",
+    "net_rating": 4.34
+  },
+  {
+    "team_id": "84",
+    "net_rating": 17.25
+  },
+  {
+    "team_id": "85",
+    "net_rating": -13.84
+  },
+  {
+    "team_id": "87",
+    "net_rating": 8.64
+  },
+  {
+    "team_id": "91",
+    "net_rating": -9.66
+  },
+  {
+    "team_id": "93",
+    "net_rating": 3.66
+  },
+  {
+    "team_id": "94",
+    "net_rating": -0.52
+  },
+  {
+    "team_id": "96",
+    "net_rating": 21.71
+  },
+  {
+    "team_id": "97",
+    "net_rating": 24.99
+  },
+  {
+    "team_id": "98",
+    "net_rating": 0.21
+  },
+  {
+    "team_id": "116",
+    "net_rating": -9.38
+  },
+  {
+    "team_id": "120",
+    "net_rating": 4.3
+  },
+  {
+    "team_id": "127",
+    "net_rating": 28.55
+  },
+  {
+    "team_id": "130",
+    "net_rating": 37.28
+  },
+  {
+    "team_id": "142",
+    "net_rating": 15.59
+  },
+  {
+    "team_id": "145",
+    "net_rating": 12.73
+  },
+  {
+    "team_id": "149",
+    "net_rating": -1.93
+  },
+  {
+    "team_id": "150",
+    "net_rating": 37.61
+  },
+  {
+    "team_id": "153",
+    "net_rating": 20.28
+  },
+  {
+    "team_id": "156",
+    "net_rating": 10.89
+  },
+  {
+    "team_id": "167",
+    "net_rating": 16.42
+  },
+  {
+    "team_id": "193",
+    "net_rating": 8.65
+  },
+  {
+    "team_id": "201",
+    "net_rating": 18.58
+  },
+  {
+    "team_id": "222",
+    "net_rating": 19.36
+  },
+  {
+    "team_id": "228",
+    "net_rating": 18.67
+  },
+  {
+    "team_id": "231",
+    "net_rating": -1.91
+  },
+  {
+    "team_id": "235",
+    "net_rating": 2.57
+  },
+  {
+    "team_id": "238",
+    "net_rating": 27.64
+  },
+  {
+    "team_id": "239",
+    "net_rating": 16.06
+  },
+  {
+    "team_id": "245",
+    "net_rating": 19.74
+  },
+  {
+    "team_id": "248",
+    "net_rating": 33.77
+  },
+  {
+    "team_id": "251",
+    "net_rating": 19.79
+  },
+  {
+    "team_id": "252",
+    "net_rating": 22.74
+  },
+  {
+    "team_id": "258",
+    "net_rating": 26.14
+  },
+  {
+    "team_id": "269",
+    "net_rating": 9.56
+  },
+  {
+    "team_id": "275",
+    "net_rating": 22.85
+  },
+  {
+    "team_id": "288",
+    "net_rating": -2.82
+  },
+  {
+    "team_id": "328",
+    "net_rating": 21.42
+  },
+  {
+    "team_id": "333",
+    "net_rating": 26.19
+  },
+  {
+    "team_id": "344",
+    "net_rating": 7.11
+  },
+  {
+    "team_id": "350",
+    "net_rating": 6.17
+  },
+  {
+    "team_id": "356",
+    "net_rating": 32.57
+  },
+  {
+    "team_id": "2006",
+    "net_rating": 12.01
+  },
+  {
+    "team_id": "2011",
+    "net_rating": -14.22
+  },
+  {
+    "team_id": "2116",
+    "net_rating": 15.1
+  },
+  {
+    "team_id": "2181",
+    "net_rating": -2.92
+  },
+  {
+    "team_id": "2250",
+    "net_rating": 27.49
+  },
+  {
+    "team_id": "2253",
+    "net_rating": 13.44
+  },
+  {
+    "team_id": "2272",
+    "net_rating": 9.16
+  },
+  {
+    "team_id": "2275",
+    "net_rating": 9.18
+  },
+  {
+    "team_id": "2294",
+    "net_rating": 22.75
+  },
+  {
+    "team_id": "2305",
+    "net_rating": 24.48
+  },
+  {
+    "team_id": "2335",
+    "net_rating": 4.74
+  },
+  {
+    "team_id": "2377",
+    "net_rating": 12.51
+  },
+  {
+    "team_id": "2437",
+    "net_rating": -8.31
+  },
+  {
+    "team_id": "2450",
+    "net_rating": -15.21
+  },
+  {
+    "team_id": "2460",
+    "net_rating": 11.51
+  },
+  {
+    "team_id": "2483",
+    "net_rating": 6.99
+  },
+  {
+    "team_id": "2504",
+    "net_rating": -9.83
+  },
+  {
+    "team_id": "2509",
+    "net_rating": 31.24
+  },
+  {
+    "team_id": "2511",
+    "net_rating": -1.42
+  },
+  {
+    "team_id": "2523",
+    "net_rating": 1.73
+  },
+  {
+    "team_id": "2541",
+    "net_rating": 19.09
+  },
+  {
+    "team_id": "2565",
+    "net_rating": -7.68
+  },
+  {
+    "team_id": "2598",
+    "net_rating": -22.27
+  },
+  {
+    "team_id": "2599",
+    "net_rating": 25.8
+  },
+  {
+    "team_id": "2608",
+    "net_rating": 21.92
+  },
+  {
+    "team_id": "2633",
+    "net_rating": 26.62
+  },
+  {
+    "team_id": "2634",
+    "net_rating": -2.02
+  },
+  {
+    "team_id": "2641",
+    "net_rating": 25.77
+  },
+  {
+    "team_id": "2653",
+    "net_rating": 1.14
+  },
+  {
+    "team_id": "2670",
+    "net_rating": 18.0
+  },
+  {
+    "team_id": "2747",
+    "net_rating": -7.3
+  },
+  {
+    "team_id": "2750",
+    "net_rating": 2.38
+  },
+  {
+    "team_id": "2752",
+    "net_rating": 7.32
+  },
+  {
+    "team_id": "2803",
+    "net_rating": -22.98
+  },
+  {
+    "team_id": "2856",
+    "net_rating": 5.84
+  },
+  {
+    "team_id": "112358",
+    "net_rating": -4.01
+  }
+]

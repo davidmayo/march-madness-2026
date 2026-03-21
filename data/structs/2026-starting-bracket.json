@@ -1,0 +1,1529 @@
+{
+  "id": "22",
+  "name": "Men's NCAA Tournament",
+  "season": "2024-25",
+  "league": "NCAAM",
+  "active_round": 1,
+  "regions": [
+    {
+      "id": 1,
+      "name": "SOUTH",
+      "slug": "south"
+    },
+    {
+      "id": 2,
+      "name": "WEST",
+      "slug": "west"
+    },
+    {
+      "id": 3,
+      "name": "EAST",
+      "slug": "east"
+    },
+    {
+      "id": 4,
+      "name": "MIDWEST",
+      "slug": "midwest"
+    }
+  ],
+  "rounds": [
+    {
+      "id": 0,
+      "name": "First Four",
+      "num_games": 4,
+      "start_at": "2025-03-18T22:40:00Z",
+      "end_at": "2025-03-19T22:40:00Z"
+    },
+    {
+      "id": 1,
+      "name": "1st Round",
+      "num_games": 32,
+      "start_at": "2025-03-20T15:00:00Z",
+      "end_at": "2025-03-22T02:45:00Z"
+    },
+    {
+      "id": 2,
+      "name": "2nd Round",
+      "num_games": 16,
+      "start_at": "2025-03-22T16:10:00Z",
+      "end_at": "2025-03-24T01:54:00Z"
+    },
+    {
+      "id": 3,
+      "name": "Sweet 16",
+      "num_games": 8,
+      "start_at": "2025-03-27T23:09:00Z",
+      "end_at": "2025-03-29T02:20:00Z"
+    },
+    {
+      "id": 4,
+      "name": "Elite 8",
+      "num_games": 4,
+      "start_at": "2025-03-29T22:09:00Z",
+      "end_at": "2025-03-30T21:05:00Z"
+    },
+    {
+      "id": 5,
+      "name": "Final Four",
+      "num_games": 2,
+      "start_at": "2025-04-05T22:09:00Z",
+      "end_at": "2025-04-06T00:49:00Z"
+    },
+    {
+      "id": 6,
+      "name": "Championship",
+      "num_games": 1,
+      "start_at": "2025-04-08T01:20:00Z",
+      "end_at": "2025-04-08T01:20:00Z"
+    }
+  ],
+  "games": [
+    {
+      "id": "401745911",
+      "round_id": 0,
+      "round_name": "First Four",
+      "bracket_location": 1,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-19T01:10:00Z",
+      "location": "Dayton, OH",
+      "status": "finished",
+      "team_1": {
+        "team_id": "21",
+        "seed": "11"
+      },
+      "team_2": {
+        "team_id": "153",
+        "seed": "11"
+      },
+      "winner_team_id": "153",
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401745995"
+    },
+    {
+      "id": "401745907",
+      "round_id": 0,
+      "round_name": "First Four",
+      "bracket_location": 2,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-18T22:40:00Z",
+      "location": "Dayton, OH",
+      "status": "finished",
+      "team_1": {
+        "team_id": "2011",
+        "seed": "16"
+      },
+      "team_2": {
+        "team_id": "2598",
+        "seed": "16"
+      },
+      "winner_team_id": "2011",
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401745957"
+    },
+    {
+      "id": "401745913",
+      "round_id": 0,
+      "round_name": "First Four",
+      "bracket_location": 3,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-19T22:40:00Z",
+      "location": "Dayton, OH",
+      "status": "finished",
+      "team_1": {
+        "team_id": "44",
+        "seed": "16"
+      },
+      "team_2": {
+        "team_id": "116",
+        "seed": "16"
+      },
+      "winner_team_id": "116",
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746003"
+    },
+    {
+      "id": "401745909",
+      "round_id": 0,
+      "round_name": "First Four",
+      "bracket_location": 4,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-20T01:18:00Z",
+      "location": "Dayton, OH",
+      "status": "finished",
+      "team_1": {
+        "team_id": "251",
+        "seed": "11"
+      },
+      "team_2": {
+        "team_id": "2752",
+        "seed": "11"
+      },
+      "winner_team_id": "2752",
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746015"
+    },
+    {
+      "id": "401745957",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 1,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-20T18:50:00Z",
+      "location": "Lexington, KY",
+      "status": "future",
+      "team_1": {
+        "team_id": "2",
+        "seed": "1"
+      },
+      "team_2": {
+        "team_id": "2011",
+        "seed": "16",
+        "from_game_id": "401745907"
+      },
+      "feed_in_game_ids": [
+        "401745907"
+      ],
+      "feeds_to_game_id": "401746042"
+    },
+    {
+      "id": "401745959",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 2,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-20T16:15:00Z",
+      "location": "Lexington, KY",
+      "status": "future",
+      "team_1": {
+        "team_id": "97",
+        "seed": "8"
+      },
+      "team_2": {
+        "team_id": "156",
+        "seed": "9"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746042"
+    },
+    {
+      "id": "401745963",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 3,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-21T02:00:00Z",
+      "location": "Denver, CO",
+      "status": "future",
+      "team_1": {
+        "team_id": "130",
+        "seed": "5"
+      },
+      "team_2": {
+        "team_id": "28",
+        "seed": "12"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746036"
+    },
+    {
+      "id": "401745966",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 4,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-20T23:25:00Z",
+      "location": "Denver, CO",
+      "status": "future",
+      "team_1": {
+        "team_id": "245",
+        "seed": "4"
+      },
+      "team_2": {
+        "team_id": "43",
+        "seed": "13"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746036"
+    },
+    {
+      "id": "401745995",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 5,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-21T20:05:00Z",
+      "location": "Milwaukee, WI",
+      "status": "future",
+      "team_1": {
+        "team_id": "145",
+        "seed": "6"
+      },
+      "team_2": {
+        "team_id": "153",
+        "seed": "11",
+        "from_game_id": "401745911"
+      },
+      "feed_in_game_ids": [
+        "401745911"
+      ],
+      "feeds_to_game_id": "401746047"
+    },
+    {
+      "id": "401745997",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 6,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-21T17:30:00Z",
+      "location": "Milwaukee, WI",
+      "status": "future",
+      "team_1": {
+        "team_id": "66",
+        "seed": "3"
+      },
+      "team_2": {
+        "team_id": "288",
+        "seed": "14"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746047"
+    },
+    {
+      "id": "401745999",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 7,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-21T23:25:00Z",
+      "location": "Cleveland, OH",
+      "status": "future",
+      "team_1": {
+        "team_id": "269",
+        "seed": "7"
+      },
+      "team_2": {
+        "team_id": "167",
+        "seed": "10"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746054"
+    },
+    {
+      "id": "401746001",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 8,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-22T02:12:00Z",
+      "location": "Cleveland, OH",
+      "status": "future",
+      "team_1": {
+        "team_id": "127",
+        "seed": "2"
+      },
+      "team_2": {
+        "team_id": "2803",
+        "seed": "15"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746054"
+    },
+    {
+      "id": "401746017",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 9,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-21T22:50:00Z",
+      "location": "Raleigh, NC",
+      "status": "future",
+      "team_1": {
+        "team_id": "57",
+        "seed": "1"
+      },
+      "team_2": {
+        "team_id": "2450",
+        "seed": "16"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746050"
+    },
+    {
+      "id": "401746018",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 10,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-22T01:32:00Z",
+      "location": "Raleigh, NC",
+      "status": "future",
+      "team_1": {
+        "team_id": "41",
+        "seed": "8"
+      },
+      "team_2": {
+        "team_id": "201",
+        "seed": "9"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746050"
+    },
+    {
+      "id": "401746019",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 11,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-21T18:00:00Z",
+      "location": "Seattle, WA",
+      "status": "future",
+      "team_1": {
+        "team_id": "235",
+        "seed": "5"
+      },
+      "team_2": {
+        "team_id": "36",
+        "seed": "12"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746046"
+    },
+    {
+      "id": "401746021",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 12,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-21T20:35:00Z",
+      "location": "Seattle, WA",
+      "status": "future",
+      "team_1": {
+        "team_id": "120",
+        "seed": "4"
+      },
+      "team_2": {
+        "team_id": "2253",
+        "seed": "13"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746046"
+    },
+    {
+      "id": "401745985",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 13,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-20T23:51:00Z",
+      "location": "Wichita, KS",
+      "status": "future",
+      "team_1": {
+        "team_id": "142",
+        "seed": "6"
+      },
+      "team_2": {
+        "team_id": "2181",
+        "seed": "11"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746040"
+    },
+    {
+      "id": "401745986",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 14,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-21T02:42:00Z",
+      "location": "Wichita, KS",
+      "status": "future",
+      "team_1": {
+        "team_id": "2641",
+        "seed": "3"
+      },
+      "team_2": {
+        "team_id": "350",
+        "seed": "14"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746040"
+    },
+    {
+      "id": "401745987",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 15,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-20T23:10:00Z",
+      "location": "Providence, RI",
+      "status": "future",
+      "team_1": {
+        "team_id": "2305",
+        "seed": "7"
+      },
+      "team_2": {
+        "team_id": "8",
+        "seed": "10"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746032"
+    },
+    {
+      "id": "401745989",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 16,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-21T01:58:00Z",
+      "location": "Providence, RI",
+      "status": "future",
+      "team_1": {
+        "team_id": "2599",
+        "seed": "2"
+      },
+      "team_2": {
+        "team_id": "2437",
+        "seed": "15"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746032"
+    },
+    {
+      "id": "401746003",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 17,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-21T19:09:00Z",
+      "location": "Raleigh, NC",
+      "status": "future",
+      "team_1": {
+        "team_id": "150",
+        "seed": "1"
+      },
+      "team_2": {
+        "team_id": "116",
+        "seed": "16",
+        "from_game_id": "401745913"
+      },
+      "feed_in_game_ids": [
+        "401745913"
+      ],
+      "feeds_to_game_id": "401746049"
+    },
+    {
+      "id": "401746005",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 18,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-21T16:15:00Z",
+      "location": "Raleigh, NC",
+      "status": "future",
+      "team_1": {
+        "team_id": "344",
+        "seed": "8"
+      },
+      "team_2": {
+        "team_id": "239",
+        "seed": "9"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746049"
+    },
+    {
+      "id": "401746007",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 19,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-22T02:26:00Z",
+      "location": "Seattle, WA",
+      "status": "future",
+      "team_1": {
+        "team_id": "2483",
+        "seed": "5"
+      },
+      "team_2": {
+        "team_id": "2335",
+        "seed": "12"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746045"
+    },
+    {
+      "id": "401746009",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 20,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-21T23:48:00Z",
+      "location": "Seattle, WA",
+      "status": "future",
+      "team_1": {
+        "team_id": "12",
+        "seed": "4"
+      },
+      "team_2": {
+        "team_id": "2006",
+        "seed": "13"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746045"
+    },
+    {
+      "id": "401745968",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 21,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-20T20:05:00Z",
+      "location": "Denver, CO",
+      "status": "future",
+      "team_1": {
+        "team_id": "252",
+        "seed": "6"
+      },
+      "team_2": {
+        "team_id": "2670",
+        "seed": "11"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746034"
+    },
+    {
+      "id": "401745970",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 22,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-20T17:30:00Z",
+      "location": "Denver, CO",
+      "status": "future",
+      "team_1": {
+        "team_id": "275",
+        "seed": "3"
+      },
+      "team_2": {
+        "team_id": "149",
+        "seed": "14"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746034"
+    },
+    {
+      "id": "401746012",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 23,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-21T19:30:00Z",
+      "location": "Cleveland, OH",
+      "status": "future",
+      "team_1": {
+        "team_id": "2608",
+        "seed": "7"
+      },
+      "team_2": {
+        "team_id": "238",
+        "seed": "10"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746052"
+    },
+    {
+      "id": "401746014",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 24,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-21T16:40:00Z",
+      "location": "Cleveland, OH",
+      "status": "future",
+      "team_1": {
+        "team_id": "333",
+        "seed": "2"
+      },
+      "team_2": {
+        "team_id": "2523",
+        "seed": "15"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746052"
+    },
+    {
+      "id": "401745972",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 25,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-20T18:00:00Z",
+      "location": "Wichita, KS",
+      "status": "future",
+      "team_1": {
+        "team_id": "248",
+        "seed": "1"
+      },
+      "team_2": {
+        "team_id": "2565",
+        "seed": "16"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746038"
+    },
+    {
+      "id": "401745974",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 26,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-20T20:35:00Z",
+      "location": "Wichita, KS",
+      "status": "future",
+      "team_1": {
+        "team_id": "2250",
+        "seed": "8"
+      },
+      "team_2": {
+        "team_id": "61",
+        "seed": "9"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746038"
+    },
+    {
+      "id": "401745978",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 27,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-20T19:29:00Z",
+      "location": "Providence, RI",
+      "status": "future",
+      "team_1": {
+        "team_id": "228",
+        "seed": "5"
+      },
+      "team_2": {
+        "team_id": "2377",
+        "seed": "12"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746030"
+    },
+    {
+      "id": "401745980",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 28,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-20T16:40:00Z",
+      "location": "Providence, RI",
+      "status": "future",
+      "team_1": {
+        "team_id": "2509",
+        "seed": "4"
+      },
+      "team_2": {
+        "team_id": "2272",
+        "seed": "13"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746030"
+    },
+    {
+      "id": "401746015",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 29,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-22T01:57:00Z",
+      "location": "Milwaukee, WI",
+      "status": "future",
+      "team_1": {
+        "team_id": "356",
+        "seed": "6"
+      },
+      "team_2": {
+        "team_id": "2752",
+        "seed": "11",
+        "from_game_id": "401745909"
+      },
+      "feed_in_game_ids": [
+        "401745909"
+      ],
+      "feeds_to_game_id": "401746048"
+    },
+    {
+      "id": "401746016",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 30,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-21T23:20:00Z",
+      "location": "Milwaukee, WI",
+      "status": "future",
+      "team_1": {
+        "team_id": "96",
+        "seed": "3"
+      },
+      "team_2": {
+        "team_id": "2653",
+        "seed": "14"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746048"
+    },
+    {
+      "id": "401745983",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 31,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-21T01:25:00Z",
+      "location": "Lexington, KY",
+      "status": "future",
+      "team_1": {
+        "team_id": "26",
+        "seed": "7"
+      },
+      "team_2": {
+        "team_id": "328",
+        "seed": "10"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746044"
+    },
+    {
+      "id": "401745984",
+      "round_id": 1,
+      "round_name": "1st Round",
+      "bracket_location": 32,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-20T22:50:00Z",
+      "location": "Lexington, KY",
+      "status": "future",
+      "team_1": {
+        "team_id": "2633",
+        "seed": "2"
+      },
+      "team_2": {
+        "team_id": "2747",
+        "seed": "15"
+      },
+      "feed_in_game_ids": [],
+      "feeds_to_game_id": "401746044"
+    },
+    {
+      "id": "401746042",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 1,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-22T23:10:00Z",
+      "location": "Lexington, KY",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401745957"
+      },
+      "team_2": {
+        "from_game_id": "401745959"
+      },
+      "feed_in_game_ids": [
+        "401745957",
+        "401745959"
+      ],
+      "feeds_to_game_id": "401746069"
+    },
+    {
+      "id": "401746036",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 2,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-22T21:30:00Z",
+      "location": "Denver, CO",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401745963"
+      },
+      "team_2": {
+        "from_game_id": "401745966"
+      },
+      "feed_in_game_ids": [
+        "401745963",
+        "401745966"
+      ],
+      "feeds_to_game_id": "401746069"
+    },
+    {
+      "id": "401746047",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 3,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-24T00:20:00Z",
+      "location": "Milwaukee, WI",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401745995"
+      },
+      "team_2": {
+        "from_game_id": "401745997"
+      },
+      "feed_in_game_ids": [
+        "401745995",
+        "401745997"
+      ],
+      "feeds_to_game_id": "401746070"
+    },
+    {
+      "id": "401746054",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 4,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-24T00:50:00Z",
+      "location": "Cleveland, OH",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401745999"
+      },
+      "team_2": {
+        "from_game_id": "401746001"
+      },
+      "feed_in_game_ids": [
+        "401745999",
+        "401746001"
+      ],
+      "feeds_to_game_id": "401746070"
+    },
+    {
+      "id": "401746050",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 5,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-23T16:10:00Z",
+      "location": "Raleigh, NC",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746017"
+      },
+      "team_2": {
+        "from_game_id": "401746018"
+      },
+      "feed_in_game_ids": [
+        "401746017",
+        "401746018"
+      ],
+      "feeds_to_game_id": "401746065"
+    },
+    {
+      "id": "401746046",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 6,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-23T23:10:00Z",
+      "location": "Seattle, WA",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746019"
+      },
+      "team_2": {
+        "from_game_id": "401746021"
+      },
+      "feed_in_game_ids": [
+        "401746019",
+        "401746021"
+      ],
+      "feeds_to_game_id": "401746065"
+    },
+    {
+      "id": "401746040",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 7,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-22T22:10:00Z",
+      "location": "Wichita, KS",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401745985"
+      },
+      "team_2": {
+        "from_game_id": "401745986"
+      },
+      "feed_in_game_ids": [
+        "401745985",
+        "401745986"
+      ],
+      "feeds_to_game_id": "401746063"
+    },
+    {
+      "id": "401746032",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 8,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-22T18:40:00Z",
+      "location": "Providence, RI",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401745987"
+      },
+      "team_2": {
+        "from_game_id": "401745989"
+      },
+      "feed_in_game_ids": [
+        "401745987",
+        "401745989"
+      ],
+      "feeds_to_game_id": "401746063"
+    },
+    {
+      "id": "401746049",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 9,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-23T19:04:00Z",
+      "location": "Raleigh, NC",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746003"
+      },
+      "team_2": {
+        "from_game_id": "401746005"
+      },
+      "feed_in_game_ids": [
+        "401746003",
+        "401746005"
+      ],
+      "feeds_to_game_id": "401746061"
+    },
+    {
+      "id": "401746045",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 10,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-24T01:48:00Z",
+      "location": "Seattle, WA",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746007"
+      },
+      "team_2": {
+        "from_game_id": "401746009"
+      },
+      "feed_in_game_ids": [
+        "401746007",
+        "401746009"
+      ],
+      "feeds_to_game_id": "401746061"
+    },
+    {
+      "id": "401746034",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 11,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-23T00:27:00Z",
+      "location": "Denver, CO",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401745968"
+      },
+      "team_2": {
+        "from_game_id": "401745970"
+      },
+      "feed_in_game_ids": [
+        "401745968",
+        "401745970"
+      ],
+      "feeds_to_game_id": "401746062"
+    },
+    {
+      "id": "401746052",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 12,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-23T22:10:00Z",
+      "location": "Cleveland, OH",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746012"
+      },
+      "team_2": {
+        "from_game_id": "401746014"
+      },
+      "feed_in_game_ids": [
+        "401746012",
+        "401746014"
+      ],
+      "feeds_to_game_id": "401746062"
+    },
+    {
+      "id": "401746038",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 13,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-23T00:44:00Z",
+      "location": "Wichita, KS",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401745972"
+      },
+      "team_2": {
+        "from_game_id": "401745974"
+      },
+      "feed_in_game_ids": [
+        "401745972",
+        "401745974"
+      ],
+      "feeds_to_game_id": "401746071"
+    },
+    {
+      "id": "401746030",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 14,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-22T16:10:00Z",
+      "location": "Providence, RI",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401745978"
+      },
+      "team_2": {
+        "from_game_id": "401745980"
+      },
+      "feed_in_game_ids": [
+        "401745978",
+        "401745980"
+      ],
+      "feeds_to_game_id": "401746071"
+    },
+    {
+      "id": "401746048",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 15,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-23T21:30:00Z",
+      "location": "Milwaukee, WI",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746015"
+      },
+      "team_2": {
+        "from_game_id": "401746016"
+      },
+      "feed_in_game_ids": [
+        "401746015",
+        "401746016"
+      ],
+      "feeds_to_game_id": "401746072"
+    },
+    {
+      "id": "401746044",
+      "round_id": 2,
+      "round_name": "2nd Round",
+      "bracket_location": 16,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-23T01:53:00Z",
+      "location": "Lexington, KY",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401745983"
+      },
+      "team_2": {
+        "from_game_id": "401745984"
+      },
+      "feed_in_game_ids": [
+        "401745983",
+        "401745984"
+      ],
+      "feeds_to_game_id": "401746072"
+    },
+    {
+      "id": "401746069",
+      "round_id": 3,
+      "round_name": "Sweet 16",
+      "bracket_location": 1,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-29T02:00:00Z",
+      "location": "Atlanta, GA",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746042"
+      },
+      "team_2": {
+        "from_game_id": "401746036"
+      },
+      "feed_in_game_ids": [
+        "401746042",
+        "401746036"
+      ],
+      "feeds_to_game_id": "401746078"
+    },
+    {
+      "id": "401746070",
+      "round_id": 3,
+      "round_name": "Sweet 16",
+      "bracket_location": 2,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-28T23:09:00Z",
+      "location": "Atlanta, GA",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746047"
+      },
+      "team_2": {
+        "from_game_id": "401746054"
+      },
+      "feed_in_game_ids": [
+        "401746047",
+        "401746054"
+      ],
+      "feeds_to_game_id": "401746078"
+    },
+    {
+      "id": "401746065",
+      "round_id": 3,
+      "round_name": "Sweet 16",
+      "bracket_location": 3,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-27T23:39:00Z",
+      "location": "San Francisco, CA",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746050"
+      },
+      "team_2": {
+        "from_game_id": "401746046"
+      },
+      "feed_in_game_ids": [
+        "401746050",
+        "401746046"
+      ],
+      "feeds_to_game_id": "401746077"
+    },
+    {
+      "id": "401746063",
+      "round_id": 3,
+      "round_name": "Sweet 16",
+      "bracket_location": 4,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-28T02:20:00Z",
+      "location": "San Francisco, CA",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746040"
+      },
+      "team_2": {
+        "from_game_id": "401746032"
+      },
+      "feed_in_game_ids": [
+        "401746040",
+        "401746032"
+      ],
+      "feeds_to_game_id": "401746077"
+    },
+    {
+      "id": "401746061",
+      "round_id": 3,
+      "round_name": "Sweet 16",
+      "bracket_location": 5,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-28T02:03:00Z",
+      "location": "Newark, NJ",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746049"
+      },
+      "team_2": {
+        "from_game_id": "401746045"
+      },
+      "feed_in_game_ids": [
+        "401746049",
+        "401746045"
+      ],
+      "feeds_to_game_id": "401746076"
+    },
+    {
+      "id": "401746062",
+      "round_id": 3,
+      "round_name": "Sweet 16",
+      "bracket_location": 6,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-27T23:09:00Z",
+      "location": "Newark, NJ",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746034"
+      },
+      "team_2": {
+        "from_game_id": "401746052"
+      },
+      "feed_in_game_ids": [
+        "401746034",
+        "401746052"
+      ],
+      "feeds_to_game_id": "401746076"
+    },
+    {
+      "id": "401746071",
+      "round_id": 3,
+      "round_name": "Sweet 16",
+      "bracket_location": 7,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-29T02:28:00Z",
+      "location": "Indianapolis, IN",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746038"
+      },
+      "team_2": {
+        "from_game_id": "401746030"
+      },
+      "feed_in_game_ids": [
+        "401746038",
+        "401746030"
+      ],
+      "feeds_to_game_id": "401746079"
+    },
+    {
+      "id": "401746072",
+      "round_id": 3,
+      "round_name": "Sweet 16",
+      "bracket_location": 8,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-28T23:39:00Z",
+      "location": "Indianapolis, IN",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746048"
+      },
+      "team_2": {
+        "from_game_id": "401746044"
+      },
+      "feed_in_game_ids": [
+        "401746048",
+        "401746044"
+      ],
+      "feeds_to_game_id": "401746079"
+    },
+    {
+      "id": "401746078",
+      "round_id": 4,
+      "round_name": "Elite 8",
+      "bracket_location": 1,
+      "region_id": 1,
+      "region_name": "SOUTH",
+      "scheduled_at": "2025-03-30T21:05:00Z",
+      "location": "Atlanta, GA",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746069"
+      },
+      "team_2": {
+        "from_game_id": "401746070"
+      },
+      "feed_in_game_ids": [
+        "401746069",
+        "401746070"
+      ],
+      "feeds_to_game_id": "401746081"
+    },
+    {
+      "id": "401746077",
+      "round_id": 4,
+      "round_name": "Elite 8",
+      "bracket_location": 2,
+      "region_id": 2,
+      "region_name": "WEST",
+      "scheduled_at": "2025-03-29T22:09:00Z",
+      "location": "San Francisco, CA",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746065"
+      },
+      "team_2": {
+        "from_game_id": "401746063"
+      },
+      "feed_in_game_ids": [
+        "401746065",
+        "401746063"
+      ],
+      "feeds_to_game_id": "401746081"
+    },
+    {
+      "id": "401746076",
+      "round_id": 4,
+      "round_name": "Elite 8",
+      "bracket_location": 3,
+      "region_id": 3,
+      "region_name": "EAST",
+      "scheduled_at": "2025-03-30T00:59:00Z",
+      "location": "Newark, NJ",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746061"
+      },
+      "team_2": {
+        "from_game_id": "401746062"
+      },
+      "feed_in_game_ids": [
+        "401746061",
+        "401746062"
+      ],
+      "feeds_to_game_id": "401746080"
+    },
+    {
+      "id": "401746079",
+      "round_id": 4,
+      "round_name": "Elite 8",
+      "bracket_location": 4,
+      "region_id": 4,
+      "region_name": "MIDWEST",
+      "scheduled_at": "2025-03-30T18:20:00Z",
+      "location": "Indianapolis, IN",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746071"
+      },
+      "team_2": {
+        "from_game_id": "401746072"
+      },
+      "feed_in_game_ids": [
+        "401746071",
+        "401746072"
+      ],
+      "feeds_to_game_id": "401746080"
+    },
+    {
+      "id": "401746081",
+      "round_id": 5,
+      "round_name": "Final Four",
+      "bracket_location": 1,
+      "scheduled_at": "2025-04-05T22:09:00Z",
+      "location": "San Antonio, TX",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746078"
+      },
+      "team_2": {
+        "from_game_id": "401746077"
+      },
+      "feed_in_game_ids": [
+        "401746078",
+        "401746077"
+      ],
+      "feeds_to_game_id": "401746082"
+    },
+    {
+      "id": "401746080",
+      "round_id": 5,
+      "round_name": "Final Four",
+      "bracket_location": 2,
+      "scheduled_at": "2025-04-06T01:28:00Z",
+      "location": "San Antonio, TX",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746076"
+      },
+      "team_2": {
+        "from_game_id": "401746079"
+      },
+      "feed_in_game_ids": [
+        "401746076",
+        "401746079"
+      ],
+      "feeds_to_game_id": "401746082"
+    },
+    {
+      "id": "401746082",
+      "round_id": 6,
+      "round_name": "Championship",
+      "bracket_location": 1,
+      "scheduled_at": "2025-04-08T00:50:00Z",
+      "location": "San Antonio, TX",
+      "status": "future",
+      "team_1": {
+        "from_game_id": "401746081"
+      },
+      "team_2": {
+        "from_game_id": "401746080"
+      },
+      "feed_in_game_ids": [
+        "401746081",
+        "401746080"
+      ]
+    }
+  ]
+}
