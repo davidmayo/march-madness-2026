@@ -13,15 +13,14 @@ from dataclasses import dataclass
 from functools import lru_cache
 from html import escape
 from pathlib import Path
+import math
 
 from march_madness.canonical_bracket import REGION_ORDER
 from march_madness.canonical_bracket import ROUND_NAMES
 from march_madness.canonical_bracket import canonical_team_name_by_id
-from march_madness.predictions import DEFAULT_SIMULATION_COUNT
-from march_madness.predictions import PredictionInterval
-from march_madness.predictions import TournamentPredictionReport
-from march_madness.predictions import UserPredictionSummary
-from march_madness.predictions import build_prediction_report
+from march_madness.predictions import TournamentPredictionHistory
+from march_madness.predictions import UserPredictionHistorySeries
+from march_madness.predictions import load_prediction_history
 from march_madness.scoring import get_bracket_from_scoreboard_data
 from march_madness.scoring import load_saved_user_brackets
 from march_madness.scoring import score_saved_user_brackets
@@ -125,15 +124,10 @@ def load_site_data() -> SiteData:
 
 
 @lru_cache(maxsize=1)
-def load_prediction_report() -> TournamentPredictionReport:
-    """Load the cached Monte Carlo prediction report for the frontend."""
+def load_prediction_history_data() -> TournamentPredictionHistory:
+    """Load the cached prediction-history dataset for the frontend."""
 
-    scoreboard_blob = json.loads(SCOREBOARD_PATH.read_text())
-    reference_bracket = get_bracket_from_scoreboard_data(scoreboard_blob)
-    return build_prediction_report(
-        reference_bracket,
-        simulation_count=DEFAULT_SIMULATION_COUNT,
-    )
+    return load_prediction_history()
 
 
 def default_bracket_slug() -> str:
@@ -311,50 +305,119 @@ def render_bracket_page(bracket_slug: str) -> tuple[int, str]:
 
 
 def render_prediction_page() -> str:
-    """Render the Monte Carlo prediction page."""
+    """Render the Monte Carlo prediction-history page."""
 
-    prediction_report = load_prediction_report()
-    projected_leader = prediction_report.users[0] if prediction_report.users else None
-
-    summary_cards = "".join(
-        (
-            _render_stat_card("Simulations", _format_score(float(prediction_report.simulation_count))),
-            _render_stat_card("Completed Games", f"{prediction_report.completed_game_count} of 63"),
-            _render_stat_card("Remaining Games", _format_score(float(prediction_report.remaining_game_count))),
-            _render_stat_card("KenPom Snapshot", prediction_report.kenpom_snapshot_name),
+    prediction_history = load_prediction_history_data()
+    latest_series = [
+        series
+        for series in prediction_history.users
+        if series.points
+    ]
+    latest_series.sort(
+        key=lambda series: (
+            series.points[-1].average_finishing_position,
+            -series.points[-1].winning_percentage,
+            series.user_name,
         )
     )
-    if projected_leader is not None:
+
+    current_leader = latest_series[0] if latest_series else None
+    win_probability_leader = max(
+        latest_series,
+        key=lambda series: series.points[-1].winning_percentage,
+        default=None,
+    )
+    summary_cards = "".join(
+        (
+            _render_stat_card("Simulations Per Checkpoint", _format_score(float(prediction_history.simulation_count))),
+            _render_stat_card("Checkpoints", _format_score(float(len(prediction_history.checkpoints)))),
+            _render_stat_card("Latest Completed Games", _format_score(float(prediction_history.completed_game_count_max))),
+        )
+    )
+    if current_leader is not None:
         summary_cards = "".join(
             (
                 summary_cards,
-                _render_stat_card("Best Avg Finish", projected_leader.user_name),
-                _render_stat_card("Projected Avg Score", _format_score(projected_leader.average_score)),
+                _render_stat_card("Current Best Avg Finish", current_leader.user_name),
+                _render_stat_card(
+                    "Current Avg Finish",
+                    _format_score(current_leader.points[-1].average_finishing_position),
+                ),
+            )
+        )
+    if win_probability_leader is not None:
+        summary_cards = "".join(
+            (
+                summary_cards,
+                _render_stat_card("Highest Win Rate", win_probability_leader.user_name),
+                _render_stat_card(
+                    "Current Win Rate",
+                    _format_percent(win_probability_leader.points[-1].winning_percentage),
+                ),
             )
         )
 
+    average_finish_chart = _render_prediction_history_chart(
+        title="Average Finish History",
+        subtitle="Lower is better. Shared places keep the same finishing position.",
+        series_list=latest_series,
+        metric_name="average_finishing_position",
+        y_axis_label="Average Finish",
+        y_min=1.0,
+        y_max=float(max(len(latest_series), 1)),
+        y_tick_values=_average_finish_tick_values(len(latest_series)),
+    )
+    winning_percentage_chart = _render_prediction_history_chart(
+        title="Winning Percentage History",
+        subtitle="Percent of simulations where the bracket finished in first place, including tied firsts.",
+        series_list=latest_series,
+        metric_name="winning_percentage",
+        y_axis_label="Winning Percentage",
+        y_min=0.0,
+        y_max=100.0,
+        y_tick_values=[0.0, 20.0, 40.0, 60.0, 80.0, 100.0],
+    )
     rows_html = "".join(
-        _render_prediction_row(prediction)
-        for prediction in prediction_report.users
+        _render_prediction_snapshot_row(series)
+        for series in latest_series
     )
     body = f"""
     <section class="hero">
-        <p class="eyebrow">Monte Carlo forecast</p>
+        <p class="eyebrow">Monte Carlo history</p>
         <h1>Prediction Engine</h1>
         <p class="lede">
-            {prediction_report.simulation_count:,} KenPom-driven tournament simulations from the current bracket state.
-            Finished games are locked to actual results, remaining games are simulated, and tied scores share the same
-            finishing place without any tiebreaker.
+            {prediction_history.simulation_count:,} KenPom-driven simulations were rerun after every completed game,
+            starting from the untouched bracket and continuing through the latest scoreboard snapshot.
         </p>
         <div class="stat-grid">{summary_cards}</div>
     </section>
     <section class="panel">
         <div class="section-heading">
             <div>
-                <p class="section-kicker">Forecast table</p>
-                <h2>Bracket Outcome Ranges</h2>
+                <p class="section-kicker">Trend graph</p>
+                <h2>Average Finish Over Time</h2>
             </div>
-            <p class="panel-note">80% intervals are the 10th to 90th percentile across simulations.</p>
+            <p class="panel-note">X axis is games completed. Y axis is each user's simulated average finishing place.</p>
+        </div>
+        {average_finish_chart}
+    </section>
+    <section class="panel">
+        <div class="section-heading">
+            <div>
+                <p class="section-kicker">Win equity</p>
+                <h2>Winning Percentage Over Time</h2>
+            </div>
+            <p class="panel-note">A win counts any simulation where a user shared first place.</p>
+        </div>
+        {winning_percentage_chart}
+    </section>
+    <section class="panel">
+        <div class="section-heading">
+            <div>
+                <p class="section-kicker">Latest checkpoint</p>
+                <h2>Current Forecast Snapshot</h2>
+            </div>
+            <p class="panel-note">Sorted by the most recent average finishing position.</p>
         </div>
         <div class="table-wrap">
             <table class="standings-table prediction-table">
@@ -362,12 +425,8 @@ def render_prediction_page() -> str:
                     <tr>
                         <th>Name</th>
                         <th>Category</th>
-                        <th>Avg Score</th>
-                        <th>Score 80% CI</th>
                         <th>Avg Finish</th>
-                        <th>Finish 80% CI</th>
-                        <th>Avg Category Finish</th>
-                        <th>Category Finish 80% CI</th>
+                        <th>Winning %</th>
                     </tr>
                 </thead>
                 <tbody>{rows_html}</tbody>
@@ -744,23 +803,188 @@ def _render_standings_row(rank: int, row: StandingsRow) -> str:
     """
 
 
-def _render_prediction_row(prediction: UserPredictionSummary) -> str:
-    """Render one row in the Monte Carlo prediction table."""
+def _render_prediction_snapshot_row(series: UserPredictionHistorySeries) -> str:
+    """Render one row in the latest-checkpoint prediction snapshot table."""
 
+    latest_point = series.points[-1]
     return f"""
     <tr>
         <td>
-            <a class="standings-link" href="/brackets/{escape(prediction.slug)}">{escape(prediction.user_name)}</a>
+            <a class="standings-link" href="/brackets/{escape(series.slug)}">{escape(series.user_name)}</a>
         </td>
-        <td>{_render_table_category_badges(tuple(prediction.user_categories))}</td>
-        <td>{_format_score(prediction.average_score)}</td>
-        <td class="interval-cell">{escape(_format_prediction_interval(prediction.score_interval))}</td>
-        <td>{_format_score(prediction.average_finishing_position)}</td>
-        <td class="interval-cell">{escape(_format_prediction_interval(prediction.finishing_position_interval))}</td>
-        <td>{_format_optional_number(prediction.average_category_finishing_position)}</td>
-        <td class="interval-cell">{escape(_format_optional_interval(prediction.category_finishing_position_interval))}</td>
+        <td>{_render_table_category_badges(tuple(series.user_categories))}</td>
+        <td>{_format_score(latest_point.average_finishing_position)}</td>
+        <td>{_format_percent(latest_point.winning_percentage)}</td>
     </tr>
     """
+
+
+def _render_prediction_history_chart(
+    *,
+    title: str,
+    subtitle: str,
+    series_list: list[UserPredictionHistorySeries],
+    metric_name: str,
+    y_axis_label: str,
+    y_min: float,
+    y_max: float,
+    y_tick_values: list[float],
+) -> str:
+    """Render one SVG line chart for the prediction-history page."""
+
+    width = 1180
+    height = 520
+    padding_left = 72
+    padding_right = 28
+    padding_top = 54
+    padding_bottom = 56
+    plot_width = width - padding_left - padding_right
+    plot_height = height - padding_top - padding_bottom
+
+    max_games_completed = max(
+        (series.points[-1].games_completed for series in series_list if series.points),
+        default=0,
+    )
+    x_tick_values = _x_axis_tick_values(max_games_completed)
+
+    def x_position(games_completed: int) -> float:
+        if max_games_completed == 0:
+            return padding_left + (plot_width / 2)
+        return padding_left + (games_completed / max_games_completed) * plot_width
+
+    def y_position(value: float) -> float:
+        if math.isclose(y_max, y_min):
+            return padding_top + (plot_height / 2)
+        return padding_top + ((y_max - value) / (y_max - y_min)) * plot_height
+
+    grid_lines = "".join(
+        f"""
+        <line class="chart-grid-line" x1="{padding_left}" y1="{y_position(tick_value):.2f}" x2="{padding_left + plot_width}" y2="{y_position(tick_value):.2f}"></line>
+        <text class="chart-axis-text" x="{padding_left - 12}" y="{y_position(tick_value) + 4:.2f}" text-anchor="end">{escape(_format_chart_tick(metric_name, tick_value))}</text>
+        """
+        for tick_value in y_tick_values
+    )
+    x_axis_labels = "".join(
+        f"""
+        <line class="chart-tick-line" x1="{x_position(tick_value):.2f}" y1="{padding_top + plot_height}" x2="{x_position(tick_value):.2f}" y2="{padding_top + plot_height + 6}"></line>
+        <text class="chart-axis-text" x="{x_position(tick_value):.2f}" y="{padding_top + plot_height + 24}" text-anchor="middle">{tick_value}</text>
+        """
+        for tick_value in x_tick_values
+    )
+
+    line_markup_parts: list[str] = []
+    legend_items: list[str] = []
+    for index, series in enumerate(series_list):
+        color = _prediction_series_color(index)
+        dasharray = _prediction_series_dasharray(series)
+        points = " ".join(
+            f"{x_position(point.games_completed):.2f},{y_position(getattr(point, metric_name)):.2f}"
+            for point in series.points
+        )
+        circle_markup = "".join(
+            f'<circle class="chart-point" cx="{x_position(point.games_completed):.2f}" cy="{y_position(getattr(point, metric_name)):.2f}" r="3.2" fill="{color}"></circle>'
+            for point in series.points
+        )
+        line_markup_parts.append(
+            f'<polyline class="chart-line" points="{points}" fill="none" stroke="{color}" stroke-dasharray="{dasharray}"></polyline>{circle_markup}'
+        )
+        legend_items.append(
+            f"""
+            <span class="chart-legend-item">
+                <svg class="chart-legend-swatch" viewBox="0 0 32 10" aria-hidden="true">
+                    <line x1="1" y1="5" x2="31" y2="5" stroke="{color}" stroke-width="3" stroke-dasharray="{dasharray}"></line>
+                </svg>
+                <span>{escape(series.user_name)}</span>
+            </span>
+            """
+        )
+
+    svg = f"""
+    <svg class="prediction-chart-svg" viewBox="0 0 {width} {height}" role="img" aria-label="{escape(title)}">
+        <text class="chart-title" x="{padding_left}" y="24">{escape(title)}</text>
+        <text class="chart-subtitle" x="{padding_left}" y="44">{escape(subtitle)}</text>
+        {grid_lines}
+        <line class="chart-axis-line" x1="{padding_left}" y1="{padding_top + plot_height}" x2="{padding_left + plot_width}" y2="{padding_top + plot_height}"></line>
+        <line class="chart-axis-line" x1="{padding_left}" y1="{padding_top}" x2="{padding_left}" y2="{padding_top + plot_height}"></line>
+        {x_axis_labels}
+        {''.join(line_markup_parts)}
+        <text class="chart-axis-label" x="{padding_left + (plot_width / 2):.2f}" y="{height - 12}" text-anchor="middle">Games Completed</text>
+        <text class="chart-axis-label" x="18" y="{padding_top + (plot_height / 2):.2f}" text-anchor="middle" transform="rotate(-90 18 {padding_top + (plot_height / 2):.2f})">{escape(y_axis_label)}</text>
+    </svg>
+    """
+    return f"""
+    <div class="prediction-chart-shell">
+        <div class="prediction-chart-wrap">{svg}</div>
+        <div class="chart-legend">{''.join(legend_items)}</div>
+    </div>
+    """
+
+
+def _prediction_series_color(index: int) -> str:
+    """Return a stable display color for one prediction series."""
+
+    palette = (
+        "#0a6a4a",
+        "#b85c38",
+        "#28536b",
+        "#d69c2f",
+        "#8b3d3d",
+        "#5a7d2b",
+        "#6b4e9b",
+        "#0e7490",
+        "#c2410c",
+        "#4f46e5",
+        "#047857",
+        "#9f1239",
+        "#7c2d12",
+        "#1d4ed8",
+    )
+    return palette[index % len(palette)]
+
+
+def _prediction_series_dasharray(series: UserPredictionHistorySeries) -> str:
+    """Return the stroke dash pattern for one user's chart line."""
+
+    if "staff" in series.user_categories:
+        return "8 5"
+    return "none"
+
+
+def _x_axis_tick_values(max_games_completed: int) -> list[int]:
+    """Return evenly spaced integer tick values for the chart x axis."""
+
+    if max_games_completed <= 0:
+        return [0]
+    step = max(1, math.ceil(max_games_completed / 7))
+    ticks = list(range(0, max_games_completed + 1, step))
+    if ticks[-1] != max_games_completed:
+        ticks.append(max_games_completed)
+    return ticks
+
+
+def _average_finish_tick_values(user_count: int) -> list[float]:
+    """Return readable y-axis ticks for the average-finish chart."""
+
+    max_finish = max(user_count, 1)
+    if max_finish <= 5:
+        return [float(value) for value in range(1, max_finish + 1)]
+
+    ticks = [1.0]
+    step = max(1, math.ceil((max_finish - 1) / 4))
+    current = 1 + step
+    while current < max_finish:
+        ticks.append(float(current))
+        current += step
+    ticks.append(float(max_finish))
+    return ticks
+
+
+def _format_chart_tick(metric_name: str, value: float) -> str:
+    """Format a y-axis tick label for one prediction-history chart."""
+
+    if metric_name == "winning_percentage":
+        return _format_percent(value)
+    return _format_score(value)
 
 
 def _render_stat_card(label: str, value: str) -> str:
@@ -853,24 +1077,9 @@ def _format_score(value: float | None) -> str:
         return str(int(value))
     return f"{value:.1f}"
 
-
-def _format_prediction_interval(interval: PredictionInterval) -> str:
-    """Render one prediction interval using the shared numeric formatter."""
-
-    return f"{_format_score(interval.lower)} to {_format_score(interval.upper)}"
-
-
-def _format_optional_number(value: float | None) -> str:
-    """Render an optional number field in a prediction table cell."""
+def _format_percent(value: float | None) -> str:
+    """Render a percentage with one decimal place."""
 
     if value is None:
         return "—"
-    return _format_score(value)
-
-
-def _format_optional_interval(interval: PredictionInterval | None) -> str:
-    """Render an optional prediction interval in a table cell."""
-
-    if interval is None:
-        return "—"
-    return _format_prediction_interval(interval)
+    return f"{value:.1f}%"

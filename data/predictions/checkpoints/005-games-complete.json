@@ -1,0 +1,353 @@
+{
+    "games_completed": 5,
+    "completed_scoreboard_event_ids": [
+        "401856479",
+        "401856489",
+        "401856482",
+        "401856480",
+        "401856478"
+    ],
+    "simulation_count": 1000,
+    "random_seed": 20260321,
+    "completed_game_count": 5,
+    "remaining_game_count": 58,
+    "kenpom_snapshot_name": "2026-03-21T01-00-00Z",
+    "users": [
+        {
+            "slug": "john-asher",
+            "user_name": "John Asher",
+            "entry_name": "JohnAsher1943847",
+            "user_categories": [
+                "student"
+            ],
+            "average_score": 95.79,
+            "average_finishing_position": 3.474,
+            "winning_percentage": 13.200000000000001,
+            "average_category_finishing_position": 2.296,
+            "score_interval": {
+                "lower": 63.0,
+                "upper": 132.0
+            },
+            "finishing_position_interval": {
+                "lower": 1.0,
+                "upper": 6.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 1.0,
+                "upper": 4.0
+            }
+        },
+        {
+            "slug": "andrea-togni",
+            "user_name": "Andrea Togni",
+            "entry_name": "atogni8526370",
+            "user_categories": [
+                "staff"
+            ],
+            "average_score": 95.406,
+            "average_finishing_position": 3.928,
+            "winning_percentage": 28.299999999999997,
+            "average_category_finishing_position": 1.667,
+            "score_interval": {
+                "lower": 62.0,
+                "upper": 135.0
+            },
+            "finishing_position_interval": {
+                "lower": 1.0,
+                "upper": 8.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 1.0,
+                "upper": 3.0
+            }
+        },
+        {
+            "slug": "mitchell-mcculley",
+            "user_name": "Mitchell Mcculley",
+            "entry_name": "msmcculley5973951",
+            "user_categories": [
+                "student"
+            ],
+            "average_score": 93.936,
+            "average_finishing_position": 4.154,
+            "winning_percentage": 7.8,
+            "average_category_finishing_position": 2.794,
+            "score_interval": {
+                "lower": 61.0,
+                "upper": 130.0
+            },
+            "finishing_position_interval": {
+                "lower": 2.0,
+                "upper": 7.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 1.0,
+                "upper": 5.0
+            }
+        },
+        {
+            "slug": "jackson-scott",
+            "user_name": "Jackson Scott",
+            "entry_name": "Jackson Scott",
+            "user_categories": [
+                "student"
+            ],
+            "average_score": 92.916,
+            "average_finishing_position": 4.467,
+            "winning_percentage": 5.0,
+            "average_category_finishing_position": 3.07,
+            "score_interval": {
+                "lower": 61.0,
+                "upper": 129.0
+            },
+            "finishing_position_interval": {
+                "lower": 2.0,
+                "upper": 7.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 1.0,
+                "upper": 5.0
+            }
+        },
+        {
+            "slug": "chloe-hart",
+            "user_name": "Chloe Hart",
+            "entry_name": "Chlomospher2720090",
+            "user_categories": [
+                "staff"
+            ],
+            "average_score": 85.992,
+            "average_finishing_position": 5.158,
+            "winning_percentage": 13.200000000000001,
+            "average_category_finishing_position": 2.384,
+            "score_interval": {
+                "lower": 57.0,
+                "upper": 126.0
+            },
+            "finishing_position_interval": {
+                "lower": 1.0,
+                "upper": 9.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 1.0,
+                "upper": 4.0
+            }
+        },
+        {
+            "slug": "ian-warford",
+            "user_name": "Ian Warford",
+            "entry_name": "Ian9714240",
+            "user_categories": [
+                "student"
+            ],
+            "average_score": 89.544,
+            "average_finishing_position": 5.205,
+            "winning_percentage": 10.8,
+            "average_category_finishing_position": 3.546,
+            "score_interval": {
+                "lower": 58.0,
+                "upper": 128.0
+            },
+            "finishing_position_interval": {
+                "lower": 1.0,
+                "upper": 9.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 1.0,
+                "upper": 6.0
+            }
+        },
+        {
+            "slug": "noah-patrick",
+            "user_name": "Noah Patrick",
+            "entry_name": "Noah6128508",
+            "user_categories": [
+                "staff"
+            ],
+            "average_score": 70.824,
+            "average_finishing_position": 6.996,
+            "winning_percentage": 9.6,
+            "average_category_finishing_position": 3.189,
+            "score_interval": {
+                "lower": 52.0,
+                "upper": 94.0
+            },
+            "finishing_position_interval": {
+                "lower": 2.0,
+                "upper": 10.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 1.0,
+                "upper": 5.0
+            }
+        },
+        {
+            "slug": "carrie-bruce",
+            "user_name": "Carrie Bruce",
+            "entry_name": "carriebeary1355070",
+            "user_categories": [
+                "student"
+            ],
+            "average_score": 64.424,
+            "average_finishing_position": 8.526,
+            "winning_percentage": 2.3,
+            "average_category_finishing_position": 5.308,
+            "score_interval": {
+                "lower": 48.0,
+                "upper": 83.0
+            },
+            "finishing_position_interval": {
+                "lower": 4.0,
+                "upper": 12.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 3.0,
+                "upper": 7.0
+            }
+        },
+        {
+            "slug": "austin-jude",
+            "user_name": "Austin Jude",
+            "entry_name": "Austin Jude2343623",
+            "user_categories": [
+                "student"
+            ],
+            "average_score": 64.334,
+            "average_finishing_position": 8.73,
+            "winning_percentage": 7.8,
+            "average_category_finishing_position": 5.253,
+            "score_interval": {
+                "lower": 46.0,
+                "upper": 88.0
+            },
+            "finishing_position_interval": {
+                "lower": 2.0,
+                "upper": 13.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 1.0,
+                "upper": 7.0
+            }
+        },
+        {
+            "slug": "mila-shearer",
+            "user_name": "Mila Shearer",
+            "entry_name": "Mila2957994",
+            "user_categories": [
+                "student"
+            ],
+            "average_score": 58.124,
+            "average_finishing_position": 9.919,
+            "winning_percentage": 1.4000000000000001,
+            "average_category_finishing_position": 5.984,
+            "score_interval": {
+                "lower": 44.0,
+                "upper": 77.0
+            },
+            "finishing_position_interval": {
+                "lower": 4.0,
+                "upper": 13.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 3.0,
+                "upper": 8.0
+            }
+        },
+        {
+            "slug": "emily-walter",
+            "user_name": "Emily Walter",
+            "entry_name": "emily_w3079092",
+            "user_categories": [
+                "staff"
+            ],
+            "average_score": 58.496,
+            "average_finishing_position": 10.11,
+            "winning_percentage": 0.0,
+            "average_category_finishing_position": 4.307,
+            "score_interval": {
+                "lower": 40.0,
+                "upper": 77.0
+            },
+            "finishing_position_interval": {
+                "lower": 6.0,
+                "upper": 14.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 2.0,
+                "upper": 6.0
+            }
+        },
+        {
+            "slug": "darren-boyd",
+            "user_name": "Darren Boyd",
+            "entry_name": "DB_SSC",
+            "user_categories": [
+                "staff"
+            ],
+            "average_score": 56.83,
+            "average_finishing_position": 10.235,
+            "winning_percentage": 1.0999999999999999,
+            "average_category_finishing_position": 4.527,
+            "score_interval": {
+                "lower": 43.0,
+                "upper": 69.0
+            },
+            "finishing_position_interval": {
+                "lower": 7.0,
+                "upper": 13.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 3.0,
+                "upper": 6.0
+            }
+        },
+        {
+            "slug": "david-mayo",
+            "user_name": "David Mayo",
+            "entry_name": "Basketball!",
+            "user_categories": [
+                "staff"
+            ],
+            "average_score": 54.836,
+            "average_finishing_position": 10.645,
+            "winning_percentage": 4.2,
+            "average_category_finishing_position": 4.738,
+            "score_interval": {
+                "lower": 42.0,
+                "upper": 69.0
+            },
+            "finishing_position_interval": {
+                "lower": 6.0,
+                "upper": 14.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 3.0,
+                "upper": 6.0
+            }
+        },
+        {
+            "slug": "austin-music",
+            "user_name": "Austin Music",
+            "entry_name": "Austin Music",
+            "user_categories": [
+                "student"
+            ],
+            "average_score": 48.834,
+            "average_finishing_position": 11.959,
+            "winning_percentage": 0.8,
+            "average_category_finishing_position": 7.077,
+            "score_interval": {
+                "lower": 38.0,
+                "upper": 60.0
+            },
+            "finishing_position_interval": {
+                "lower": 9.0,
+                "upper": 14.0
+            },
+            "category_finishing_position_interval": {
+                "lower": 5.0,
+                "upper": 8.0
+            }
+        }
+    ]
+}

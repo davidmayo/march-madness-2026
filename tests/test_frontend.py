@@ -98,8 +98,9 @@ def test_prediction_and_historical_pages_render() -> None:
     assert prediction_response.status_code == 200
     prediction_html = prediction_response.body.decode()
     assert "Prediction Engine" in prediction_html
-    assert "Monte Carlo forecast" in prediction_html
-    assert "Score 80% CI" in prediction_html
+    assert "Monte Carlo history" in prediction_html
+    assert "Average Finish Over Time" in prediction_html
+    assert "Winning Percentage Over Time" in prediction_html
     assert "Darren Boyd" in prediction_html
 
     assert historical_response.status_code == 200

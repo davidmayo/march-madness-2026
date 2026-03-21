@@ -117,12 +117,32 @@ def score(
 def get_bracket_from_scoreboard_data(espn_api_scoreboard_blob: Any) -> Bracket:
     """Build the canonical reference bracket for the completed scoreboard games."""
 
+    return get_bracket_from_scoreboard_data_with_limit(espn_api_scoreboard_blob)
+
+
+def get_bracket_from_scoreboard_data_with_limit(
+    espn_api_scoreboard_blob: Any,
+    *,
+    completed_game_limit: int | None = None,
+) -> Bracket:
+    """Build the canonical bracket after only the first ``completed_game_limit`` results."""
+
     current_bracket = build_canonical_bracket().model_copy(deep=True)
     _apply_scoreboard_results(
         reference_bracket=current_bracket,
         espn_api_scoreboard_blob=espn_api_scoreboard_blob,
+        completed_game_limit=completed_game_limit,
     )
     return current_bracket
+
+
+def get_completed_scoreboard_event_ids(espn_api_scoreboard_blob: Any) -> list[str]:
+    """Return completed scoreboard event IDs in the exact order they are applied."""
+
+    return [
+        completed_game.event_id
+        for completed_game in _completed_games_from_scoreboard_blob(espn_api_scoreboard_blob)
+    ]
 
 
 def load_user_bracket(path: Path) -> UserBracket:
@@ -185,10 +205,17 @@ def _completed_reference_game_lookup(reference_bracket: Bracket) -> dict[str, Ga
     }
 
 
-def _apply_scoreboard_results(reference_bracket: Bracket, espn_api_scoreboard_blob: Any) -> int:
+def _apply_scoreboard_results(
+    reference_bracket: Bracket,
+    espn_api_scoreboard_blob: Any,
+    *,
+    completed_game_limit: int | None = None,
+) -> int:
     """Apply completed scoreboard results onto the canonical bracket template."""
 
     completed_games = _completed_games_from_scoreboard_blob(espn_api_scoreboard_blob)
+    if completed_game_limit is not None:
+        completed_games = completed_games[:completed_game_limit]
     game_lookup = {game.id: game for game in reference_bracket.games}
     game_by_espn_event_id = {
         game.espn_event_id: game for game in reference_bracket.games if game.espn_event_id is not None

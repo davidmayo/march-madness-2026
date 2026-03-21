@@ -25,6 +25,8 @@ from march_madness.canonical_bracket import REGION_ORDER
 from march_madness.canonical_bracket import canonical_team_name_by_id
 from march_madness.canonical_bracket import canonical_team_seed_by_id
 from march_madness.scoring import TRADITIONAL_SCORING_BY_ROUND
+from march_madness.scoring import get_bracket_from_scoreboard_data_with_limit
+from march_madness.scoring import get_completed_scoreboard_event_ids
 from march_madness.scoring import load_saved_user_brackets
 from march_madness.scoring import score
 from march_madness.scrape import KENPOM_INDEX_PATH
@@ -39,6 +41,12 @@ from march_madness.user_brackets import USER_BRACKETS_DIR
 from march_madness.user_brackets import UserBracket
 from march_madness.user_brackets import UserCategory
 
+
+ROOT = Path(__file__).resolve().parents[2]
+SCOREBOARD_PATH = ROOT / "data" / "espn" / "api" / "scoreboard.json"
+PREDICTIONS_DIR = ROOT / "data" / "predictions"
+PREDICTION_CHECKPOINTS_DIR = PREDICTIONS_DIR / "checkpoints"
+PREDICTION_HISTORY_PATH = PREDICTIONS_DIR / "prediction-history.json"
 
 AVERAGE_TEMPO = 70.0
 KENPOM_SCALE_FACTOR = 13.7420
@@ -81,6 +89,7 @@ class UserPredictionSummary(BaseModel):
     user_categories: list[UserCategory]
     average_score: float
     average_finishing_position: float
+    winning_percentage: float
     average_category_finishing_position: float | None = None
     score_interval: PredictionInterval
     finishing_position_interval: PredictionInterval
@@ -92,12 +101,58 @@ class TournamentPredictionReport(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    games_completed: int
+    completed_scoreboard_event_ids: list[str]
     simulation_count: int
     random_seed: int
     completed_game_count: int
     remaining_game_count: int
     kenpom_snapshot_name: str
     users: list[UserPredictionSummary]
+
+
+class UserPredictionHistoryPoint(BaseModel):
+    """Store one checkpoint value for the prediction-history graphs."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    games_completed: int
+    average_finishing_position: float
+    winning_percentage: float
+
+
+class UserPredictionHistorySeries(BaseModel):
+    """Store the full graph series for one user across checkpoints."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    slug: str
+    user_name: str
+    entry_name: str
+    user_categories: list[UserCategory]
+    points: list[UserPredictionHistoryPoint]
+
+
+class PredictionHistoryCheckpoint(BaseModel):
+    """Describe one saved checkpoint report written to disk."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    games_completed: int
+    completed_scoreboard_event_ids: list[str]
+    report_path: str
+
+
+class TournamentPredictionHistory(BaseModel):
+    """Store the graph-ready prediction history across all checkpoints."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    simulation_count: int
+    random_seed: int
+    completed_game_count_max: int
+    checkpoints: list[PredictionHistoryCheckpoint]
+    users: list[UserPredictionHistorySeries]
 
 
 @dataclass
@@ -107,6 +162,7 @@ class _UserSimulationAccumulator:
     scores: list[float] = field(default_factory=list)
     finishing_positions: list[int] = field(default_factory=list)
     category_finishing_positions: list[int] = field(default_factory=list)
+    wins: int = 0
 
 
 def load_latest_kenpom_ratings(
@@ -192,6 +248,8 @@ def simulate_remaining_tournament(
 def build_prediction_report(
     reference_bracket: Bracket,
     *,
+    games_completed: int | None = None,
+    completed_scoreboard_event_ids: list[str] | None = None,
     simulation_count: int = DEFAULT_SIMULATION_COUNT,
     random_seed: int = DEFAULT_RANDOM_SEED,
     user_brackets_dir: Path = USER_BRACKETS_DIR,
@@ -238,6 +296,8 @@ def build_prediction_report(
         global_ranks = _competition_ranks(score_by_slug)
         for slug, rank in global_ranks.items():
             accumulators[slug].finishing_positions.append(rank)
+            if rank == 1:
+                accumulators[slug].wins += 1
 
         for user_category in sorted({category for category in category_by_slug.values() if category is not None}):
             category_scores = {
@@ -277,6 +337,8 @@ def build_prediction_report(
     )
 
     return TournamentPredictionReport(
+        games_completed=completed_game_count if games_completed is None else games_completed,
+        completed_scoreboard_event_ids=list(completed_scoreboard_event_ids or []),
         simulation_count=simulation_count,
         random_seed=random_seed,
         completed_game_count=completed_game_count,
@@ -284,6 +346,85 @@ def build_prediction_report(
         kenpom_snapshot_name=kenpom_snapshot_path.stem,
         users=user_summaries,
     )
+
+
+def build_prediction_history(
+    scoreboard_blob: dict[str, object],
+    *,
+    simulation_count: int = DEFAULT_SIMULATION_COUNT,
+    random_seed: int = DEFAULT_RANDOM_SEED,
+    user_brackets_dir: Path = USER_BRACKETS_DIR,
+    kenpom_snapshot_dir: Path = KENPOM_SNAPSHOTS_DIR,
+) -> tuple[TournamentPredictionHistory, list[TournamentPredictionReport]]:
+    """Build checkpoint reports for 0 through N completed games."""
+
+    completed_scoreboard_event_ids = get_completed_scoreboard_event_ids(scoreboard_blob)
+    checkpoint_reports: list[TournamentPredictionReport] = []
+
+    for completed_game_count in range(len(completed_scoreboard_event_ids) + 1):
+        reference_bracket = get_bracket_from_scoreboard_data_with_limit(
+            scoreboard_blob,
+            completed_game_limit=completed_game_count,
+        )
+        checkpoint_reports.append(
+            build_prediction_report(
+                reference_bracket,
+                games_completed=completed_game_count,
+                completed_scoreboard_event_ids=completed_scoreboard_event_ids[:completed_game_count],
+                simulation_count=simulation_count,
+                random_seed=random_seed,
+                user_brackets_dir=user_brackets_dir,
+                kenpom_snapshot_dir=kenpom_snapshot_dir,
+            )
+        )
+
+    return (
+        _build_prediction_history_from_reports(
+            checkpoint_reports,
+            simulation_count=simulation_count,
+            random_seed=random_seed,
+        ),
+        checkpoint_reports,
+    )
+
+
+def write_prediction_history_files(
+    *,
+    scoreboard_path: Path = SCOREBOARD_PATH,
+    output_dir: Path = PREDICTION_CHECKPOINTS_DIR,
+    history_output_path: Path = PREDICTION_HISTORY_PATH,
+    simulation_count: int = DEFAULT_SIMULATION_COUNT,
+    random_seed: int = DEFAULT_RANDOM_SEED,
+    user_brackets_dir: Path = USER_BRACKETS_DIR,
+    kenpom_snapshot_dir: Path = KENPOM_SNAPSHOTS_DIR,
+) -> TournamentPredictionHistory:
+    """Write every checkpoint report plus the aggregate history JSON."""
+
+    scoreboard_blob = json.loads(scoreboard_path.read_text())
+    prediction_history, checkpoint_reports = build_prediction_history(
+        scoreboard_blob,
+        simulation_count=simulation_count,
+        random_seed=random_seed,
+        user_brackets_dir=user_brackets_dir,
+        kenpom_snapshot_dir=kenpom_snapshot_dir,
+    )
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for checkpoint_report in checkpoint_reports:
+        checkpoint_path = output_dir / f"{checkpoint_report.games_completed:03d}-games-complete.json"
+        checkpoint_path.write_text(checkpoint_report.model_dump_json(indent=4))
+
+    history_output_path.parent.mkdir(parents=True, exist_ok=True)
+    history_output_path.write_text(prediction_history.model_dump_json(indent=4))
+    return prediction_history
+
+
+def load_prediction_history(history_path: Path = PREDICTION_HISTORY_PATH) -> TournamentPredictionHistory:
+    """Load the saved prediction-history JSON, generating it if needed."""
+
+    if not history_path.exists():
+        return write_prediction_history_files(history_output_path=history_path)
+    return TournamentPredictionHistory.model_validate_json(history_path.read_text())
 
 
 def _build_user_prediction_summary(
@@ -310,6 +451,7 @@ def _build_user_prediction_summary(
         user_categories=list(user_bracket.bracket_metadata.user_categories),
         average_score=fmean(accumulator.scores),
         average_finishing_position=fmean(accumulator.finishing_positions),
+        winning_percentage=(accumulator.wins / len(accumulator.finishing_positions)) * 100.0,
         average_category_finishing_position=average_category_finishing_position,
         score_interval=PredictionInterval(
             lower=float(_nearest_rank_percentile(accumulator.scores, 0.10)),
@@ -320,6 +462,60 @@ def _build_user_prediction_summary(
             upper=float(_nearest_rank_percentile(accumulator.finishing_positions, 0.90)),
         ),
         category_finishing_position_interval=category_interval,
+    )
+
+
+def _build_prediction_history_from_reports(
+    checkpoint_reports: list[TournamentPredictionReport],
+    *,
+    simulation_count: int,
+    random_seed: int,
+) -> TournamentPredictionHistory:
+    """Convert checkpoint reports into graph-ready per-user history series."""
+
+    user_series_by_slug: dict[str, UserPredictionHistorySeries] = {}
+    checkpoint_metadata: list[PredictionHistoryCheckpoint] = []
+
+    for checkpoint_report in checkpoint_reports:
+        checkpoint_metadata.append(
+            PredictionHistoryCheckpoint(
+                games_completed=checkpoint_report.games_completed,
+                completed_scoreboard_event_ids=checkpoint_report.completed_scoreboard_event_ids,
+                report_path=f"checkpoints/{checkpoint_report.games_completed:03d}-games-complete.json",
+            )
+        )
+        for user_summary in checkpoint_report.users:
+            series = user_series_by_slug.setdefault(
+                user_summary.slug,
+                UserPredictionHistorySeries(
+                    slug=user_summary.slug,
+                    user_name=user_summary.user_name,
+                    entry_name=user_summary.entry_name,
+                    user_categories=user_summary.user_categories,
+                    points=[],
+                ),
+            )
+            series.points.append(
+                UserPredictionHistoryPoint(
+                    games_completed=checkpoint_report.games_completed,
+                    average_finishing_position=user_summary.average_finishing_position,
+                    winning_percentage=user_summary.winning_percentage,
+                )
+            )
+
+    ordered_users = sorted(
+        user_series_by_slug.values(),
+        key=lambda series: (
+            series.points[-1].average_finishing_position if series.points else float("inf"),
+            series.user_name,
+        ),
+    )
+    return TournamentPredictionHistory(
+        simulation_count=simulation_count,
+        random_seed=random_seed,
+        completed_game_count_max=checkpoint_reports[-1].games_completed if checkpoint_reports else 0,
+        checkpoints=checkpoint_metadata,
+        users=ordered_users,
     )
 
 
@@ -447,3 +643,18 @@ def _assign_slot_team(slot: GameSlot, team_id: str, seed: str | None, parent_gam
     slot.team_id = team_id
     slot.seed = seed
     return changed
+
+
+def main() -> None:
+    """Write the full prediction-history checkpoint set to disk."""
+
+    prediction_history = write_prediction_history_files()
+    print(
+        "Wrote prediction history for "
+        f"{prediction_history.completed_game_count_max + 1} checkpoints "
+        f"to {PREDICTIONS_DIR}."
+    )
+
+
+if __name__ == "__main__":
+    main()

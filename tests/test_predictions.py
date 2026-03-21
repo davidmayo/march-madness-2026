@@ -12,8 +12,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from march_madness.predictions import build_prediction_report
+from march_madness.predictions import build_prediction_history
 from march_madness.predictions import load_latest_kenpom_ratings
 from march_madness.predictions import simulate_remaining_tournament
+from march_madness.predictions import write_prediction_history_files
+from march_madness.scoring import get_completed_scoreboard_event_ids
 from march_madness.scoring import get_bracket_from_scoreboard_data
 
 
@@ -64,6 +67,7 @@ def test_build_prediction_report_summarizes_all_users() -> None:
     category_sizes = {"student": 8, "staff": 6}
     for user in report.users:
         assert 0.0 <= user.average_score <= 192.0
+        assert 0.0 <= user.winning_percentage <= 100.0
         assert user.score_interval.lower <= user.score_interval.upper
         assert 1.0 <= user.average_finishing_position <= 14.0
         assert user.finishing_position_interval.lower <= user.finishing_position_interval.upper
@@ -76,3 +80,38 @@ def test_build_prediction_report_summarizes_all_users() -> None:
             user.category_finishing_position_interval.lower
             <= user.category_finishing_position_interval.upper
         )
+
+
+def test_build_prediction_history_and_write_files(tmp_path: Path) -> None:
+    """Prediction history should cover every completed-game checkpoint and write JSON files."""
+
+    scoreboard_blob = json.loads((ROOT / "data" / "espn" / "api" / "scoreboard.json").read_text())
+    completed_event_ids = get_completed_scoreboard_event_ids(scoreboard_blob)
+
+    history, reports = build_prediction_history(
+        scoreboard_blob,
+        simulation_count=5,
+        random_seed=123,
+    )
+
+    assert len(reports) == len(completed_event_ids) + 1
+    assert history.completed_game_count_max == len(completed_event_ids)
+    assert len(history.checkpoints) == len(reports)
+    assert len(history.users) == 14
+    for series in history.users:
+        assert len(series.points) == len(reports)
+        assert series.points[0].games_completed == 0
+        assert series.points[-1].games_completed == len(completed_event_ids)
+
+    output_dir = tmp_path / "checkpoints"
+    history_output_path = tmp_path / "prediction-history.json"
+    written_history = write_prediction_history_files(
+        output_dir=output_dir,
+        history_output_path=history_output_path,
+        simulation_count=5,
+        random_seed=123,
+    )
+
+    assert written_history.completed_game_count_max == len(completed_event_ids)
+    assert history_output_path.exists()
+    assert len(list(output_dir.glob("*.json"))) == len(completed_event_ids) + 1
